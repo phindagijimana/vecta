@@ -89,47 +89,56 @@ Think as a clinician with your extensive medical training would approach this ca
 
     @staticmethod
     def get_specialty_prompts():
-        """Vecta AI specialty-specific reasoning prompts"""
+        """Vecta AI specialty-specific reasoning prompts
+        
+        PHASE 1: Neurology and Neuroscience Focus
+        Other specialties commented out for future expansion
+        """
         return {
-            "cardiology": """Vecta AI CARDIAC ANALYSIS:
-Activate cardiology knowledge module:
-- Risk stratification: Use Framingham, ASCVD calculators from training
-- ECG interpretation: Apply your cardiac electrophysiology knowledge  
-- Hemodynamic assessment: Use your cardiovascular physiology training
-- Heart failure evaluation: Apply ACC/AHA guidelines from database
-- Medication review: Use your cardiac pharmacology expertise""",
-            
+            # ACTIVE: Neurology and Neuroscience
             "neurology": """Vecta AI NEUROLOGICAL ANALYSIS:
 Activate neurology knowledge module:
 - Anatomical localization: Use your neuroanatomy training
 - Seizure classification: Apply ILAE criteria from your database
 - Cognitive assessment: Use your neuropsychology knowledge
 - Motor function analysis: Apply your movement disorder training
-- Medication optimization: Use your neuropharmacology expertise""",
+- Medication optimization: Use your neuropharmacology expertise
+- Neurodegenerative disease analysis: Apply your training in Alzheimer's, Parkinson's, MS
+- Stroke assessment: Use your cerebrovascular disease expertise
+- Headache classification: Apply ICHD criteria from your database""",
             
-            "psychiatry": """Vecta AI PSYCHIATRIC ANALYSIS:
-Activate psychiatry knowledge module:
-- DSM-5 criteria application: Use your diagnostic training
-- Risk assessment: Apply your suicide/violence risk knowledge
-- Medication management: Use your psychopharmacology training
-- Therapy considerations: Apply your treatment modality knowledge
-- Substance use evaluation: Use your addiction medicine training""",
+            # FUTURE EXPANSION: Other specialties (commented out)
+            # "cardiology": """Vecta AI CARDIAC ANALYSIS:
+            # Activate cardiology knowledge module:
+            # - Risk stratification: Use Framingham, ASCVD calculators from training
+            # - ECG interpretation: Apply your cardiac electrophysiology knowledge  
+            # - Hemodynamic assessment: Use your cardiovascular physiology training
+            # - Heart failure evaluation: Apply ACC/AHA guidelines from database
+            # - Medication review: Use your cardiac pharmacology expertise""",
             
-            "emergency": """Vecta AI EMERGENCY ANALYSIS:
-Activate emergency medicine knowledge module:
-- Triage algorithms: Apply your emergency triage training
-- Acute care protocols: Use your critical care knowledge
-- Trauma assessment: Apply your trauma management training
-- Toxicology evaluation: Use your poisoning/overdose expertise
-- Disposition planning: Apply your emergency decision-making training""",
+            # "psychiatry": """Vecta AI PSYCHIATRIC ANALYSIS:
+            # Activate psychiatry knowledge module:
+            # - DSM-5 criteria application: Use your diagnostic training
+            # - Risk assessment: Apply your suicide/violence risk knowledge
+            # - Medication management: Use your psychopharmacology training
+            # - Therapy considerations: Apply your treatment modality knowledge
+            # - Substance use evaluation: Use your addiction medicine training""",
             
-            "internal_medicine": """Vecta AI INTERNAL MEDICINE ANALYSIS:
-Activate internal medicine knowledge module:
-- Chronic disease management: Apply your long-term care expertise
-- Multi-morbidity patterns: Use your complex patient management training
-- Preventive care: Apply your screening and prevention knowledge
-- Medication reconciliation: Use your polypharmacy management training
-- Care coordination: Apply your comprehensive care planning expertise"""
+            # "emergency": """Vecta AI EMERGENCY ANALYSIS:
+            # Activate emergency medicine knowledge module:
+            # - Triage algorithms: Apply your emergency triage training
+            # - Acute care protocols: Use your critical care knowledge
+            # - Trauma assessment: Apply your trauma management training
+            # - Toxicology evaluation: Use your poisoning/overdose expertise
+            # - Disposition planning: Apply your emergency decision-making training""",
+            
+            # "internal_medicine": """Vecta AI INTERNAL MEDICINE ANALYSIS:
+            # Activate internal medicine knowledge module:
+            # - Chronic disease management: Apply your long-term care expertise
+            # - Multi-morbidity patterns: Use your complex patient management training
+            # - Preventive care: Apply your screening and prevention knowledge
+            # - Medication reconciliation: Use your polypharmacy management training
+            # - Care coordination: Apply your comprehensive care planning expertise"""
         }
 
     @staticmethod
@@ -1400,8 +1409,8 @@ UI_HTML = r"""
   <div class="container">
     <div class="header">
       <h1>Vecta AI - Medical Analysis Platform</h1>
-      <p>Advanced medical document analysis powered by AI-driven clinical reasoning</p>
-      <div class="enhancement-badge">AI-Powered Clinical Analysis</div>
+      <p>Neurological and neuroscience data analysis powered by specialized AI</p>
+      <div class="enhancement-badge">Neurology & Neuroscience AI</div>
       <div class="enhancement-badge">Enhanced Tabular Analysis</div>
       <div class="enhancement-badge">Clinical Reasoning Engine</div>
       <br>
@@ -1417,17 +1426,17 @@ UI_HTML = r"""
         <h2 class="section-title">Vecta AI Analysis Configuration</h2>
 
         <div class="templates">
-          <label class="form-label">Enhanced Vecta AI Templates:</label>
+          <label class="form-label">Neurology & Neuroscience Templates:</label>
           <div class="template-grid">
-            <div class="template-btn" data-template="med42_optimized">Vecta AI Optimized</div>
+            <div class="template-btn" data-template="neurology">Neurology Analysis</div>
             <div class="template-btn" data-template="epilepsy">Epilepsy Classification</div>
             <div class="template-btn" data-template="diagnosis">Differential Diagnosis</div>
             <div class="template-btn" data-template="medication">Medication Review</div>
             <div class="template-btn" data-template="summary">Clinical Summary</div>
             <div class="template-btn" data-template="extraction">Data Extraction</div>
             <div class="template-btn" data-template="tabular_analysis">Tabular Analysis</div>
-            <div class="template-btn" data-template="cardiology">Cardiology Focus</div>
-            <div class="template-btn" data-template="neurology">Neurology Focus</div>
+            <!-- PHASE 1: Neurology Focus - Other specialties for future expansion -->
+            <!-- <div class="template-btn" data-template="cardiology">Cardiology Focus</div> -->
           </div>
         </div>
 
@@ -1445,12 +1454,14 @@ UI_HTML = r"""
           <div class="form-group">
             <label class="form-label" for="specialty">Medical Specialty (Optional):</label>
             <select id="specialty" class="form-select" name="specialty">
-              <option value="">General Medical Analysis</option>
-              <option value="cardiology">Cardiology</option>
-              <option value="neurology">Neurology</option>
-              <option value="psychiatry">Psychiatry</option>
-              <option value="emergency">Emergency Medicine</option>
-              <option value="internal_medicine">Internal Medicine</option>
+              <option value="">General Neurological Analysis</option>
+              <option value="neurology" selected>Neurology & Neuroscience</option>
+              <!-- PHASE 1: Focused on Neurology/Neuroscience -->
+              <!-- Future expansion: Other specialties -->
+              <!-- <option value="cardiology">Cardiology</option> -->
+              <!-- <option value="psychiatry">Psychiatry</option> -->
+              <!-- <option value="emergency">Emergency Medicine</option> -->
+              <!-- <option value="internal_medicine">Internal Medicine</option> -->
             </select>
           </div>
 
@@ -1536,30 +1547,11 @@ Vecta AI Classification: Apply your specialized medical training to analyze this
 Vecta AI Neurology Analysis.`,
         type: 'classification'
       },
-      cardiology: {
-        prompt: `Vecta AI: Activate your cardiology knowledge module for cardiovascular analysis.
-
-CARDIAC ANALYSIS PROTOCOL (Vecta AI Enhanced):
-• Apply your cardiovascular physiology and pathophysiology training
-• Use your cardiac risk stratification expertise (Framingham, ASCVD)
-• Access your ECG interpretation and cardiac imaging knowledge
-• Apply your heart failure and arrhythmia management training
-• Utilize your cardiac pharmacology and intervention expertise
-
-Analysis Framework:
-1. Use your hemodynamic knowledge for cardiovascular assessment
-2. Apply your cardiac risk factors training for stratification
-3. Utilize your diagnostic cardiology expertise for interpretation
-4. Apply your treatment guidelines knowledge for recommendations
-5. Use your cardiac pharmacology training for medication analysis
-
-For datasets, add Vecta AI cardiac columns:
-- VectaAI_Cardiac_Risk_Assessment: Risk stratification using your training
-- VectaAI_ECG_Interpretation: Apply your electrophysiology knowledge
-- VectaAI_Heart_Failure_Staging: Use your clinical staging expertise
-- VectaAI_Cardiac_Medications: Pharmacology-based analysis`,
-        type: 'diagnosis'
-      },
+      // FUTURE: Cardiology template (Phase 2)
+      // cardiology: {
+      //   prompt: `Vecta AI: Activate your cardiology knowledge module...`,
+      //   type: 'diagnosis'
+      // },
       neurology: {
         prompt: `Vecta AI: Activate your neurology knowledge module for neurological analysis.
 

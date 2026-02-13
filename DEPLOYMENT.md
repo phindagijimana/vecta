@@ -1,5 +1,7 @@
 # Deployment Guide
 
+**Phase 1: Neurology & Neuroscience Focus**
+
 ## Prerequisites
 
 - Python 3.9+

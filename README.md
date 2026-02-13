@@ -1,13 +1,17 @@
 # Vecta AI
 
-Medical AI analysis service for clinical data and documents.
+AI-powered medical analysis service for clinical data and documents.
+
+**Phase 1: Neurology & Neuroscience Focus**
 
 ## Features
 
-- Medical AI with multi-specialty support (cardiology, neurology, psychiatry, emergency, internal medicine)
+- Specialized neurological analysis (epilepsy, movement disorders, cognitive assessment, stroke, neurodegenerative diseases)
 - Analysis types: diagnosis, classification, extraction, summarization
 - File formats: PDF, DOCX, Excel, CSV, TXT, JSON
 - Production CLI and SLURM integration
+
+**Note:** Currently focused on neurology/neuroscience. Other specialties planned for future releases (see Roadmap below).
 
 ## Quick Start
 
@@ -44,10 +48,19 @@ max_concurrent_users = 10
 ## API
 
 - `GET /` - Web interface
-- `GET /health` - Health check
-- `POST /analyze` - Analysis endpoint
+- `GET /health` - Health check  
+- `POST /analyze` - Analysis endpoint (parameters: prompt, analysisType, specialty, directText/file)
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment and configuration options.
+## Roadmap
+
+**Phase 1 (Current):** Neurology & Neuroscience  
+**Phase 2 (Future):** Cardiology, Psychiatry, Emergency Medicine, Internal Medicine
+
+Code structure supports future expansion - additional specialties will be activated based on validation and demand.
+
+## Documentation
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for deployment options and configuration details.
 
 ## Disclaimer
 
