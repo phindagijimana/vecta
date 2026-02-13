@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Model and Cache
+model_cache/
+models/
+*.bin
+*.safetensors
+
+# Logs
+logs/
+*.log
+*.out
+*.err
+
+# Uploads
+uploads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Gunicorn
+gunicorn.pid
+gunicorn_access.log
+gunicorn_error.log
+
+# Environment
+.env
+*.env
+
+# Backups
+*.backup
+*_old.py
+*_new.py
+
+# SLURM outputs
+med42_service_*.out
+med42_service_*.err
+
+# Site-specific
+nginx_*.conf
+*.service
+*_test.sh
+LOCAL_ACCESS_INSTRUCTIONS.md
+TESTING_GUIDE.md
+REBRANDING_COMPLETE.md
+connect_med42.sh
+test_connection.sh
+ood_test*.sh
+deploy_ssh.sh
+ssh_tunnel.sh
+start_service.sh

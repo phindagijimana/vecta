@@ -1,0 +1,503 @@
+#!/usr/bin/env bash
+################################################################################
+# Vecta AI Service Management CLI
+# Production-ready command-line interface for managing Vecta AI service
+#
+# Usage: med <command> [options]
+# Commands: install, slurm, start, stop, restart, status, logs, test
+################################################################################
+
+set -euo pipefail
+
+# Configuration
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly APP_HOME="${SCRIPT_DIR}"
+readonly SERVICE_NAME="med42_service"
+readonly DEFAULT_PORT="${SERVICE_PORT:-8081}"
+readonly DEFAULT_HOST="${SERVICE_HOST:-0.0.0.0}"
+
+# Colors for output (can be disabled with --no-color)
+USE_COLOR=true
+if [[ "${NO_COLOR:-}" == "1" ]] || [[ ! -t 1 ]]; then
+    USE_COLOR=false
+fi
+
+# Output functions
+log_info() {
+    if [[ "$USE_COLOR" == "true" ]]; then
+        echo -e "\033[0;32m[INFO]\033[0m $*"
+    else
+        echo "[INFO] $*"
+    fi
+}
+
+log_warn() {
+    if [[ "$USE_COLOR" == "true" ]]; then
+        echo -e "\033[0;33m[WARN]\033[0m $*" >&2
+    else
+        echo "[WARN] $*" >&2
+    fi
+}
+
+log_error() {
+    if [[ "$USE_COLOR" == "true" ]]; then
+        echo -e "\033[0;31m[ERROR]\033[0m $*" >&2
+    else
+        echo "[ERROR] $*" >&2
+    fi
+}
+
+log_success() {
+    if [[ "$USE_COLOR" == "true" ]]; then
+        echo -e "\033[1;32m[SUCCESS]\033[0m $*"
+    else
+        echo "[SUCCESS] $*"
+    fi
+}
+
+# Usage information
+usage() {
+    cat <<EOF
+Vecta AI Service Management CLI
+
+USAGE:
+    med <command> [options]
+
+COMMANDS:
+    install             Install dependencies and set up virtual environment
+    slurm              Submit service as SLURM job (HPC clusters)
+    start              Start service locally (non-SLURM)
+    stop               Stop running service
+    restart            Restart service
+    status             Show service status and connection info
+    logs               Show service logs
+    test               Run health check and API tests
+    help               Show this help message
+
+OPTIONS:
+    --port <port>      Service port (default: 8081)
+    --host <host>      Service host (default: 0.0.0.0)
+    --no-color         Disable colored output
+
+EXAMPLES:
+    med install                    # Install dependencies
+    med slurm                      # Submit SLURM job
+    med start                      # Start service locally
+    med status                     # Check service status
+    med logs --tail 50             # Show last 50 log lines
+    med test                       # Run health checks
+
+For detailed documentation, see: docs/README.md
+
+EOF
+}
+
+# Check if running on cluster
+is_cluster() {
+    command -v sbatch &> /dev/null
+}
+
+# Install dependencies
+cmd_install() {
+    log_info "Installing Vecta AI service dependencies..."
+    
+    cd "$APP_HOME"
+    
+    # Create virtual environment
+    if [[ ! -d "venv" ]]; then
+        log_info "Creating virtual environment..."
+        python3 -m venv venv
+    else
+        log_info "Virtual environment already exists"
+    fi
+    
+    # Activate and install
+    source venv/bin/activate
+    
+    log_info "Upgrading pip..."
+    pip install --upgrade pip
+    
+    log_info "Installing requirements..."
+    pip install -r requirements.txt
+    
+    # Create necessary directories
+    mkdir -p logs uploads model_cache
+    
+    log_success "Installation complete"
+    log_info "Next steps:"
+    log_info "  - Review configuration: config.py"
+    log_info "  - Start service: med slurm (cluster) or med start (local)"
+}
+
+# Submit SLURM job
+cmd_slurm() {
+    if ! is_cluster; then
+        log_error "SLURM not available. Use 'med start' for local deployment"
+        exit 1
+    fi
+    
+    log_info "Submitting Vecta AI service to SLURM..."
+    
+    if [[ ! -f "${APP_HOME}/med42_service.slurm" ]]; then
+        log_error "SLURM script not found: med42_service.slurm"
+        exit 1
+    fi
+    
+    local job_id
+    job_id=$(sbatch "${APP_HOME}/med42_service.slurm" | awk '{print $NF}')
+    
+    log_success "SLURM job submitted: Job ID ${job_id}"
+    log_info "Monitor with: squeue -j ${job_id}"
+    log_info "Check output: tail -f med42_service_${job_id}.out"
+    log_info "Check errors: tail -f med42_service_${job_id}.err"
+    
+    # Wait a moment and show initial status
+    sleep 2
+    squeue -j "${job_id}" 2>/dev/null || true
+}
+
+# Start service locally
+cmd_start() {
+    log_info "Starting Vecta AI service locally..."
+    
+    cd "$APP_HOME"
+    
+    if [[ ! -d "venv" ]]; then
+        log_error "Virtual environment not found. Run 'med install' first"
+        exit 1
+    fi
+    
+    # Check if already running
+    if [[ -f "gunicorn.pid" ]]; then
+        local pid
+        pid=$(cat gunicorn.pid)
+        if ps -p "$pid" > /dev/null 2>&1; then
+            log_warn "Service already running (PID: ${pid})"
+            log_info "Use 'med stop' to stop it first"
+            exit 1
+        else
+            rm -f gunicorn.pid
+        fi
+    fi
+    
+    source venv/bin/activate
+    
+    export SERVICE_HOST="${SERVICE_HOST:-$DEFAULT_HOST}"
+    export SERVICE_PORT="${SERVICE_PORT:-$DEFAULT_PORT}"
+    export APP_HOME="$APP_HOME"
+    
+    log_info "Starting on ${SERVICE_HOST}:${SERVICE_PORT}..."
+    
+    # Start gunicorn in background
+    gunicorn -c gunicorn.conf.py app:app --daemon
+    
+    sleep 2
+    
+    if [[ -f "gunicorn.pid" ]]; then
+        local pid
+        pid=$(cat gunicorn.pid)
+        if ps -p "$pid" > /dev/null 2>&1; then
+            log_success "Service started (PID: ${pid})"
+            log_info "Access at: http://${SERVICE_HOST}:${SERVICE_PORT}"
+            log_info "Check status: med status"
+            log_info "View logs: med logs"
+        else
+            log_error "Service failed to start. Check logs: med logs"
+            exit 1
+        fi
+    else
+        log_error "PID file not created. Check logs for errors"
+        exit 1
+    fi
+}
+
+# Stop service
+cmd_stop() {
+    log_info "Stopping Vecta AI service..."
+    
+    local stopped=false
+    
+    # Stop SLURM job
+    if is_cluster; then
+        local job_ids
+        job_ids=$(squeue -u "$USER" -h -o "%i" -n "${SERVICE_NAME}" 2>/dev/null || true)
+        if [[ -n "$job_ids" ]]; then
+            for job_id in $job_ids; do
+                log_info "Cancelling SLURM job: ${job_id}"
+                scancel "$job_id"
+                stopped=true
+            done
+        fi
+    fi
+    
+    # Stop local gunicorn
+    if [[ -f "${APP_HOME}/gunicorn.pid" ]]; then
+        local pid
+        pid=$(cat "${APP_HOME}/gunicorn.pid")
+        if ps -p "$pid" > /dev/null 2>&1; then
+            log_info "Stopping gunicorn (PID: ${pid})..."
+            kill "$pid"
+            sleep 2
+            if ps -p "$pid" > /dev/null 2>&1; then
+                log_warn "Forcing shutdown..."
+                kill -9 "$pid"
+            fi
+            rm -f "${APP_HOME}/gunicorn.pid"
+            stopped=true
+        fi
+    fi
+    
+    # Find any running gunicorn processes
+    local pids
+    pids=$(pgrep -f "gunicorn.*med42" 2>/dev/null || true)
+    if [[ -n "$pids" ]]; then
+        log_info "Stopping additional gunicorn processes..."
+        echo "$pids" | xargs kill 2>/dev/null || true
+        stopped=true
+    fi
+    
+    if [[ "$stopped" == "true" ]]; then
+        log_success "Service stopped"
+    else
+        log_info "No running service found"
+    fi
+}
+
+# Show status
+cmd_status() {
+    log_info "Vecta AI Service Status"
+    echo "========================================"
+    
+    local running=false
+    
+    # Check SLURM jobs
+    if is_cluster; then
+        echo ""
+        echo "SLURM Jobs:"
+        if squeue -u "$USER" -n "${SERVICE_NAME}" 2>/dev/null | grep -q "${SERVICE_NAME}"; then
+            squeue -u "$USER" -n "${SERVICE_NAME}"
+            
+            # Get job details
+            local job_id node
+            job_id=$(squeue -u "$USER" -h -o "%i" -n "${SERVICE_NAME}" 2>/dev/null | head -1)
+            node=$(squeue -u "$USER" -h -o "%N" -n "${SERVICE_NAME}" 2>/dev/null | head -1)
+            
+            if [[ -n "$node" ]] && [[ "$node" != "(None)" ]]; then
+                echo ""
+                echo "Access Information:"
+                echo "  Node: ${node}"
+                echo "  Port: ${DEFAULT_PORT}"
+                echo "  OpenOnDemand: https://ood.urmc-sh.rochester.edu/rnode/${node}/${DEFAULT_PORT}/"
+                
+                # Test connection
+                if ssh "$node" "curl -s http://localhost:${DEFAULT_PORT}/health" &>/dev/null; then
+                    echo "  Status: HEALTHY"
+                    running=true
+                else
+                    echo "  Status: STARTING (service may still be loading)"
+                fi
+            fi
+        else
+            echo "  No SLURM jobs running"
+        fi
+    fi
+    
+    # Check local gunicorn
+    echo ""
+    echo "Local Service:"
+    if [[ -f "${APP_HOME}/gunicorn.pid" ]]; then
+        local pid
+        pid=$(cat "${APP_HOME}/gunicorn.pid")
+        if ps -p "$pid" > /dev/null 2>&1; then
+            echo "  PID: ${pid}"
+            echo "  Status: RUNNING"
+            
+            # Try to get port from process
+            local port
+            port=$(ss -tlnp 2>/dev/null | grep "$pid" | grep -oP ':\K[0-9]+' | head -1 || echo "$DEFAULT_PORT")
+            echo "  Port: ${port}"
+            echo "  URL: http://localhost:${port}"
+            
+            if curl -s "http://localhost:${port}/health" &>/dev/null; then
+                echo "  Health: OK"
+                running=true
+            else
+                echo "  Health: NOT RESPONDING"
+            fi
+        else
+            echo "  Status: STOPPED (stale PID file)"
+        fi
+    else
+        echo "  Status: NOT RUNNING"
+    fi
+    
+    echo ""
+    echo "========================================"
+    
+    if [[ "$running" == "true" ]]; then
+        log_success "Service is operational"
+        return 0
+    else
+        log_warn "Service is not running"
+        log_info "Start with: med slurm (cluster) or med start (local)"
+        return 1
+    fi
+}
+
+# Show logs
+cmd_logs() {
+    local lines=100
+    local follow=false
+    
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --tail|-n)
+                lines="$2"
+                shift 2
+                ;;
+            --follow|-f)
+                follow=true
+                shift
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+    
+    log_info "Vecta AI Service Logs"
+    
+    if [[ -f "${APP_HOME}/logs/med42_service.log" ]]; then
+        echo ""
+        echo "=== Application Log ==="
+        if [[ "$follow" == "true" ]]; then
+            tail -f -n "$lines" "${APP_HOME}/logs/med42_service.log"
+        else
+            tail -n "$lines" "${APP_HOME}/logs/med42_service.log"
+        fi
+    fi
+    
+    if [[ -f "${APP_HOME}/logs/error.log" ]]; then
+        echo ""
+        echo "=== Error Log ==="
+        if [[ "$follow" == "true" ]]; then
+            tail -f -n "$lines" "${APP_HOME}/logs/error.log"
+        else
+            tail -n "$lines" "${APP_HOME}/logs/error.log"
+        fi
+    fi
+    
+    # Show SLURM logs if available
+    if is_cluster; then
+        local latest_out latest_err
+        latest_out=$(ls -t med42_service_*.out 2>/dev/null | head -1)
+        latest_err=$(ls -t med42_service_*.err 2>/dev/null | head -1)
+        
+        if [[ -n "$latest_out" ]]; then
+            echo ""
+            echo "=== SLURM Output (${latest_out}) ==="
+            tail -n "$lines" "$latest_out"
+        fi
+        
+        if [[ -n "$latest_err" ]] && [[ -s "$latest_err" ]]; then
+            echo ""
+            echo "=== SLURM Error (${latest_err}) ==="
+            tail -n "$lines" "$latest_err"
+        fi
+    fi
+}
+
+# Run tests
+cmd_test() {
+    log_info "Running Vecta AI service tests..."
+    
+    # Determine service URL
+    local service_url=""
+    
+    if is_cluster; then
+        local node
+        node=$(squeue -u "$USER" -h -o "%N" -n "${SERVICE_NAME}" 2>/dev/null | head -1)
+        if [[ -n "$node" ]] && [[ "$node" != "(None)" ]]; then
+            service_url="http://${node}:${DEFAULT_PORT}"
+        fi
+    fi
+    
+    if [[ -z "$service_url" ]]; then
+        service_url="http://localhost:${DEFAULT_PORT}"
+    fi
+    
+    log_info "Testing: ${service_url}"
+    
+    # Health check
+    echo ""
+    echo "=== Health Check ==="
+    if curl -sf "${service_url}/health" | python3 -m json.tool 2>/dev/null; then
+        log_success "Health check passed"
+    else
+        log_error "Health check failed"
+        return 1
+    fi
+    
+    # Test endpoint
+    echo ""
+    echo "=== Test Endpoint ==="
+    if curl -sf "${service_url}/test" | python3 -m json.tool 2>/dev/null; then
+        log_success "Test endpoint passed"
+    else
+        log_error "Test endpoint failed"
+        return 1
+    fi
+    
+    log_success "All tests passed"
+}
+
+# Main command dispatcher
+main() {
+    if [[ $# -eq 0 ]]; then
+        usage
+        exit 0
+    fi
+    
+    local command="$1"
+    shift
+    
+    case "$command" in
+        install)
+            cmd_install "$@"
+            ;;
+        slurm)
+            cmd_slurm "$@"
+            ;;
+        start)
+            cmd_start "$@"
+            ;;
+        stop)
+            cmd_stop "$@"
+            ;;
+        restart)
+            cmd_stop "$@"
+            sleep 2
+            cmd_start "$@"
+            ;;
+        status)
+            cmd_status "$@"
+            ;;
+        logs)
+            cmd_logs "$@"
+            ;;
+        test)
+            cmd_test "$@"
+            ;;
+        help|--help|-h)
+            usage
+            ;;
+        *)
+            log_error "Unknown command: ${command}"
+            echo ""
+            usage
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

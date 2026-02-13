@@ -1,0 +1,29 @@
+SAMPLE MEDICAL DATA FOR TESTING
+==============================
+
+Case 1: Cardiology
+Patient: 65-year-old male
+Symptoms: Chest pain, shortness of breath, fatigue
+History: Hypertension, diabetes, smoking
+ECG: ST elevation in leads II, III, aVF
+Diagnosis: Inferior wall myocardial infarction
+
+Case 2: Neurology - Epilepsy
+Patient: 28-year-old female
+Symptoms: Recurrent seizures, loss of consciousness
+EEG: Abnormal spike-wave discharges
+Medications: Levetiracetam 500mg BID
+Classification: Focal epilepsy with impaired awareness
+
+Case 3: Respiratory
+Patient: 45-year-old male
+Symptoms: Persistent cough, fever, night sweats
+CXR: Right upper lobe opacity
+Sputum: Acid-fast bacilli positive
+Diagnosis: Pulmonary tuberculosis
+
+Case 4: Tabular Data Sample (CSV format would be used)
+PatientID,Age,Gender,Diagnosis,BloodPressure,Symptoms
+P001,45,F,Hypertension,150/90,Headache,fatigue
+P002,62,M,Diabetes,140/85,Polyuria,thirst
+P003,38,F,Asthma,120/80,Wheezing,shortness of breath
