@@ -12,6 +12,8 @@ Medical AI analysis service for clinical data and documents.
 ## Quick Start
 
 ```bash
+git clone https://github.com/phindagijimana/vecta.git
+cd vecta
 ./med install    # Install dependencies
 ./med start      # Start locally
 ./med slurm      # Deploy to HPC
