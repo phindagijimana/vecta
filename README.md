@@ -1,63 +1,43 @@
 # Vecta AI - Medical Analysis Platform
 
-Production-ready medical AI analysis service for clinical data, documents, and medical datasets.
+Production-ready medical AI analysis service for clinical data and documents.
 
 ## Features
 
-- Specialized Medical AI with clinical training
+- Specialized medical AI with clinical training across multiple specialties
 - Multiple analysis types: Diagnosis, Classification, Extraction, Summarization
-- Specialty support: Cardiology, Neurology, Psychiatry, Emergency Medicine, Internal Medicine
 - Multi-format processing: PDF, DOCX, Excel, CSV, TXT, JSON
 - Tabular data analysis with AI-enhanced columns
-- Production-ready: SLURM integration, monitoring, logging, CLI management
+- Production CLI for deployment and monitoring
+- SLURM integration for HPC environments
 
 ## Quick Start
 
-### Installation
-
 ```bash
-# Install dependencies
+# Install
 ./med install
-```
 
-### Starting the Service
-
-**On HPC Cluster (SLURM):**
-```bash
+# Start (HPC)
 ./med slurm
-```
 
-**Local Development:**
-```bash
+# Start (Local)
 ./med start
-```
 
-### Check Status
-
-```bash
+# Check status
 ./med status
 ```
 
-## CLI Reference
+## CLI Commands
 
-```
-Usage: med <command> [options]
-
-Commands:
-  install     Install dependencies
-  slurm       Submit as SLURM job
-  start       Start service locally
-  stop        Stop service
-  restart     Restart service
-  status      Show status and connection info
-  logs        Show logs (--tail N, --follow)
-  test        Run health checks
-  help        Show help
-
-Options:
-  --port <port>      Service port (default: 8081)
-  --host <host>      Service host (default: 0.0.0.0)
-  --no-color         Disable colored output
+```bash
+med install     # Install dependencies
+med slurm       # Submit SLURM job
+med start       # Start locally
+med stop        # Stop service
+med restart     # Restart service
+med status      # Show status
+med logs        # View logs (--tail N, --follow)
+med test        # Health check
 ```
 
 ## Configuration
@@ -65,156 +45,60 @@ Options:
 Edit `config.py`:
 
 ```python
-# Service settings
 service_port = 8081
 service_host = "0.0.0.0"
 max_concurrent_users = 10
-
-# Model settings
 model_name = "m42-health/Llama3-Med42-8B"
-
-# File upload
-max_content_length = 50 * 1024 * 1024  # 50MB
 ```
 
 ## API Endpoints
 
-### GET /
-Web interface with analysis templates
+**GET /** - Web interface
 
-### GET /health
-Service health check
-
+**GET /health** - Health check
 ```json
-{
-  "status": "healthy",
-  "model_loaded": true,
-  "device": "cpu",
-  "stats": {...}
-}
+{"status": "healthy", "model_loaded": true}
 ```
 
-### POST /analyze
-Main analysis endpoint
-
-**Parameters:**
-- `prompt` (required): Analysis prompt
-- `analysisType` (required): diagnosis|classification|extraction|custom  
-- `specialty` (optional): cardiology|neurology|psychiatry|emergency|internal_medicine
-- `directText` or `file`: Input data
-- `userId` (optional): User identifier
-
-**Response:**
+**POST /analyze** - Main endpoint
 ```json
 {
-  "success": true,
-  "analysis": "...",
-  "execution_time": 12.5,
-  "timestamp": "..."
+  "prompt": "Analysis prompt",
+  "analysisType": "diagnosis|classification|extraction|custom",
+  "specialty": "cardiology|neurology|psychiatry|emergency|internal_medicine",
+  "directText": "text" OR "file": file,
+  "userId": "optional"
 }
 ```
 
 ## Deployment
 
-### HPC/SLURM
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment options.
 
-1. Configure `med42_service.slurm`
-2. Submit: `./med slurm`
-3. Monitor: `./med status`
-
-### Standalone Server
-
-1. Install: `./med install`
-2. Configure: Edit `config.py` and `gunicorn_config.py`
-3. Start: `./med start`
-
-### Docker (Optional)
-
-```dockerfile
-FROM python:3.9-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["gunicorn", "-c", "gunicorn.conf.py", "app:app"]
-```
+**Quick Deploy:**
+1. Configure `med42_service.slurm` or `config.py`
+2. Run `./med slurm` (HPC) or `./med start` (local)
+3. Monitor with `./med status`
 
 ## Monitoring
 
 ```bash
-# View logs
-./med logs --tail 50
-
-# Follow logs
-./med logs --follow
-
-# Health check
-./med test
-
-# Service status
-./med status
+./med logs --tail 50   # View logs
+./med test             # Health check
+./med status           # Service info
 ```
-
-## Architecture
-
-```
-Vecta AI
-├── app.py              # Flask application
-├── med                 # CLI management tool
-├── config.py           # Configuration
-├── gunicorn*.py        # WSGI server config
-├── requirements.txt    # Dependencies
-├── services/           # Service modules
-│   ├── med42_model.py  # Model loading & inference
-│   ├── file_processor.py
-│   └── prompt_engine.py
-└── utils/              # Utility modules
-```
-
-## Development
-
-```bash
-# Activate virtual environment
-source venv/bin/activate
-
-# Run Flask development server
-python app.py
-
-# Run tests
-./run_all_tests.sh
-```
-
-## Performance Tuning
-
-**Gunicorn Configuration:**
-```python
-workers = 1  # For GPU workloads
-timeout = 300  # Increase for long analyses
-```
-
-**Model Optimization:**
-- Use GPU: Set `device = "cuda"` in config
-- Adjust batch size in model service
-- Enable model caching
 
 ## Security
 
 - Input validation and sanitization
-- File type restrictions
-- Request size limits
-- PHI filtering (enable in config)
+- File type and size restrictions
+- Optional PHI filtering
 - Audit logging
-
-## License
-
-See LICENSE file
 
 ## Medical Disclaimer
 
-This AI tool is for research and educational purposes only. All analyses must be reviewed by qualified medical professionals before any clinical use.
+This tool is for research and educational purposes only. All analyses must be reviewed by qualified medical professionals before clinical use.
 
 ---
 
-**Version:** 2.0  
-**Model:** Med42-8B (m42-health/Llama3-Med42-8B)  
-**Platform:** Vecta AI
+**Version:** 2.0 | **Model:** Med42-8B | **Platform:** Vecta AI
