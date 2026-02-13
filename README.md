@@ -1,11 +1,23 @@
-# Vecta AI - Medical Analysis Platform
+# Vecta AI - Neurology & Neuroscience Analysis Platform
 
-AI-powered medical text analysis platform with neurologist validation system.
+AI-powered neurological text analysis platform specialized in neurology and neuroscience with neurologist validation system.
 
-## Features
+## Current Focus: Neurology & Neuroscience
 
-- **50 Few-Shot Examples**: Curated clinical cases across 10 neurology conditions
-- **Clinical Guidelines**: ILAE, ICHD-3, AAN, AHA/ASA guidelines integrated
+This platform is currently focused exclusively on neurological and neuroscience conditions. All features, examples, and guidelines are optimized for neurology practice.
+
+## Neurology-Focused Features
+
+- **50 Few-Shot Examples**: Curated neurological cases across 10 neurology conditions
+  - Epilepsy, Parkinson's Disease, Stroke, Migraine, Dementia
+  - Multiple Sclerosis, Peripheral Neuropathy, Myasthenia Gravis
+  - Spinal Cord Disorders, Motor Neuron Disease
+- **Clinical Guidelines**: Neurology-specific guidelines integrated
+  - ILAE 2025 (Epilepsy Classification)
+  - ICHD-3 (Headache/Migraine)
+  - AAN Guidelines (Parkinson's, Dementia)
+  - AHA/ASA Stroke Guidelines
+  - MDS Criteria (Movement Disorders)
 - **RAG System**: Semantic search with ChromaDB (optional)
 - **2-Page System**: Main analysis app + neurologist validator
 - **CLI Management**: Start, stop, restart, status, logs

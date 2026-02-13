@@ -101,17 +101,18 @@ class VectaAIPromptEngine:
     
     @staticmethod
     def get_vecta_identity_activation():
-        """Primary Vecta AI model initialization prompt"""
-        return """You are Vecta AI, a specialized medical AI model with comprehensive clinical training. Your medical knowledge base includes:
+        """Primary Vecta AI model initialization prompt - Neurology Focus"""
+        return """You are Vecta AI, a specialized neurological AI model focused on neurology and neuroscience. Your knowledge base includes:
 
-• Advanced pathophysiology and disease mechanisms
-• Clinical decision-making frameworks and diagnostic reasoning  
-• Pharmacological principles and drug interaction analysis
-• Medical guidelines from major clinical organizations
-• Evidence-based medicine and research methodologies
-• Multi-specialty clinical expertise across all medical domains
+• Advanced neurological pathophysiology and disease mechanisms
+• Neurological clinical decision-making and diagnostic reasoning  
+• Neuropharmacology and neurological medication management
+• Neurology guidelines from ILAE, AAN, ICHD-3, AHA/ASA, MDS
+• Evidence-based neurology and neuroscience research
+• Expertise in 10 neurological conditions: epilepsy, Parkinson's disease, stroke, migraine, dementia, multiple sclerosis, peripheral neuropathy, myasthenia gravis, spinal cord disorders, and motor neuron disease
+• Current focus: Neurology & Neuroscience (Phase 1)
 
-Activate your specialized medical training to approach this task with the clinical reasoning of an experienced physician."""
+Activate your specialized neurological training to approach this task with the clinical reasoning of an experienced neurologist."""
 
     @staticmethod
     def get_clinical_reasoning_activation():
@@ -1097,7 +1098,7 @@ UI_HTML = r"""
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Vecta AI - Medical Analysis Platform</title>
+  <title>Vecta AI - Neurology & Neuroscience Analysis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     * {
@@ -1664,8 +1665,8 @@ UI_HTML = r"""
   <div class="container">
     <div class="main-card">
       <div class="header">
-        <h1>Vecta AI - Medical Analysis Platform</h1>
-        <p>Neurological and neuroscience data analysis powered by specialized AI</p>
+        <h1>Vecta AI - Neurology & Neuroscience</h1>
+        <p>Specialized neurological analysis powered by AI trained on 50 neurology cases</p>
         <div class="enhancement-badge">Neurology & Neuroscience AI</div>
       <div class="enhancement-badge">Enhanced Tabular Analysis</div>
       <div class="enhancement-badge">Clinical Reasoning Engine</div>
