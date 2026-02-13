@@ -1,43 +1,32 @@
-# Vecta AI - Medical Analysis Platform
+# Vecta AI
 
-Production-ready medical AI analysis service for clinical data and documents.
+Medical AI analysis service for clinical data and documents.
 
 ## Features
 
-- Specialized medical AI with clinical training across multiple specialties
-- Multiple analysis types: Diagnosis, Classification, Extraction, Summarization
-- Multi-format processing: PDF, DOCX, Excel, CSV, TXT, JSON
-- Tabular data analysis with AI-enhanced columns
-- Production CLI for deployment and monitoring
-- SLURM integration for HPC environments
+- Medical AI with multi-specialty support (cardiology, neurology, psychiatry, emergency, internal medicine)
+- Analysis types: diagnosis, classification, extraction, summarization
+- File formats: PDF, DOCX, Excel, CSV, TXT, JSON
+- Production CLI and SLURM integration
 
 ## Quick Start
 
 ```bash
-# Install
-./med install
-
-# Start (HPC)
-./med slurm
-
-# Start (Local)
-./med start
-
-# Check status
-./med status
+./med install    # Install dependencies
+./med start      # Start locally
+./med slurm      # Deploy to HPC
+./med status     # Check status
 ```
 
-## CLI Commands
+## CLI
 
 ```bash
-med install     # Install dependencies
-med slurm       # Submit SLURM job
-med start       # Start locally
-med stop        # Stop service
-med restart     # Restart service
-med status      # Show status
-med logs        # View logs (--tail N, --follow)
-med test        # Health check
+med install      # Install
+med start/stop   # Control service
+med slurm        # SLURM deployment
+med status       # Status
+med logs         # View logs
+med test         # Health check
 ```
 
 ## Configuration
@@ -46,59 +35,18 @@ Edit `config.py`:
 
 ```python
 service_port = 8081
-service_host = "0.0.0.0"
-max_concurrent_users = 10
 model_name = "m42-health/Llama3-Med42-8B"
+max_concurrent_users = 10
 ```
 
-## API Endpoints
+## API
 
-**GET /** - Web interface
+- `GET /` - Web interface
+- `GET /health` - Health check
+- `POST /analyze` - Analysis endpoint
 
-**GET /health** - Health check
-```json
-{"status": "healthy", "model_loaded": true}
-```
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment and configuration options.
 
-**POST /analyze** - Main endpoint
-```json
-{
-  "prompt": "Analysis prompt",
-  "analysisType": "diagnosis|classification|extraction|custom",
-  "specialty": "cardiology|neurology|psychiatry|emergency|internal_medicine",
-  "directText": "text" OR "file": file,
-  "userId": "optional"
-}
-```
+## Disclaimer
 
-## Deployment
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment options.
-
-**Quick Deploy:**
-1. Configure `med42_service.slurm` or `config.py`
-2. Run `./med slurm` (HPC) or `./med start` (local)
-3. Monitor with `./med status`
-
-## Monitoring
-
-```bash
-./med logs --tail 50   # View logs
-./med test             # Health check
-./med status           # Service info
-```
-
-## Security
-
-- Input validation and sanitization
-- File type and size restrictions
-- Optional PHI filtering
-- Audit logging
-
-## Medical Disclaimer
-
-This tool is for research and educational purposes only. All analyses must be reviewed by qualified medical professionals before clinical use.
-
----
-
-**Version:** 2.0 | **Model:** Med42-8B | **Platform:** Vecta AI
+For research and educational use only. Requires medical professional review before clinical use.
