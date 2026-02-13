@@ -1,67 +1,161 @@
-# Vecta AI
+# Vecta AI - Medical Analysis Platform
 
-AI-powered medical analysis service for clinical data and documents.
-
-**Phase 1: Neurology & Neuroscience Focus**
+AI-powered medical text analysis platform with neurologist validation system.
 
 ## Features
 
-- Specialized neurological analysis (epilepsy, movement disorders, cognitive assessment, stroke, neurodegenerative diseases)
-- Analysis types: diagnosis, classification, extraction, summarization
-- File formats: PDF, DOCX, Excel, CSV, TXT, JSON
-- Production CLI and SLURM integration
-
-**Note:** Currently focused on neurology/neuroscience. Other specialties planned for future releases (see Roadmap below).
+- **50 Few-Shot Examples**: Curated clinical cases across 10 neurology conditions
+- **Clinical Guidelines**: ILAE, ICHD-3, AAN, AHA/ASA guidelines integrated
+- **RAG System**: Semantic search with ChromaDB (optional)
+- **2-Page System**: Main analysis app + neurologist validator
+- **CLI Management**: Start, stop, restart, status, logs
+- **Smart Port Detection**: Auto-finds free port (8085-8150)
 
 ## Quick Start
 
+### Installation
+
 ```bash
-git clone https://github.com/phindagijimana/vecta.git
-cd vecta
-./med install    # Install dependencies
-./med start      # Start locally
-./med slurm      # Deploy to HPC
-./med status     # Check status
+# Clone repository
+git clone <your-repo-url>
+cd med42_service
+
+# Start service (auto-installs dependencies)
+./vecta start
 ```
 
-## CLI
+The CLI will automatically check and install required dependencies (Flask, pandas, numpy).
+
+### Access
+
+- **Main App**: http://localhost:8085
+- **Validator**: http://localhost:8085/validate
+
+## CLI Commands
 
 ```bash
-med install      # Install
-med start/stop   # Control service
-med slurm        # SLURM deployment
-med status       # Status
-med logs         # View logs
-med test         # Health check
+./vecta start          # Start service (background)
+./vecta start -f       # Start in foreground
+./vecta start -p 8090  # Start on specific port
+./vecta stop           # Stop service
+./vecta restart        # Restart service
+./vecta status         # Check status
+./vecta logs           # View logs
+./vecta help           # Show help
+```
+
+## Manual Installation (Optional)
+
+If auto-install doesn't work:
+
+```bash
+pip3 install --user flask flask-cors pandas numpy
+
+# Optional: for RAG system
+pip3 install --user chromadb sentence-transformers
+```
+
+## Architecture
+
+- **Flask App** (`app.py`): Main application with prompt engineering
+- **Validation System** (`routes/validation.py`): Neurologist portal
+- **Database** (`database.py`): SQLite for tracking validations
+- **RAG System** (`utils/rag_system.py`): Semantic search (optional)
+- **Few-Shot Loader** (`utils/few_shot_loader.py`): Example injection
+- **Port Finder** (`utils/port_finder.py`): Smart port detection
+
+## Data
+
+- `data/few_shot_examples.json`: 50 clinical examples (224KB)
+- `data/guidelines/neurology_guidelines.json`: Clinical guidelines (72KB)
+- `data/validation.db`: Validation tracking database (auto-created)
+
+## Documentation
+
+- `CLI_GUIDE.md`: Complete CLI reference
+- `TWO_PAGE_SYSTEM_GUIDE.md`: System architecture
+- `IMPLEMENTATION_COMPLETE.md`: Implementation details
+- `START_APP_NOW.md`: Detailed startup guide
+
+## Development
+
+### Run in Foreground
+
+```bash
+./vecta start -f
+```
+
+### Check Logs
+
+```bash
+./vecta logs 100
+```
+
+### Restart After Changes
+
+```bash
+./vecta restart
 ```
 
 ## Configuration
 
-Edit `config.py`:
+### Port Configuration
 
-```python
-service_port = 8081
-model_name = "m42-health/Llama3-Med42-8B"
-max_concurrent_users = 10
+Default port: 8085
+
+Override:
+```bash
+./vecta start -p 8090
+# OR
+export SERVICE_PORT=8090
+./vecta start
 ```
 
-## API
+### Database Location
 
-- `GET /` - Web interface
-- `GET /health` - Health check  
-- `POST /analyze` - Analysis endpoint (parameters: prompt, analysisType, specialty, directText/file)
+`data/validation.db` (auto-created on first run)
 
-## Roadmap
+## Prompt Engineering
 
-**Phase 1 (Current):** Neurology & Neuroscience  
-**Phase 2 (Future):** Cardiology, Psychiatry, Emergency Medicine, Internal Medicine
+### Phase 1: Few-Shot Examples
+- 50 examples across 10 conditions
+- Automatic condition detection
+- Dynamic injection
 
-Code structure supports future expansion - additional specialties will be activated based on validation and demand.
+### Phase 2: Clinical Guidelines
+- ILAE 2025, ICHD-3, AAN, AHA/ASA
+- Condition-specific retrieval
+- Formatted for LLM
 
-## Documentation
+### Phase 3: RAG System (Optional)
+- ChromaDB vector database
+- Semantic search
+- Dynamic context retrieval
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for deployment options and configuration details.
+## Validation System
 
-## Disclaimer
+- Auto-samples 10% of outputs
+- Neurologist review interface
+- Statistics dashboard
+- Comment system
+- Demo data included (5 cases)
 
-For research and educational use only. Requires medical professional review before clinical use.
+## Tech Stack
+
+- **Backend**: Flask, Python 3
+- **Database**: SQLite
+- **Vector DB**: ChromaDB (optional)
+- **Embeddings**: sentence-transformers (optional)
+- **Data Processing**: pandas, numpy
+
+## License
+
+MIT
+
+## Support
+
+For issues or questions, please open a GitHub issue.
+
+## Status
+
+READY - All features implemented and tested. Auto-installs dependencies on first start.

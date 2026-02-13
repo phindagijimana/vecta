@@ -4,26 +4,24 @@ __pycache__/
 *$py.class
 *.so
 .Python
-
-# Virtual Environment
-venv/
 env/
+venv/
 ENV/
-
-# Model and Cache
-model_cache/
-models/
-*.bin
-*.safetensors
-
-# Logs
-logs/
-*.log
-*.out
-*.err
-
-# Uploads
-uploads/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # IDE
 .vscode/
@@ -32,38 +30,27 @@ uploads/
 *.swo
 *~
 
+# Logs
+logs/*.log
+*.log
+
+# Database
+*.db-journal
+
+# Runtime
+vecta_ai.pid
+
 # OS
 .DS_Store
 Thumbs.db
 
-# Gunicorn
-gunicorn.pid
-gunicorn_access.log
-gunicorn_error.log
-
-# Environment
+# Env files
 .env
-*.env
+.env.local
 
-# Backups
-*.backup
-*_old.py
-*_new.py
+# Vector DB
+data/vector_db/
 
-# SLURM outputs
-med42_service_*.out
-med42_service_*.err
-
-# Site-specific
-nginx_*.conf
-*.service
-*_test.sh
-LOCAL_ACCESS_INSTRUCTIONS.md
-TESTING_GUIDE.md
-REBRANDING_COMPLETE.md
-connect_med42.sh
-test_connection.sh
-ood_test*.sh
-deploy_ssh.sh
-ssh_tunnel.sh
-start_service.sh
+# Temporary files
+tmp/
+temp/

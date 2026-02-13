@@ -1,0 +1,374 @@
+#!/usr/bin/env python3
+"""
+Vecta AI - Command Line Interface
+Manage Vecta AI service (start, stop, restart, status)
+"""
+import os
+import sys
+import signal
+import time
+import subprocess
+from pathlib import Path
+
+APP_DIR = Path(__file__).parent
+PID_FILE = APP_DIR / "vecta_ai.pid"
+LOG_FILE = APP_DIR / "logs" / "vecta_ai.log"
+
+
+def check_dependencies():
+    """Check if required dependencies are installed"""
+    required = ['flask', 'flask_cors', 'pandas', 'numpy']
+    missing = []
+    
+    for package in required:
+        try:
+            __import__(package)
+        except ImportError:
+            missing.append(package)
+    
+    return missing
+
+
+def install_dependencies():
+    """Install missing dependencies"""
+    print("Checking dependencies...")
+    missing = check_dependencies()
+    
+    if not missing:
+        print("All required dependencies are installed.")
+        return True
+    
+    print(f"Missing dependencies: {', '.join(missing)}")
+    print("Installing required packages...")
+    
+    try:
+        subprocess.check_call([
+            sys.executable, '-m', 'pip', 'install', '--user',
+            'flask', 'flask-cors', 'pandas', 'numpy'
+        ])
+        print("Dependencies installed successfully.")
+        return True
+    except subprocess.CalledProcessError:
+        print("ERROR: Failed to install dependencies.")
+        print("Please run manually: pip3 install --user flask flask-cors pandas numpy")
+        return False
+
+
+def print_banner():
+    print("")
+    print("=" * 70)
+    print("  Vecta AI - Medical Analysis Platform")
+    print("  Command Line Interface")
+    print("=" * 70)
+    print("")
+
+
+def get_pid_info():
+    """Get PID and port from PID file"""
+    if not PID_FILE.exists():
+        return None, None
+    
+    try:
+        with open(PID_FILE, 'r') as f:
+            content = f.read().strip()
+            if ':' in content:
+                pid_str, port_str = content.split(':')
+                return int(pid_str), int(port_str)
+            else:
+                return int(content), None
+    except Exception:
+        return None, None
+
+
+def is_process_running(pid):
+    """Check if process is running"""
+    if pid is None:
+        return False
+    
+    try:
+        os.kill(pid, 0)
+        return True
+    except (OSError, ProcessLookupError):
+        return False
+
+
+def start_service(background=False):
+    """Start Vecta AI service"""
+    # Check dependencies first
+    if not install_dependencies():
+        return
+    
+    pid, port = get_pid_info()
+    
+    if pid and is_process_running(pid):
+        print(f"[OK] Vecta AI is already running (PID: {pid}, Port: {port})")
+        if port:
+            print(f"\n   Main App:   http://localhost:{port}")
+            print(f"   Validator:  http://localhost:{port}/validate")
+        print("")
+        return
+    
+    print("Starting Vecta AI service...")
+    print("")
+    
+    if background:
+        # Start in background
+        log_path = APP_DIR / "logs"
+        log_path.mkdir(exist_ok=True)
+        
+        with open(LOG_FILE, 'a') as log:
+            process = subprocess.Popen(
+                [sys.executable, str(APP_DIR / "app.py")],
+                stdout=log,
+                stderr=log,
+                cwd=str(APP_DIR),
+                start_new_session=True
+            )
+        
+        # Wait a moment for startup
+        time.sleep(2)
+        
+        # Check if started successfully
+        pid, port = get_pid_info()
+        if pid and is_process_running(pid):
+            print(f"[OK] Vecta AI started successfully in background")
+            print(f"   PID: {pid}")
+            if port:
+                print(f"   Port: {port}")
+                print(f"\n   Main App:   http://localhost:{port}")
+                print(f"   Validator:  http://localhost:{port}/validate")
+            print(f"\n   Logs: {LOG_FILE}")
+            print(f"\n   Stop with: vecta stop")
+        else:
+            print("[ERROR] Failed to start Vecta AI")
+            print(f"   Check logs: {LOG_FILE}")
+    else:
+        # Start in foreground
+        print("Starting Vecta AI in foreground (Ctrl+C to stop)...")
+        print("")
+        try:
+            os.execvp(sys.executable, [sys.executable, str(APP_DIR / "app.py")])
+        except Exception as e:
+            print(f"[ERROR] Failed to start: {e}")
+            sys.exit(1)
+
+
+def stop_service():
+    """Stop Vecta AI service"""
+    pid, port = get_pid_info()
+    
+    if not pid:
+        print("ℹ️  Vecta AI is not running (no PID file found)")
+        print("")
+        return
+    
+    if not is_process_running(pid):
+        print(f"ℹ️  Vecta AI is not running (stale PID: {pid})")
+        # Clean up stale PID file
+        try:
+            PID_FILE.unlink()
+            print("   Cleaned up stale PID file")
+        except Exception:
+            pass
+        print("")
+        return
+    
+    print(f"Stopping Vecta AI (PID: {pid}, Port: {port})...")
+    
+    try:
+        # Send SIGTERM for graceful shutdown
+        os.kill(pid, signal.SIGTERM)
+        
+        # Wait for process to stop (up to 10 seconds)
+        for i in range(10):
+            time.sleep(1)
+            if not is_process_running(pid):
+                print("[OK] Vecta AI stopped successfully")
+                print("")
+                # Clean up PID file
+                try:
+                    PID_FILE.unlink()
+                except Exception:
+                    pass
+                return
+        
+        # Force kill if still running
+        print("[WARN] Process did not stop gracefully, forcing shutdown...")
+        os.kill(pid, signal.SIGKILL)
+        time.sleep(1)
+        
+        if not is_process_running(pid):
+            print("[OK] Vecta AI stopped (forced)")
+        else:
+            print("[ERROR] Failed to stop Vecta AI")
+        
+        # Clean up PID file
+        try:
+            PID_FILE.unlink()
+        except Exception:
+            pass
+        
+    except Exception as e:
+        print(f"[ERROR] Error stopping Vecta AI: {e}")
+    
+    print("")
+
+
+def restart_service():
+    """Restart Vecta AI service"""
+    print("Restarting Vecta AI...")
+    print("")
+    stop_service()
+    time.sleep(1)
+    start_service(background=True)
+
+
+def show_status():
+    """Show Vecta AI status"""
+    pid, port = get_pid_info()
+    
+    print("Vecta AI Status")
+    print("─" * 70)
+    
+    if not pid:
+        print("Status:  NOT RUNNING")
+        print("")
+        print("Start with: vecta start")
+    elif is_process_running(pid):
+        print(f"Status:  RUNNING")
+        print(f"PID:     {pid}")
+        print(f"Port:    {port}")
+        
+        if port:
+            print("")
+            print("Access URLs:")
+            print(f"  Main App:   http://localhost:{port}")
+            print(f"  Validator:  http://localhost:{port}/validate")
+        
+        print("")
+        print("Stop with:    vecta stop")
+        print("Restart with: vecta restart")
+    else:
+        print(f"Status:  NOT RUNNING (stale PID: {pid})")
+        print("")
+        print("Clean up with: vecta stop")
+        print("Start with:    vecta start")
+    
+    print("")
+
+
+def show_logs(tail_lines=50):
+    """Show recent logs"""
+    if not LOG_FILE.exists():
+        print("No logs found")
+        print("")
+        return
+    
+    print(f"Recent logs (last {tail_lines} lines):")
+    print("─" * 70)
+    
+    try:
+        with open(LOG_FILE, 'r') as f:
+            lines = f.readlines()
+            for line in lines[-tail_lines:]:
+                print(line.rstrip())
+    except Exception as e:
+        print(f"Error reading logs: {e}")
+    
+    print("")
+    print(f"Full logs: {LOG_FILE}")
+    print("")
+
+
+def show_help():
+    """Show help message"""
+    print_banner()
+    print("Usage: vecta <command> [options]")
+    print("")
+    print("Commands:")
+    print("  start       Start Vecta AI service")
+    print("  stop        Stop Vecta AI service")
+    print("  restart     Restart Vecta AI service")
+    print("  status      Show service status")
+    print("  logs        Show recent logs (last 50 lines)")
+    print("  help        Show this help message")
+    print("")
+    print("Options:")
+    print("  -f, --foreground    Start in foreground (default: background)")
+    print("  -p, --port PORT     Specify port (default: 8085)")
+    print("")
+    print("Examples:")
+    print("  vecta start              # Start in background on port 8085")
+    print("  vecta start -f           # Start in foreground")
+    print("  vecta start -p 8090      # Start on port 8090")
+    print("  vecta stop               # Stop the service")
+    print("  vecta restart            # Restart the service")
+    print("  vecta status             # Check status")
+    print("  vecta logs               # View recent logs")
+    print("")
+    print("Port Range: 8085-8150 (auto-detects free port)")
+    print("")
+
+
+def main():
+    if len(sys.argv) < 2:
+        show_help()
+        sys.exit(1)
+    
+    command = sys.argv[1].lower()
+    
+    if command in ['help', '-h', '--help']:
+        show_help()
+    
+    elif command == 'start':
+        background = True
+        
+        # Check for foreground flag
+        if len(sys.argv) > 2 and sys.argv[2] in ['-f', '--foreground']:
+            background = False
+        
+        # Check for port override
+        if '-p' in sys.argv or '--port' in sys.argv:
+            idx = sys.argv.index('-p') if '-p' in sys.argv else sys.argv.index('--port')
+            if len(sys.argv) > idx + 1:
+                try:
+                    port = int(sys.argv[idx + 1])
+                    os.environ['SERVICE_PORT'] = str(port)
+                except ValueError:
+                    print("[ERROR] Invalid port number")
+                    sys.exit(1)
+        
+        print_banner()
+        start_service(background=background)
+    
+    elif command == 'stop':
+        print_banner()
+        stop_service()
+    
+    elif command == 'restart':
+        print_banner()
+        restart_service()
+    
+    elif command == 'status':
+        print_banner()
+        show_status()
+    
+    elif command == 'logs':
+        print_banner()
+        tail_lines = 50
+        if len(sys.argv) > 2:
+            try:
+                tail_lines = int(sys.argv[2])
+            except ValueError:
+                pass
+        show_logs(tail_lines)
+    
+    else:
+        print(f"[ERROR] Unknown command: {command}")
+        print("")
+        show_help()
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

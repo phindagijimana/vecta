@@ -17,3 +17,12 @@ torchaudio>=2.7
 torchvision>=2.7
 pydantic>=2.0
 pydantic-settings>=2.0
+
+# Phase 3: RAG System (Week 5-8)
+chromadb>=0.4.22
+sentence-transformers>=2.2.2
+
+# Future: Validation System
+flask-login>=0.6.3
+apscheduler>=3.10.4
+bcrypt>=4.1.2

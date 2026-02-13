@@ -9,6 +9,9 @@ from flask import Flask, request, jsonify, send_file, render_template_string, Re
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
+# Import few-shot examples and guidelines loader (loaded after logger init)
+# Import RAG system (Phase 3)
+
 # Optional model deps — keep app alive even if missing
 try:
     import torch
@@ -39,6 +42,28 @@ logging.basicConfig(
 )
 logger = logging.getLogger("vectaai")
 
+# Initialize few-shot examples and guidelines loader
+try:
+    from utils.few_shot_loader import FewShotExampleLoader
+    few_shot_loader = FewShotExampleLoader()
+    logger.info("✅ Few-shot examples and guidelines loaded successfully (50 examples across 10 conditions)")
+except Exception as e:
+    few_shot_loader = None
+    logger.warning(f"⚠️ Few-shot loader not available: {e}")
+
+# Initialize RAG system (Phase 3: Week 5-8)
+try:
+    from utils.rag_system import get_rag_system
+    rag_system = get_rag_system()
+    if rag_system and rag_system.available:
+        logger.info("✅ RAG system initialized successfully (ChromaDB + semantic search)")
+    else:
+        rag_system = None
+        logger.info("ℹ️ RAG system not initialized (install: pip install chromadb sentence-transformers)")
+except Exception as e:
+    rag_system = None
+    logger.info(f"ℹ️ RAG system not available: {e}")
+
 app = Flask(__name__)
 CORS(app)
 
@@ -48,6 +73,22 @@ app.config.update({
     "SECRET_KEY": os.urandom(24),
     "MAX_CONCURRENT_REQUESTS": int(os.environ.get("MAX_CONCURRENT_USERS", "10"))
 })
+
+# Register validation blueprint
+try:
+    from routes.validation import validation_bp
+    app.register_blueprint(validation_bp)
+    logger.info("✅ Validation routes registered")
+except Exception as e:
+    logger.warning(f"⚠️ Validation routes not registered: {e}")
+
+# Initialize database
+try:
+    from database import init_db
+    init_db()
+    logger.info("✅ Database initialized")
+except Exception as e:
+    logger.warning(f"⚠️ Database initialization failed: {e}")
 
 ALLOWED_EXT = {"txt", "pdf", "docx", "xlsx", "csv", "json"}
 
@@ -322,11 +363,84 @@ ADAPTIVE MEDICAL ANALYSIS:
         return templates.get(analysis_type, templates["custom"])
 
     @staticmethod
-    def construct_med42_prompt(system_prompt, user_prompt, medical_data, is_tabular=False, analysis_type="custom"):
-        """Construct optimized Vecta AI prompt with proper formatting"""
+    def get_enhanced_context(condition=None, analysis_type="classification", num_examples=2, 
+                            query_text=None, use_rag=True):
+        """
+        Get enhanced context with few-shot examples, clinical guidelines, and RAG
+        
+        Phase 1: Few-Shot Examples (Week 1-2) ✅
+        Phase 2: Context Injection - Static Guidelines (Week 3-4) ✅
+        Phase 3: RAG - Dynamic Retrieval (Week 5-8) ✅
+        """
+        if not few_shot_loader:
+            return ""
+        
+        context_parts = []
+        
+        try:
+            # Phase 1: Add few-shot examples if condition is specified
+            if condition:
+                examples = few_shot_loader.get_examples_by_condition(
+                    condition=condition,
+                    n=num_examples,
+                    analysis_type=analysis_type
+                )
+                
+                if examples:
+                    formatted_examples = few_shot_loader.format_few_shot_examples_for_prompt(
+                        examples=examples,
+                        analysis_type=analysis_type
+                    )
+                    context_parts.append(formatted_examples)
+                
+                # Phase 2: Add static clinical guidelines for this condition
+                guidelines = few_shot_loader.get_guideline_context(condition)
+                if guidelines:
+                    context_parts.append(f"\n📚 CLINICAL GUIDELINES (Static):\n{guidelines}\n")
+            
+            # Phase 3: Add RAG-retrieved dynamic guidelines
+            if use_rag and rag_system and query_text:
+                try:
+                    rag_results = rag_system.retrieve(
+                        query=query_text,
+                        condition=condition,
+                        n_results=2
+                    )
+                    if rag_results:
+                        context_parts.append(rag_results)
+                        logger.info(f"✅ RAG retrieval successful for condition: {condition}")
+                except Exception as e:
+                    logger.warning(f"RAG retrieval failed: {e}")
+        
+        except Exception as e:
+            logger.warning(f"Could not load enhanced context: {e}")
+        
+        return "\n".join(context_parts) if context_parts else ""
+    
+    @staticmethod
+    def construct_med42_prompt(system_prompt, user_prompt, medical_data, is_tabular=False, analysis_type="custom", 
+                               condition=None, use_few_shot=True, use_rag=True):
+        """Construct optimized Vecta AI prompt with proper formatting
+        
+        Enhanced with:
+        - Few-shot examples (Phase 1: Week 1-2) ✅
+        - Clinical guidelines (Phase 2: Week 3-4) ✅
+        - RAG retrieval (Phase 3: Week 5-8) ✅
+        """
         
         # Add clinical reasoning activation
         clinical_activation = VectaAIPromptEngine.get_clinical_reasoning_activation()
+        
+        # Get enhanced context (few-shot + guidelines + RAG)
+        enhanced_context = ""
+        if use_few_shot and condition:
+            enhanced_context = VectaAIPromptEngine.get_enhanced_context(
+                condition=condition,
+                analysis_type=analysis_type,
+                num_examples=2,
+                query_text=medical_data,  # Use medical data for RAG query
+                use_rag=use_rag
+            )
         
         # Minimal additional instructions to avoid conflicting with template-specific formatting
         if is_tabular:
@@ -358,11 +472,14 @@ You may provide detailed analysis first, but MUST end with exactly these 4 bulle
 """
 
         # Construct final prompt with proper Llama 3 formatting
+        # Inject enhanced context (few-shot examples + guidelines) into system section
+        context_section = f"\n\n{enhanced_context}\n" if enhanced_context else ""
+        
         final_prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 
 {format_instruction}{system_prompt}
 
-{clinical_activation}
+{clinical_activation}{context_section}
 
 {data_instructions}
 
@@ -724,6 +841,44 @@ class VectaAIService:
         n = self.stats["requests"]
         self.stats["avg_time"] = ((n-1) * self.stats["avg_time"] + dt) / n
 
+    def _detect_condition(self, text, specialty=None):
+        """
+        Detect neurological condition from text to select appropriate few-shot examples
+        
+        Conditions supported: epilepsy, parkinsons, stroke, headache, dementia,
+        multiple_sclerosis, peripheral_neuropathy, myasthenia_gravis, spinal_cord, motor_neuron_disease
+        """
+        if not text:
+            return None
+        
+        text_lower = text.lower()
+        
+        # Condition keywords mapping
+        condition_keywords = {
+            "epilepsy": ["seizure", "epilep", "convuls", "eeg", "ictal", "antiseizure", "asm"],
+            "parkinsons": ["parkinson", "tremor", "rigidity", "bradykinesia", "levodopa", "dopamine"],
+            "stroke": ["stroke", "cva", "ischemic", "hemorrhagic", "tpa", "thrombolysis", "hemiparesis"],
+            "headache": ["headache", "migraine", "cephalalgia", "triptan", "ichd"],
+            "dementia": ["dementia", "alzheimer", "cognitive decline", "memory loss", "mmse", "moca"],
+            "multiple_sclerosis": ["multiple sclerosis", "ms ", "demyelinating", "optic neuritis"],
+            "peripheral_neuropathy": ["neuropathy", "nerve damage", "polyneuropathy", "diabetic neuropathy"],
+            "myasthenia_gravis": ["myasthenia", "mg ", "acetylcholine", "neuromuscular junction"],
+            "spinal_cord": ["spinal cord", "myelopathy", "paraplegia", "tetraplegia"],
+            "motor_neuron_disease": ["als ", "amyotrophic lateral sclerosis", "motor neuron"]
+        }
+        
+        # Check for condition keywords in text
+        for condition, keywords in condition_keywords.items():
+            if any(keyword in text_lower for keyword in keywords):
+                return condition
+        
+        # Fallback to specialty if provided
+        if specialty and specialty.lower() == "neurology":
+            # Default to epilepsy for neurology if no specific condition detected
+            return "epilepsy"
+        
+        return None
+    
     def analyze(self, prompt, text, analysis_type="custom", user_id=None, tabular_data=None, specialty=None):
         if not self.model_loaded:
             raise RuntimeError(f"Vecta AI model not available: {self.load_error or 'not loaded'}")
@@ -763,14 +918,22 @@ class VectaAIService:
                 text = truncated + "\n\n[Note: Text truncated for Vecta AI processing]"
                 logger.info(f"[{req_id}] Text truncated to {len(text)} characters for Vecta AI")
 
-            # Construct optimized Vecta AI prompt
+            # Detect condition from text or specialty for few-shot examples
+            detected_condition = self._detect_condition(text, specialty)
+            
+            # Construct optimized Vecta AI prompt with few-shot examples and guidelines
             final_prompt = self.prompt_engine.construct_med42_prompt(
                 system_prompt=system_prompt,
                 user_prompt=prompt,
                 medical_data=text,
                 is_tabular=is_tabular,
-                analysis_type=analysis_type
+                analysis_type=analysis_type,
+                condition=detected_condition,
+                use_few_shot=True  # Enable few-shot examples and guidelines
             )
+            
+            if detected_condition:
+                logger.info(f"[{req_id}] Enhanced with few-shot examples for condition: {detected_condition}")
 
             logger.info(f"[{req_id}] Vecta AI prompt constructed - Total length: {len(final_prompt)} chars")
 
@@ -945,14 +1108,89 @@ UI_HTML = r"""
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #ffffff;
+      background: linear-gradient(135deg, #e8f4ff 0%, #f0f8ff 100%);
       min-height: 100vh;
-      padding: 20px;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* Navigation Bar */
+    .nav-bar {
+      background: #004977;
+      box-shadow: 0 4px 15px rgba(0, 73, 119, 0.2);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 30px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 20px 0;
+    }
+
+    .nav-logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-subtitle {
+      color: white;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      opacity: 0.9;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 5px;
+      list-style: none;
+    }
+
+    .nav-link {
+      color: white;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      background: transparent;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 73, 119, 0.3);
     }
 
     .container {
       max-width: 1400px;
-      margin: 0 auto;
+      margin: 30px auto;
+      padding: 0 30px;
+    }
+
+    .main-card {
       background: rgba(255, 255, 255, 0.95);
       border-radius: 20px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -961,7 +1199,7 @@ UI_HTML = r"""
     }
 
     .header {
-      background: linear-gradient(135deg, #004977, #00A9E0);
+      background: #004977;
       color: white;
       padding: 30px;
       text-align: center;
@@ -981,7 +1219,7 @@ UI_HTML = r"""
 
     .enhancement-badge {
       display: inline-block;
-      background: linear-gradient(135deg, #004977, #00A9E0);
+      background: rgba(255, 255, 255, 0.2);
       padding: 8px 16px;
       border-radius: 20px;
       font-size: 0.9em;
@@ -997,7 +1235,7 @@ UI_HTML = r"""
       font-weight: bold;
     }
 
-    .status-loading { background: #00A9E0; color: white; }
+    .status-loading { background: #004977; color: white; opacity: 0.8; }
     .status-healthy { background: #004977; color: white; }
     .status-error { background: #666666; color: white; }
 
@@ -1020,7 +1258,7 @@ UI_HTML = r"""
       font-size: 1.3em;
       margin-bottom: 20px;
       font-weight: 600;
-      border-bottom: 3px solid #00A9E0;
+      border-bottom: 3px solid #004977;
       padding-bottom: 8px;
     }
 
@@ -1054,7 +1292,7 @@ UI_HTML = r"""
     .template-btn:hover, .template-btn.active {
       background: #00A9E0;
       color: white;
-      border-color: #00A9E0;
+      border-color: #004977;
       transform: translateY(-2px);
     }
 
@@ -1105,7 +1343,7 @@ UI_HTML = r"""
 
     .form-input:focus, .form-textarea:focus, .form-select:focus {
       outline: none;
-      border-color: #00A9E0;
+      border-color: #004977;
       box-shadow: 0 0 0 3px rgba(0, 169, 224, 0.1);
     }
 
@@ -1140,7 +1378,7 @@ UI_HTML = r"""
     .upload-icon {
       font-size: 3em;
       margin-bottom: 15px;
-      color: #00A9E0;
+      color: #004977;
     }
 
     .file-input {
@@ -1162,7 +1400,7 @@ UI_HTML = r"""
     }
 
     .analyze-btn {
-      background: linear-gradient(135deg, #00A9E0, #004977);
+      background: #004977;
       color: white;
       border: none;
       padding: 15px 30px;
@@ -1176,7 +1414,8 @@ UI_HTML = r"""
 
     .analyze-btn:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(0, 169, 224, 0.3);
+      box-shadow: 0 10px 25px rgba(0, 73, 119, 0.3);
+      opacity: 0.9;
     }
 
     .analyze-btn:disabled {
@@ -1210,7 +1449,7 @@ UI_HTML = r"""
 
     .spinner {
       border: 4px solid #f3f3f3;
-      border-top: 4px solid #00A9E0;
+      border-top: 4px solid #004977;
       border-radius: 50%;
       width: 50px;
       height: 50px;
@@ -1229,7 +1468,7 @@ UI_HTML = r"""
 
     .result-card {
       background: #f8f9fa;
-      border-left: 4px solid #00A9E0;
+      border-left: 4px solid #004977;
       padding: 20px;
       margin-bottom: 20px;
       border-radius: 5px;
@@ -1354,7 +1593,7 @@ UI_HTML = r"""
       background: #f8f9fa;
       padding: 10px 8px;
       text-align: left;
-      border-bottom: 2px solid #00A9E0;
+      border-bottom: 2px solid #004977;
       position: sticky;
       top: 0;
       z-index: 10;
@@ -1406,11 +1645,28 @@ UI_HTML = r"""
   </style>
 </head>
 <body>
+  <!-- Navigation Bar -->
+  <nav class="nav-bar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <a href="/" class="nav-logo">
+          Vecta AI
+          <div class="nav-subtitle">MEDICAL ANALYSIS PLATFORM</div>
+        </a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="/" class="nav-link active">Main App</a></li>
+        <li><a href="/validate" class="nav-link">Validator</a></li>
+      </ul>
+    </div>
+  </nav>
+
   <div class="container">
-    <div class="header">
-      <h1>Vecta AI - Medical Analysis Platform</h1>
-      <p>Neurological and neuroscience data analysis powered by specialized AI</p>
-      <div class="enhancement-badge">Neurology & Neuroscience AI</div>
+    <div class="main-card">
+      <div class="header">
+        <h1>Vecta AI - Medical Analysis Platform</h1>
+        <p>Neurological and neuroscience data analysis powered by specialized AI</p>
+        <div class="enhancement-badge">Neurology & Neuroscience AI</div>
       <div class="enhancement-badge">Enhanced Tabular Analysis</div>
       <div class="enhancement-badge">Clinical Reasoning Engine</div>
       <br>
@@ -1999,6 +2255,8 @@ Vecta AI Tabular Analysis: Apply your comprehensive medical training for dataset
       window.URL.revokeObjectURL(url);
     }
   </script>
+    </div> <!-- End main-card -->
+  </div> <!-- End container -->
 </body>
 </html>"""
 
@@ -2137,6 +2395,64 @@ def analyze():
             res = svc.analyze(prompt, text, analysis_type, user_id, tabular_data, specialty)
             logger.info(f"Vecta AI enhanced analysis completed successfully for user {user_id}")
             
+            # Save to validation database (10% sampling for validation)
+            try:
+                import random
+                from database import get_db
+                
+                if random.random() < 0.10:  # 10% sample rate
+                    with get_db() as db:
+                        # Extract structured output if available
+                        response_text = res.get('response', '')
+                        ai_classification = ""
+                        ai_confidence = ""
+                        ai_evidence = ""
+                        ai_medication = ""
+                        
+                        # Try to extract bullet points
+                        if '• Classification:' in response_text or '- Classification:' in response_text:
+                            lines = response_text.split('\n')
+                            for line in lines:
+                                if 'Classification:' in line:
+                                    ai_classification = line.split(':', 1)[1].strip() if ':' in line else ""
+                                elif 'Confidence:' in line or 'Clinical_Confidence:' in line:
+                                    ai_confidence = line.split(':', 1)[1].strip() if ':' in line else ""
+                                elif 'Evidence:' in line:
+                                    ai_evidence = line.split(':', 1)[1].strip() if ':' in line else ""
+                                elif 'Medication' in line:
+                                    ai_medication = line.split(':', 1)[1].strip() if ':' in line else ""
+                        
+                        # Detect condition from text
+                        detected_condition = svc._detect_condition(text, specialty) if hasattr(svc, '_detect_condition') else None
+                        
+                        db.execute("""
+                            INSERT INTO ai_outputs (
+                                input_text, input_type, condition, specialty,
+                                ai_classification, ai_confidence, ai_evidence, 
+                                ai_medication_analysis, ai_full_response,
+                                model_version, selected_for_validation,
+                                selection_date, session_id
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?)
+                        """, (
+                            text[:1000],  # Limit input text length
+                            analysis_type,
+                            detected_condition,
+                            specialty or 'neurology',
+                            ai_classification,
+                            ai_confidence,
+                            ai_evidence,
+                            ai_medication,
+                            response_text,
+                            '2.0-enhanced',
+                            True,  # Selected for validation
+                            user_id
+                        ))
+                        db.commit()
+                        logger.info(f"✅ Saved output for validation (ID: {db.execute('SELECT last_insert_rowid()').fetchone()[0]})")
+            except Exception as e:
+                # Don't fail the request if validation save fails
+                logger.warning(f"Failed to save for validation: {e}")
+            
             response_data = {"success": True, **res}
             response = jsonify(response_data)
             response.headers['Content-Type'] = 'application/json; charset=utf-8'
@@ -2160,22 +2476,51 @@ def analyze():
 
 if __name__ == "__main__":
     logger.info("Starting Vecta AI service...")
-    port = int(os.environ.get("SERVICE_PORT", 8080))
+    
+    # Port selection logic: Default 8085, auto-find free port in 8085-8150 range
     host = os.environ.get("SERVICE_HOST", "0.0.0.0")
     
-    #logger.info(f"Loading Med42-8B model with enhanced prompting on startup...")
+    try:
+        from utils.port_finder import find_free_port
+        default_port = int(os.environ.get("SERVICE_PORT", 8085))
+        port = find_free_port(start_port=default_port, end_port=8150)
+        
+        if port != default_port:
+            logger.info("Default port {} in use, using port {}".format(default_port, port))
+    except Exception as e:
+        logger.warning("Port finder not available: {}".format(e))
+        port = int(os.environ.get("SERVICE_PORT", 8085))
+    
+    # Save PID file for stop script
+    pid_file = os.path.join(APP_HOME, "vecta_ai.pid")
+    try:
+        with open(pid_file, 'w') as f:
+            f.write("{}:{}".format(os.getpid(), port))
+        logger.info("PID file created: {}".format(pid_file))
+    except Exception as e:
+        logger.warning("Could not create PID file: {}".format(e))
+    
     logger.info("Loading Vecta AI model with enhanced prompting on startup...")
 
     if svc.load_model():
         logger.info("Vecta AI model loaded successfully with optimized prompting!")
     else:
-        #logger.warning(f"Vecta AI model loading failed: {svc.load_error}")
         logger.warning("Vecta AI model loading failed: {}".format(svc.load_error))
-        
         logger.info("Vecta AI service will continue - model loading will be attempted on first request")
     
-    #logger.info(f"Starting Med42-8B Enhanced server on {host}:{port}")
     logger.info("Starting Vecta AI server on {}:{}".format(host, port))
+    logger.info("Access URLs:")
+    logger.info("  Main App:   http://localhost:{}".format(port))
+    logger.info("  Validator:  http://localhost:{}/validate".format(port))
 
-    app.run(host=host, port=port, debug=False, threaded=True)
+    try:
+        app.run(host=host, port=port, debug=False, threaded=True)
+    finally:
+        # Clean up PID file on shutdown
+        try:
+            if os.path.exists(pid_file):
+                os.remove(pid_file)
+                logger.info("PID file removed")
+        except Exception:
+            pass
 

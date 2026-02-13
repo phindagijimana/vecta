@@ -1,0 +1,282 @@
+{
+  "neurology_few_shot_examples": {
+    "epilepsy": [
+      {
+        "id": "epilepsy_001",
+        "source": "PhysioNet CHB-MIT Database",
+        "condition": "Generalized Epilepsy",
+        "input": "11-year-old female patient (chb01) with history of intractable seizures. Monitoring EEG shows bilaterally synchronous 3Hz spike-and-wave complexes. Patient experiences recurrent episodes of brief loss of awareness lasting 10-15 seconds with subtle motor arrest. Anti-seizure medications recently withdrawn for surgical evaluation.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Generalized absence epilepsy with characteristic 3Hz spike-wave pattern",
+          "clinical_confidence": "High based on classic EEG findings and clinical semiology",
+          "evidence": "Bilaterally synchronous 3Hz spike-wave on EEG, brief awareness loss, typical age",
+          "medication_analysis": "First-line: Ethosuximide or valproate, avoid sodium channel blockers like carbamazepine"
+        }
+      },
+      {
+        "id": "epilepsy_002",
+        "source": "Clinical case reports - temporal lobe epilepsy",
+        "condition": "Focal Epilepsy",
+        "input": "14-year-old female with recurrent episodes of behavioral arrest, lip smacking, and automatisms lasting 1-2 minutes. Post-ictal confusion present. EEG shows left temporal sharp waves. MRI reveals small left mesial temporal sclerosis.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Focal impaired awareness seizures, left temporal lobe epilepsy with MTS",
+          "clinical_confidence": "High based on semiology, EEG localization, and imaging correlation",
+          "evidence": "Temporal automatisms, post-ictal confusion, left temporal EEG abnormality, MTS on MRI",
+          "medication_analysis": "First-line: Levetiracetam or lamotrigine, consider surgical evaluation given focal lesion"
+        }
+      },
+      {
+        "id": "epilepsy_003",
+        "source": "CHB-MIT subject chb04",
+        "condition": "Medically Refractory Epilepsy",
+        "input": "22-year-old male with history of multiple seizure types since childhood. Currently experiencing 3-5 generalized tonic-clonic seizures monthly despite trials of 4 different anti-seizure medications. EEG shows multifocal epileptiform discharges. Significant impact on quality of life and employment.",
+        "analysis_type": "diagnosis",
+        "expected_output": {
+          "diagnosis_support": "Drug-resistant epilepsy per ILAE criteria, requires advanced treatment options",
+          "clinical_confidence": "High based on failure of adequate trials of 2+ appropriate ASMs",
+          "evidence": "Multiple seizure types, failure of 4 ASM trials, multifocal discharges, ongoing seizures",
+          "medication_analysis": "Consider adjunctive therapy with newer ASMs, evaluate for VNS or RNS candidacy, reassess surgical options"
+        }
+      },
+      {
+        "id": "epilepsy_004",
+        "source": "Pediatric epilepsy monitoring unit",
+        "condition": "Juvenile Myoclonic Epilepsy",
+        "input": "16-year-old male reports morning jerks of arms causing dropped objects, occasional generalized tonic-clonic seizures upon awakening. Sleep-deprived EEG demonstrates 4-6Hz generalized polyspike-wave discharges. Family history positive for epilepsy in maternal aunt.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Juvenile myoclonic epilepsy (JME), genetic generalized epilepsy syndrome",
+          "clinical_confidence": "High based on characteristic age, semiology, EEG pattern, family history",
+          "evidence": "Morning myoclonic jerks, awakening GTCS, polyspike-wave on EEG, typical age of onset",
+          "medication_analysis": "First-line: Valproate (males) or levetiracetam, avoid carbamazepine/phenytoin, emphasize compliance"
+        }
+      },
+      {
+        "id": "epilepsy_005",
+        "source": "Emergency department case",
+        "condition": "Status Epilepticus",
+        "input": "7-year-old female brought to ED with continuous convulsive activity for 25 minutes. Witnessed generalized tonic-clonic movements, unresponsive to verbal stimuli. No prior epilepsy history. Fever 102.5F, no focal neurological signs. Received lorazepam 0.1mg/kg IV with persistent seizure activity.",
+        "analysis_type": "diagnosis",
+        "expected_output": {
+          "diagnosis_support": "Established status epilepticus, likely febrile seizure-related, requires immediate escalation",
+          "clinical_confidence": "High based on seizure duration >5 minutes and benzodiazepine failure",
+          "evidence": "Continuous seizure >25 minutes, fever present, failed first-line benzodiazepine",
+          "medication_analysis": "Immediate second-line: Fosphenytoin or levetiracetam IV, consider valproate if refractory, ICU monitoring"
+        }
+      }
+    ],
+    "parkinsons": [
+      {
+        "id": "parkinsons_001",
+        "source": "Journal of Medical Case Reports 2025",
+        "condition": "Advanced Parkinson's Disease",
+        "input": "85-year-old South Asian male with 13-year Parkinson's disease history. Currently bed-bound, nonverbal, dysphagia requiring feeding tube. On carbidopa-levodopa 25-100mg TID with symptom relief lasting only 2-3 hours. Hypomimia, bradykinesia, postural instability present. No falls due to caregiver supervision.",
+        "analysis_type": "diagnosis",
+        "expected_output": {
+          "diagnosis_support": "Advanced PD with motor fluctuations and wearing-off, candidate for extended-release formulation",
+          "clinical_confidence": "High based on disease duration, motor symptoms, and medication response pattern",
+          "evidence": "13-year PD duration, severe bradykinesia, short medication benefit window, advanced disability",
+          "medication_analysis": "Switch to extended-release carbidopa-levodopa (Rytary) for 4-6hr coverage, consider MAO-B inhibitor adjunct"
+        }
+      },
+      {
+        "id": "parkinsons_002",
+        "source": "Movement disorders clinic",
+        "condition": "Early Parkinson's Disease",
+        "input": "62-year-old male presents with 6-month history of right hand rest tremor, described as pill-rolling. Reports decreased arm swing on right during walking, handwriting has become smaller. No cognitive changes or postural issues. Examination confirms 4-6Hz rest tremor, mild right-sided rigidity, normal gait.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Early-stage Parkinson's disease, Hoehn-Yahr stage 1, unilateral involvement",
+          "clinical_confidence": "High based on classic motor triad features and unilateral presentation",
+          "evidence": "Unilateral rest tremor, rigidity, bradykinesia (micrographia), decreased arm swing",
+          "medication_analysis": "Consider MAO-B inhibitor (rasagiline) or dopamine agonist for initial monotherapy, delay levodopa"
+        }
+      },
+      {
+        "id": "parkinsons_003",
+        "source": "Neurology clinic follow-up",
+        "condition": "PD with Motor Fluctuations",
+        "input": "68-year-old female with 8-year PD history on carbidopa-levodopa 25-100mg QID. Reports predictable wearing-off 3 hours after doses with tremor re-emergence and slowness. Also experiencing 30-45 minute periods of involuntary dance-like movements of trunk and limbs (dyskinesias) at peak dose effect.",
+        "analysis_type": "diagnosis",
+        "expected_output": {
+          "diagnosis_support": "PD with motor complications: wearing-off phenomenon and peak-dose dyskinesias",
+          "clinical_confidence": "High based on temporal relationship to levodopa dosing and symptom pattern",
+          "evidence": "Predictable 3-hour wearing-off, peak-dose dyskinesias, long-term levodopa exposure",
+          "medication_analysis": "Add COMT inhibitor (entacapone) to extend levodopa duration, consider amantadine for dyskinesias"
+        }
+      },
+      {
+        "id": "parkinsons_004",
+        "source": "Movement disorders subspecialty",
+        "condition": "Parkinson's with Non-Motor Symptoms",
+        "input": "71-year-old male with 5-year PD, well-controlled motor symptoms on levodopa. New complaints of vivid dreams, acting out dreams with violent movements, daytime sleepiness. Wife reports he shouts and thrashes during sleep. Also describes constipation, urinary urgency, and mild depression.",
+        "analysis_type": "extraction",
+        "expected_output": {
+          "information_extraction": "REM sleep behavior disorder, autonomic dysfunction, mood disorder in established PD",
+          "clinical_confidence": "High based on characteristic non-motor symptom constellation in PD",
+          "evidence": "Dream enactment behavior, constipation, urinary symptoms, depression, established PD",
+          "medication_analysis": "Melatonin or clonazepam for RBD, antidepressant (SSRI), evaluate for cognitive impairment"
+        }
+      },
+      {
+        "id": "parkinsons_005",
+        "source": "DaTscan evaluation clinic",
+        "condition": "Essential Tremor vs Early PD",
+        "input": "58-year-old with 2-year bilateral hand tremor, worse with action (holding coffee cup, writing). No rest tremor noted. Some family history of tremor. Examination shows bilateral postural and kinetic tremor, no rigidity or bradykinesia. DaTscan shows normal dopamine transporter uptake bilaterally.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Essential tremor, not Parkinson's disease, based on clinical and DaTscan findings",
+          "clinical_confidence": "High based on action tremor semiology and normal DaTscan excluding nigrostriatal loss",
+          "evidence": "Bilateral action tremor, family history, no parkinsonian signs, normal DaTscan",
+          "medication_analysis": "First-line: Propranolol or primidone for essential tremor, no dopaminergic therapy indicated"
+        }
+      }
+    ],
+    "stroke": [
+      {
+        "id": "stroke_001",
+        "source": "Frontiers in Neurology 2024",
+        "condition": "Capsular Warning Syndrome",
+        "input": "83-year-old male on apixaban for atrial fibrillation presents with recurrent stereotyped episodes of left hemiparesis over 8 hours. Each episode lasts 15-20 minutes with partial recovery. MRI shows acute ischemic stroke in right corona radiata. History of recent subdural hematoma evacuation 48 hours prior.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Capsular warning syndrome with established lacunar stroke, high risk for completion",
+          "clinical_confidence": "High based on recurrent stereotyped TIAs and DWI-positive stroke in capsular region",
+          "evidence": "Recurrent TIAs, corona radiata infarct on DWI, capsular location, recent surgery",
+          "medication_analysis": "Urgent antiplatelet if surgery permits, consider dual antiplatelet therapy, high stroke risk"
+        }
+      },
+      {
+        "id": "stroke_002",
+        "source": "Neurology case series",
+        "condition": "Posterior Circulation Stroke",
+        "input": "64-year-old male with sudden onset severe dizziness, nausea, vomiting, and truncal ataxia preventing ambulation. NIHSS score 0. No limb weakness or sensory loss. MRI shows acute infarction in medial PICA territory. Large vessel atherosclerosis of vertebral artery identified on angiography.",
+        "analysis_type": "diagnosis",
+        "expected_output": {
+          "diagnosis_support": "Posterior inferior cerebellar artery (PICA) stroke with severe ataxia despite low NIHSS",
+          "clinical_confidence": "High based on MRI confirmation and typical posterior circulation symptoms",
+          "evidence": "Acute dizziness, truncal ataxia, PICA territory DWI signal, vertebral atherosclerosis",
+          "medication_analysis": "Dual antiplatelet therapy (aspirin + clopidogrel) for 21 days, statin, risk factor modification"
+        }
+      },
+      {
+        "id": "stroke_003",
+        "source": "Emergency stroke protocol",
+        "condition": "Acute Ischemic Stroke - tPA Candidate",
+        "input": "72-year-old female with sudden onset right arm and leg weakness, facial droop, and slurred speech starting 2 hours ago. NIHSS 12. BP 165/95. No head trauma, no anticoagulation. CT head shows no hemorrhage, ASPECTS score 9. CT angiography shows left MCA M1 occlusion.",
+        "analysis_type": "diagnosis",
+        "expected_output": {
+          "diagnosis_support": "Acute left MCA stroke with large vessel occlusion, candidate for tPA and thrombectomy",
+          "clinical_confidence": "High based on clear symptom onset, imaging findings, and time window",
+          "evidence": "Right hemiparesis, NIHSS 12, M1 occlusion on CTA, within 4.5hr window, no contraindications",
+          "medication_analysis": "Immediate IV tPA 0.9mg/kg, emergent mechanical thrombectomy, aspirin post-intervention"
+        }
+      },
+      {
+        "id": "stroke_004",
+        "source": "TIA clinic evaluation",
+        "condition": "Transient Ischemic Attack",
+        "input": "55-year-old male with 20-minute episode of right hand weakness and speech difficulty that completely resolved. Occurred 2 days ago. Diabetes, hypertension, current smoker. Carotid duplex shows 70% left internal carotid artery stenosis. MRI brain shows no acute infarct but small chronic lacunes.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "High-risk TIA with large vessel stenosis, secondary stroke prevention urgently needed",
+          "clinical_confidence": "High based on symptomatic carotid stenosis and vascular risk factors",
+          "evidence": "Transient focal symptoms, 70% ipsilateral carotid stenosis, multiple risk factors",
+          "medication_analysis": "Dual antiplatelet therapy, high-intensity statin, urgent carotid endarterectomy/stenting evaluation"
+        }
+      },
+      {
+        "id": "stroke_005",
+        "source": "Stroke rehabilitation unit",
+        "condition": "Stroke with Hemorrhagic Transformation",
+        "input": "68-year-old with large left MCA stroke day 3 post-tPA and thrombectomy. New somnolence and worsening right hemiplegia. Repeat CT shows hemorrhagic transformation (PH2) within infarct area. Blood pressure 180/100. Currently on aspirin 81mg daily started day 2.",
+        "analysis_type": "diagnosis",
+        "expected_output": {
+          "diagnosis_support": "Symptomatic hemorrhagic transformation of large MCA infarct with mass effect",
+          "clinical_confidence": "High based on clinical deterioration and CT findings post-reperfusion therapy",
+          "evidence": "Worsening neuro exam, PH2 hemorrhage on CT, large infarct, elevated BP",
+          "medication_analysis": "Hold antiplatelet therapy, strict BP control <140/90, avoid anticoagulation, monitor closely"
+        }
+      }
+    ],
+    "headache": [
+      {
+        "id": "headache_001",
+        "source": "ICHD-3 diagnostic criteria",
+        "condition": "Migraine with Aura",
+        "input": "28-year-old female with recurrent episodes of visual disturbances (zigzag lines, blind spots) lasting 20-30 minutes, followed by severe unilateral throbbing headache with nausea and photophobia lasting 6-12 hours. Episodes occur 3-4 times monthly, often triggered by stress and menses.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Migraine with visual aura per ICHD-3 criteria, menstrually-related pattern",
+          "clinical_confidence": "High based on characteristic aura description and headache features",
+          "evidence": "Typical visual aura duration, unilateral throbbing headache, photophobia, nausea, triggers",
+          "medication_analysis": "Acute: Triptan at aura onset, preventive: Consider propranolol or topiramate if ≥4 attacks/month"
+        }
+      },
+      {
+        "id": "headache_002",
+        "source": "Neurology headache clinic",
+        "condition": "Cluster Headache",
+        "input": "42-year-old male with severe right orbital pain episodes lasting 45-60 minutes, occurring 2-3 times daily for past 3 weeks. During attacks: ipsilateral tearing, nasal congestion, and restlessness. Pain described as burning/boring, severity 10/10. Had similar 6-week episode 1 year ago.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Episodic cluster headache, active cluster period, ICHD-3 diagnostic criteria met",
+          "clinical_confidence": "High based on severe unilateral autonomic symptoms and episodic pattern",
+          "evidence": "Short-duration attacks, autonomic features, circadian pattern, restlessness, episodic clustering",
+          "medication_analysis": "Acute: 100% oxygen 12L/min + sumatriptan injection, preventive: Verapamil titration during cluster"
+        }
+      }
+    ],
+    "dementia": [
+      {
+        "id": "dementia_001",
+        "source": "Memory disorders clinic",
+        "condition": "Alzheimer's Disease",
+        "input": "74-year-old female with 2-year progressive memory decline. Difficulty remembering recent conversations, appointments. Family reports repetitive questions and word-finding difficulties. MMSE 18/30, impaired delayed recall. MRI shows bilateral hippocampal atrophy. Independent in basic ADLs but needs help with finances and medications.",
+        "analysis_type": "diagnosis",
+        "expected_output": {
+          "diagnosis_support": "Probable Alzheimer's disease dementia, moderate stage, typical amnestic presentation",
+          "clinical_confidence": "High based on progressive episodic memory impairment and imaging findings",
+          "evidence": "Progressive memory decline, MMSE 18/30, hippocampal atrophy, functional impact",
+          "medication_analysis": "Acetylcholinesterase inhibitor (donepezil 10mg) plus memantine for moderate stage combination"
+        }
+      },
+      {
+        "id": "dementia_002",
+        "source": "Behavioral neurology clinic",
+        "condition": "Lewy Body Dementia",
+        "input": "69-year-old male with cognitive fluctuations, visual hallucinations (seeing children in the house), and REM sleep behavior disorder for 18 months. Also has mild parkinsonian features (bradykinesia, rigidity). MMSE 22/30 with prominent visuospatial deficits. Extreme sensitivity to haloperidol trial.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Probable dementia with Lewy bodies, multiple core features present",
+          "clinical_confidence": "High based on fluctuations, visual hallucinations, RBD, parkinsonism, neuroleptic sensitivity",
+          "evidence": "Cognitive fluctuations, formed visual hallucinations, RBD, parkinsonism, antipsychotic sensitivity",
+          "medication_analysis": "Cholinesterase inhibitor (rivastigmine), avoid typical antipsychotics, low-dose quetiapine for hallucinations if needed"
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "version": "1.0",
+    "created_date": "2026-02-13",
+    "sources": [
+      "PhysioNet CHB-MIT Scalp EEG Database",
+      "Journal of Medical Case Reports (Open Access)",
+      "Frontiers in Neurology (Open Access)",
+      "ILAE 2025 Classification Guidelines",
+      "ICHD-3 Diagnostic Criteria",
+      "Clinical neurology case series"
+    ],
+    "total_examples": 22,
+    "conditions_covered": [
+      "epilepsy",
+      "parkinsons",
+      "stroke",
+      "headache",
+      "dementia"
+    ],
+    "note": "All examples derived from open-access published case reports and public databases. De-identified and formatted for AI training purposes."
+  }
+}
