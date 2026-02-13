@@ -59,6 +59,8 @@ temp/
 *.md
 !README.md
 !DEPLOYMENT.md
+!UI_UX_IMPROVEMENTS.md
+!GPU_DEPLOYMENT_GUIDE.md
 
 # Static files - Keep favicon
 !static/favicon.svg
