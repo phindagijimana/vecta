@@ -64,7 +64,7 @@ except Exception as e:
     rag_system = None
     logger.info(f"ℹ️ RAG system not available: {e}")
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)
 
 app.config.update({
@@ -1100,6 +1100,7 @@ UI_HTML = r"""
   <meta charset="utf-8" />
   <title>Vecta AI - Neurology & Neuroscience Analysis</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
   <style>
     * {
       margin: 0;

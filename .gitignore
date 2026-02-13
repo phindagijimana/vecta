@@ -54,3 +54,11 @@ data/vector_db/
 # Temporary files
 tmp/
 temp/
+
+# Documentation - Keep only README and DEPLOYMENT on GitHub
+*.md
+!README.md
+!DEPLOYMENT.md
+
+# Static files - Keep favicon
+!static/favicon.svg
