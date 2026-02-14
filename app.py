@@ -1242,17 +1242,45 @@ UI_HTML = r"""
     .status-error { background: #666666; color: white; }
 
     .main-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
       padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
-    .input-section, .results-section {
+    .config-row {
       background: #f8f9fa;
       border-radius: 15px;
       padding: 25px;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .input-box {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .results-section {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      min-height: 500px;
     }
 
     .section-title {
@@ -1626,9 +1654,16 @@ UI_HTML = r"""
 
     @media (max-width: 768px) {
       .main-content {
-        grid-template-columns: 1fr;
-        gap: 20px;
         padding: 15px;
+      }
+
+      .config-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .input-row {
+        grid-template-columns: 1fr;
       }
 
       .template-grid {
@@ -1676,84 +1711,69 @@ UI_HTML = r"""
     </div>
 
     <div class="main-content">
-      <div class="input-section">
+      <!-- Row 1: Configuration -->
+      <div class="config-row">
         <h2 class="section-title">Vecta AI Analysis Configuration</h2>
-
-        <div class="templates">
-          <label class="form-label">Medical Specialty Templates:</label>
-          <div class="template-grid">
-            <div class="template-btn" data-template="neurology">Neurology Analysis</div>
-            <div class="template-btn" data-template="epilepsy">Epilepsy Classification</div>
-            <div class="template-btn" data-template="diagnosis">Differential Diagnosis</div>
-            <div class="template-btn" data-template="medication">Medication Review</div>
-            <div class="template-btn" data-template="summary">Clinical Summary</div>
-            <div class="template-btn" data-template="extraction">Data Extraction</div>
-            <div class="template-btn" data-template="tabular_analysis">Tabular Analysis</div>
-            <!-- PHASE 1: Neurology Focus - Other specialties for future expansion -->
-            <!-- <div class="template-btn" data-template="cardiology">Cardiology Focus</div> -->
-          </div>
-        </div>
-
         <form id="analysisForm">
-          <div class="form-group">
-            <label class="form-label" for="analysisType">Analysis Type:</label>
-            <select id="analysisType" class="form-select" name="analysisType">
-              <option value="classification">Classification</option>
-              <option value="diagnosis">Diagnosis Support</option>
-              <option value="summary">Summarization</option>
-              <option value="extraction">Information Extraction</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="specialty">Medical Specialty (Optional):</label>
-            <select id="specialty" class="form-select" name="specialty">
-              <option value="">General Neurological Analysis</option>
-              <option value="neurology" selected>Neurology</option>
-              <!-- PHASE 1: Focused on Neurology/Neuroscience -->
-              <!-- Future expansion: Other specialties -->
-              <!-- <option value="cardiology">Cardiology</option> -->
-              <!-- <option value="psychiatry">Psychiatry</option> -->
-              <!-- <option value="emergency">Emergency Medicine</option> -->
-              <!-- <option value="internal_medicine">Internal Medicine</option> -->
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="prompt">Vecta AI Analysis Prompt:</label>
-            <textarea id="prompt" class="form-textarea" name="prompt" 
-                      placeholder="Enter your detailed analysis prompt for Vecta AI processing..." 
-                      rows="4" required></textarea>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Upload Medical Document:</label>
-            <div class="file-upload-area" id="fileUploadArea">
-              <input type="file" id="fileUpload" class="file-input" 
-                     accept=".txt,.pdf,.docx,.xlsx,.csv,.json">
-              <div class="upload-icon">Document</div>
-              <div>
-                <strong>Click to upload</strong> or drag and drop<br>
-                <small>Supports: PDF, DOCX, Excel, CSV, TXT, JSON</small><br>
-                <small style="color: #004977;">Enhanced Vecta AI processing for all formats</small>
-              </div>
+          <div class="config-grid">
+            <div class="form-group">
+              <label class="form-label" for="analysisType">Analysis Type:</label>
+              <select id="analysisType" class="form-select" name="analysisType">
+                <option value="classification">Classification</option>
+                <option value="diagnosis">Diagnosis Support</option>
+                <option value="summary">Summarization</option>
+                <option value="extraction">Information Extraction</option>
+              </select>
             </div>
-            <div id="fileInfo" class="file-info"></div>
+
+            <div class="form-group">
+              <label class="form-label" for="specialty">Medical Specialty:</label>
+              <select id="specialty" class="form-select" name="specialty">
+                <option value="">General Medical Analysis</option>
+                <option value="neurology" selected>Neurology</option>
+                <!-- Future expansion: Other specialties -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prompt">Vecta AI Analysis Prompt:</label>
+              <textarea id="prompt" class="form-textarea" name="prompt" 
+                        placeholder="Enter your analysis prompt..." 
+                        rows="2" required style="min-height: 60px;"></textarea>
+            </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="directText">Or Enter Text Directly:</label>
-            <textarea id="directText" class="form-textarea" name="directText" 
-                      placeholder="Paste clinical text, patient notes, or medical information here for Vecta AI analysis..." 
-                      rows="6"></textarea>
+          <!-- Row 2: Input Methods -->
+          <div class="input-row">
+            <div class="input-box">
+              <h3 class="section-title" style="font-size: 1.1em;">Upload Medical Document</h3>
+              <div class="file-upload-area" id="fileUploadArea">
+                <input type="file" id="fileUpload" class="file-input" 
+                       accept=".txt,.pdf,.docx,.xlsx,.csv,.json">
+                <div class="upload-icon">Document</div>
+                <div>
+                  <strong>Click to upload</strong> or drag and drop<br>
+                  <small>PDF, DOCX, Excel, CSV, TXT, JSON</small>
+                </div>
+              </div>
+              <div id="fileInfo" class="file-info"></div>
+            </div>
+
+            <div class="input-box">
+              <h3 class="section-title" style="font-size: 1.1em;">Enter Text Directly</h3>
+              <textarea id="directText" class="form-textarea" name="directText" 
+                        placeholder="Paste clinical text, patient notes, or medical information here..." 
+                        rows="8" style="height: 200px;"></textarea>
+            </div>
           </div>
 
-          <button type="submit" class="analyze-btn" id="analyzeBtn">
+          <button type="submit" class="analyze-btn" id="analyzeBtn" style="width: 100%; margin-top: 20px;">
             Analyze with Vecta AI
           </button>
         </form>
       </div>
 
+      <!-- Row 3: Results (Larger) -->
       <div class="results-section">
         <h2 class="section-title">Vecta AI Analysis Results</h2>
         
