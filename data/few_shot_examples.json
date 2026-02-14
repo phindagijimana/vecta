@@ -146,6 +146,36 @@
           "evidence_accurate": 1,
           "medication_appropriate": 1
         }
+      },
+      {
+        "id": "validated_6_20260214",
+        "source": "Expert Validated",
+        "citation": "Validated by Dr. Test Validator (board_certified_epileptologist)",
+        "source_url": "internal_validation",
+        "condition": "epilepsy",
+        "specialty": "neurology",
+        "input": "35-year-old female with history of brief staring spells lasting 10-15 seconds. EEG shows bilaterally synchronous 3Hz spike-and-wave complexes. Patient experiences loss of awareness with subtle motor arrest. No family history of seizures.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Generalized absence epilepsy with characteristic 3Hz spike-wave pattern per ILAE 2025",
+          "clinical_confidence": "High based on classic EEG findings and clinical semiology",
+          "evidence": "3Hz spike-wave on EEG, brief awareness loss, typical presentation",
+          "medication_analysis": "First-line: Ethosuximide or valproate. Avoid sodium channel blockers like carbamazepine which may worsen absence seizures"
+        },
+        "expert_feedback": {
+          "neurologist": "Dr. Test Validator",
+          "specialty": "Epileptology",
+          "certification": "board_certified_epileptologist",
+          "comments": "Excellent analysis of epilepsy. Clear evidence and appropriate clinical reasoning.",
+          "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of epilepsy. The AI correctly identified critical clinical features.",
+          "validated_on": "2026-02-14 05:49:47"
+        },
+        "quality_scores": {
+          "classification_correct": 1,
+          "confidence_appropriate": 1,
+          "evidence_accurate": 1,
+          "medication_appropriate": 1
+        }
       }
     ],
     "parkinsons": [
@@ -512,6 +542,36 @@
           "evidence": "Age 73, temporal headache, jaw claudication, scalp tenderness, markedly elevated ESR/CRP",
           "medication_analysis": "URGENT: High-dose prednisone 60mg daily immediately, temporal artery biopsy within 1 week (don't delay steroids)"
         }
+      },
+      {
+        "id": "validated_4_20260214",
+        "source": "Expert Validated",
+        "citation": "Validated by Dr. Test Validator (board_certified_epileptologist)",
+        "source_url": "internal_validation",
+        "condition": "headache",
+        "specialty": "neurology",
+        "input": "45-year-old female with recurrent unilateral throbbing headaches lasting 4-72 hours. Associated with photophobia, phonophobia, and nausea. Relieved by triptans.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Migraine without aura per ICHD-3 criteria",
+          "clinical_confidence": "High based on characteristic features",
+          "evidence": "Unilateral, throbbing, 4-72 hour duration, photo/phonophobia, triptan response",
+          "medication_analysis": "Acute: Triptans appropriate. Consider prophylaxis if >4 attacks/month"
+        },
+        "expert_feedback": {
+          "neurologist": "Dr. Test Validator",
+          "specialty": "Epileptology",
+          "certification": "board_certified_epileptologist",
+          "comments": "Excellent analysis of headache. Clear evidence and appropriate clinical reasoning.",
+          "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of headache. The AI correctly identified critical clinical features.",
+          "validated_on": "2026-02-14 05:49:47"
+        },
+        "quality_scores": {
+          "classification_correct": 1,
+          "confidence_appropriate": 1,
+          "evidence_accurate": 1,
+          "medication_appropriate": 1
+        }
       }
     ],
     "dementia": [
@@ -584,6 +644,36 @@
           "clinical_confidence": "High based on combined AD biomarkers and significant vascular pathology on imaging",
           "evidence": "Progressive memory decline, executive dysfunction, AD CSF biomarkers, hippocampal atrophy, white matter disease",
           "medication_analysis": "Cholinesterase inhibitor + memantine for AD component, aggressive vascular risk management, antiplatelet therapy"
+        }
+      },
+      {
+        "id": "validated_5_20260214",
+        "source": "Expert Validated",
+        "citation": "Validated by Dr. Test Validator (board_certified_epileptologist)",
+        "source_url": "internal_validation",
+        "condition": "dementia",
+        "specialty": "neurology",
+        "input": "76-year-old with progressive memory loss over 3 years. MMSE 20/30. Difficulty with recent events and word-finding. ADLs partially impaired. MRI shows hippocampal atrophy.",
+        "analysis_type": "diagnosis",
+        "expected_output": {
+          "classification": "Alzheimer's disease, mild to moderate stage",
+          "clinical_confidence": "High based on clinical and imaging features",
+          "evidence": "Gradual onset, memory predominant, hippocampal atrophy on MRI",
+          "medication_analysis": "Consider cholinesterase inhibitor (donepezil, rivastigmine). Memantine for moderate stage"
+        },
+        "expert_feedback": {
+          "neurologist": "Dr. Test Validator",
+          "specialty": "Epileptology",
+          "certification": "board_certified_epileptologist",
+          "comments": "Excellent analysis of dementia. Clear evidence and appropriate clinical reasoning.",
+          "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of dementia. The AI correctly identified critical clinical features.",
+          "validated_on": "2026-02-14 05:49:47"
+        },
+        "quality_scores": {
+          "classification_correct": 1,
+          "confidence_appropriate": 1,
+          "evidence_accurate": 1,
+          "medication_appropriate": 1
         }
       }
     ],
@@ -945,6 +1035,96 @@
           "comments": "Excellent analysis of stroke. Clear evidence and appropriate clinical reasoning.",
           "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of stroke. The AI correctly identified critical clinical features.",
           "validated_on": "2026-02-14 05:19:22"
+        },
+        "quality_scores": {
+          "classification_correct": 1,
+          "confidence_appropriate": 1,
+          "evidence_accurate": 1,
+          "medication_appropriate": 1
+        }
+      },
+      {
+        "id": "validated_4_20260214",
+        "source": "Expert Validated",
+        "citation": "Validated by Dr. Test Validator (board_certified_epileptologist)",
+        "source_url": "internal_validation",
+        "condition": "headache",
+        "specialty": "neurology",
+        "input": "45-year-old female with recurrent unilateral throbbing headaches lasting 4-72 hours. Associated with photophobia, phonophobia, and nausea. Relieved by triptans.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Migraine without aura per ICHD-3 criteria",
+          "clinical_confidence": "High based on characteristic features",
+          "evidence": "Unilateral, throbbing, 4-72 hour duration, photo/phonophobia, triptan response",
+          "medication_analysis": "Acute: Triptans appropriate. Consider prophylaxis if >4 attacks/month"
+        },
+        "expert_feedback": {
+          "neurologist": "Dr. Test Validator",
+          "specialty": "Epileptology",
+          "certification": "board_certified_epileptologist",
+          "comments": "Excellent analysis of headache. Clear evidence and appropriate clinical reasoning.",
+          "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of headache. The AI correctly identified critical clinical features.",
+          "validated_on": "2026-02-14 05:49:47"
+        },
+        "quality_scores": {
+          "classification_correct": 1,
+          "confidence_appropriate": 1,
+          "evidence_accurate": 1,
+          "medication_appropriate": 1
+        }
+      },
+      {
+        "id": "validated_5_20260214",
+        "source": "Expert Validated",
+        "citation": "Validated by Dr. Test Validator (board_certified_epileptologist)",
+        "source_url": "internal_validation",
+        "condition": "dementia",
+        "specialty": "neurology",
+        "input": "76-year-old with progressive memory loss over 3 years. MMSE 20/30. Difficulty with recent events and word-finding. ADLs partially impaired. MRI shows hippocampal atrophy.",
+        "analysis_type": "diagnosis",
+        "expected_output": {
+          "classification": "Alzheimer's disease, mild to moderate stage",
+          "clinical_confidence": "High based on clinical and imaging features",
+          "evidence": "Gradual onset, memory predominant, hippocampal atrophy on MRI",
+          "medication_analysis": "Consider cholinesterase inhibitor (donepezil, rivastigmine). Memantine for moderate stage"
+        },
+        "expert_feedback": {
+          "neurologist": "Dr. Test Validator",
+          "specialty": "Epileptology",
+          "certification": "board_certified_epileptologist",
+          "comments": "Excellent analysis of dementia. Clear evidence and appropriate clinical reasoning.",
+          "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of dementia. The AI correctly identified critical clinical features.",
+          "validated_on": "2026-02-14 05:49:47"
+        },
+        "quality_scores": {
+          "classification_correct": 1,
+          "confidence_appropriate": 1,
+          "evidence_accurate": 1,
+          "medication_appropriate": 1
+        }
+      },
+      {
+        "id": "validated_6_20260214",
+        "source": "Expert Validated",
+        "citation": "Validated by Dr. Test Validator (board_certified_epileptologist)",
+        "source_url": "internal_validation",
+        "condition": "epilepsy",
+        "specialty": "neurology",
+        "input": "35-year-old female with history of brief staring spells lasting 10-15 seconds. EEG shows bilaterally synchronous 3Hz spike-and-wave complexes. Patient experiences loss of awareness with subtle motor arrest. No family history of seizures.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Generalized absence epilepsy with characteristic 3Hz spike-wave pattern per ILAE 2025",
+          "clinical_confidence": "High based on classic EEG findings and clinical semiology",
+          "evidence": "3Hz spike-wave on EEG, brief awareness loss, typical presentation",
+          "medication_analysis": "First-line: Ethosuximide or valproate. Avoid sodium channel blockers like carbamazepine which may worsen absence seizures"
+        },
+        "expert_feedback": {
+          "neurologist": "Dr. Test Validator",
+          "specialty": "Epileptology",
+          "certification": "board_certified_epileptologist",
+          "comments": "Excellent analysis of epilepsy. Clear evidence and appropriate clinical reasoning.",
+          "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of epilepsy. The AI correctly identified critical clinical features.",
+          "validated_on": "2026-02-14 05:49:47"
         },
         "quality_scores": {
           "classification_correct": 1,

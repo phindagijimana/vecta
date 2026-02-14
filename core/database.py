@@ -6,8 +6,8 @@ import os
 from pathlib import Path
 from contextlib import contextmanager
 
-# Database path
-DB_DIR = Path(__file__).parent / "data"
+# Database path (go up to root directory, then to data/)
+DB_DIR = Path(__file__).parent.parent / "data"
 DB_DIR.mkdir(exist_ok=True)
 DB_PATH = DB_DIR / "validation.db"
 

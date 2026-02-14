@@ -5,9 +5,14 @@ Adds validated cases and runs learning cycle
 """
 
 import sqlite3
+import sys
 from pathlib import Path
-from learning_engine import LearningEngine
-from database import get_db
+
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from learning.learning_engine import LearningEngine
+from core.database import get_db
 
 def add_test_validated_cases():
     """Add test validated cases to demonstrate learning"""

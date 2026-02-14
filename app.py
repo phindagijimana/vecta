@@ -84,7 +84,7 @@ except Exception as e:
 
 # Initialize database
 try:
-    from database import init_db
+    from core.database import init_db
     init_db()
     logger.info("✅ Database initialized")
 except Exception as e:
@@ -2685,7 +2685,7 @@ def health():
 def learning_metrics():
     """Get learning and improvement metrics"""
     try:
-        from learning_engine import LearningEngine
+        from learning.learning_engine import LearningEngine
         engine = LearningEngine()
         metrics = engine.calculate_improvement_metrics()
         
@@ -2708,7 +2708,7 @@ def learning_metrics():
 def trigger_learning():
     """Manually trigger a learning cycle"""
     try:
-        from learning_engine import LearningEngine
+        from learning.learning_engine import LearningEngine
         engine = LearningEngine()
         result = engine.run_learning_cycle()
         
@@ -2835,7 +2835,7 @@ def analyze():
             # Save to validation database (10% sampling for validation)
             try:
                 import random
-                from database import get_db
+                from core.database import get_db
                 
                 if random.random() < 0.10:  # 10% sample rate
                     with get_db() as db:

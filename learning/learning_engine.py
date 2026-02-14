@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Paths
-APP_DIR = Path(__file__).parent
+APP_DIR = Path(__file__).parent.parent  # Go up to root directory
 DB_PATH = APP_DIR / "data" / "validation.db"
 FEW_SHOT_PATH = APP_DIR / "data" / "few_shot_examples.json"
 LEARNING_LOG_PATH = APP_DIR / "data" / "learning_history.json"

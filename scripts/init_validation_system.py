@@ -5,11 +5,12 @@ Initialize Validation System with Demo Data
 import sys
 import os
 from datetime import datetime
+from pathlib import Path
 
-# Add current directory to path
-sys.path.insert(0, os.path.dirname(__file__))
+# Add parent directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from database import init_db, get_db
+from core.database import init_db, get_db
 
 def add_demo_data():
     """Add some demo AI outputs for testing the validator"""

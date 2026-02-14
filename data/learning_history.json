@@ -39,10 +39,30 @@
         "cases_with_corrections": 0,
         "clinical_pearls_count": 3
       }
+    },
+    {
+      "timestamp": "2026-02-14T00:49:47.975232",
+      "cases_reviewed": 6,
+      "examples_added": 3,
+      "agreement_rate": 1.0,
+      "learnable_cases": 6,
+      "metrics": {
+        "total_validations": 6,
+        "agreement_rate": 1.0,
+        "component_accuracy": {
+          "classification_correct": 1.0,
+          "confidence_appropriate": 1.0,
+          "evidence_accurate": 1.0,
+          "medication_appropriate": 1.0
+        },
+        "learnable_cases": 6,
+        "cases_with_corrections": 0,
+        "clinical_pearls_count": 6
+      }
     }
   ],
-  "total_examples_added": 3,
-  "last_learning_cycle": "2026-02-14T00:19:22.570787",
+  "total_examples_added": 6,
+  "last_learning_cycle": "2026-02-14T00:49:47.975232",
   "agreement_rate_history": [
     {
       "timestamp": "2026-02-14T00:17:41.256737",
@@ -50,6 +70,10 @@
     },
     {
       "timestamp": "2026-02-14T00:19:22.570787",
+      "rate": 1.0
+    },
+    {
+      "timestamp": "2026-02-14T00:49:47.975232",
       "rate": 1.0
     }
   ]
