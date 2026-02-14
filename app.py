@@ -903,7 +903,7 @@ class VectaAIService:
                 raise ValueError("No text content provided for Vecta AI analysis")
 
             # Get optimized Vecta AI system prompt
-            system_prompt = self.prompt_engine.get_med42_system_prompts(
+            system_prompt = self.prompt_engine.get_vecta_system_prompts(
                 analysis_type, 
                 is_tabular=is_tabular, 
                 specialty=specialty
