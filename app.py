@@ -2055,11 +2055,6 @@ UI_HTML = r"""
       <div class="header">
         <h1>Vecta AI - Medical Analysis Platform</h1>
         <br>
-        <div style="margin: 10px 0;">
-          <a href="/learning" style="color: #667eea; text-decoration: none; font-weight: 500; font-size: 0.9em;">
-            📊 Learning Dashboard
-          </a>
-        </div>
       <div id="serviceStatus" class="status-indicator status-loading">Checking Service Status...</div>
     </div>
 
