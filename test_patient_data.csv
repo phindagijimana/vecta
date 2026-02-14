@@ -1,0 +1,6 @@
+Patient_ID,Age,Gender,Seizure_Type,EEG_Findings,MRI_Findings,Current_Medication,Seizure_Frequency
+P001,28,Female,Focal_Impaired_Awareness,Left_Temporal_Sharp_Waves,Left_Hippocampal_Sclerosis,Levetiracetam_1500mg_BID,2-3_per_week
+P002,45,Male,Generalized_Tonic_Clonic,Generalized_Spike_Wave,Normal,Valproate_1000mg_BID,1_per_month
+P003,35,Female,Focal_Aware,Right_Frontal_Spikes,Right_Frontal_Gliosis,Lamotrigine_200mg_BID,1-2_per_month
+P004,52,Male,Focal_to_Bilateral,Left_Temporal_Slowing,Left_Temporal_Tumor,Levetiracetam_2000mg_BID,1_per_week
+P005,19,Female,Absence,3Hz_Spike_Wave,Normal,Ethosuximide_500mg_BID,Multiple_daily

@@ -1,0 +1,13 @@
+CASE 1: EPILEPSY CLASSIFICATION
+Patient: 28-year-old female
+Chief Complaint: Recurrent episodes of altered awareness
+
+History: Patient reports 6-month history of episodes beginning with sudden epigastric rising sensation, followed by behavioral arrest, oral automatisms (lip smacking, chewing), and bilateral hand automatisms. Episodes last 1-2 minutes. Post-ictal confusion for 5-10 minutes. Occurs 2-3 times weekly. No tonic-clonic activity reported.
+
+EEG Findings: Interictal left temporal sharp waves (F7/T3). Ictal recording shows rhythmic theta activity originating from left temporal region.
+
+Imaging: MRI brain shows left hippocampal sclerosis with volume loss and increased T2 signal.
+
+Medication Trial: Failed levetiracetam 1500mg BID (breakthrough seizures 2-3x/week).
+
+Family History: Mother with epilepsy (unspecified type).
