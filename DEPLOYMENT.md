@@ -19,9 +19,10 @@ Access at http://localhost:8085
 ```bash
 git clone https://github.com/phindagijimana/vecta.git
 cd vecta
-module load cuda python gcc
 ./vecta-hpc install
-./vecta-hpc run
+./vecta-hpc run gpu     # GPU mode (default)
+# OR
+./vecta-hpc run cpu     # CPU-only mode
 ```
 
 ## Deployment Options
@@ -33,9 +34,15 @@ module load cuda python gcc
 - 2GB RAM minimum
 - 16GB+ GPU VRAM (optional, for AI model)
 
+**Resource Detection:**
+The local deployment automatically detects available resources:
+- **GPU Available**: Uses GPU acceleration (CUDA)
+- **No GPU**: Falls back to CPU mode
+- No manual configuration needed!
+
 **Quick Start:**
 ```bash
-./vecta start          # Auto-installs dependencies
+./vecta start          # Auto-installs dependencies & detects GPU/CPU
 ```
 
 **Manual Setup:**
@@ -55,6 +62,7 @@ python3 app.py
 
 **Features:**
 - Auto-installs Flask dependencies
+- Auto-detects GPU/CPU resources
 - Smart port detection (8085-8150)
 - PID tracking
 - Log management
@@ -64,19 +72,49 @@ python3 app.py
 **Requirements:**
 - SLURM workload manager
 - Python 3.8+ module
-- CUDA module (optional)
-- GPU partition access
+- CUDA module (for GPU mode)
+- GPU partition access (for GPU mode)
+
+**Resource Modes:**
+Choose between CPU-only or GPU-accelerated deployment:
+
+| Mode | Resources | Use Case |
+|------|-----------|----------|
+| `gpu` | CPU + GPU | Full AI model, faster analysis |
+| `cpu` | CPU only | No GPU needed, slower but functional |
 
 **Installation:**
 ```bash
-# Load modules
-module load cuda/12.2 python/3.9 gcc/11.2
-
-# One-time setup
+# One-time setup (modules auto-loaded)
 ./vecta-hpc install
 ```
 
-**Submit Job:**
+**Submit Job (GPU Mode - Default):**
+```bash
+# Default GPU configuration
+./vecta-hpc run gpu
+
+# Custom GPU resources
+./vecta-hpc run gpu --gpus 2 --memory 128G --cpus 8
+```
+
+**Submit Job (CPU-Only Mode):**
+```bash
+# Default CPU configuration
+./vecta-hpc run cpu
+
+# Custom CPU resources
+./vecta-hpc run cpu --cpus 32 --memory 64G --time 48:00:00
+```
+
+**Resource Defaults:**
+
+| Mode | Partition | GPUs | CPUs | Memory | Time |
+|------|-----------|------|------|--------|------|
+| GPU | `gpu` | 1 | 8 | 64G | 24h |
+| CPU | `standard` | 0 | 16 | 32G | 24h |
+
+**Additional Commands:**
 ```bash
 # Default resources (1 GPU, 64GB, 24h)
 ./vecta-hpc run

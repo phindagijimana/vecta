@@ -1,0 +1,56 @@
+{
+  "learning_events": [
+    {
+      "timestamp": "2026-02-14T00:17:41.256737",
+      "cases_reviewed": 0,
+      "examples_added": 0,
+      "agreement_rate": 0.0,
+      "learnable_cases": 0,
+      "metrics": {
+        "total_validations": 0,
+        "agreement_rate": 0.0,
+        "component_accuracy": {
+          "classification_correct": 0.0,
+          "confidence_appropriate": 0.0,
+          "evidence_accurate": 0.0,
+          "medication_appropriate": 0.0
+        },
+        "learnable_cases": 0,
+        "cases_with_corrections": 0,
+        "clinical_pearls_count": 0
+      }
+    },
+    {
+      "timestamp": "2026-02-14T00:19:22.570787",
+      "cases_reviewed": 3,
+      "examples_added": 3,
+      "agreement_rate": 1.0,
+      "learnable_cases": 3,
+      "metrics": {
+        "total_validations": 3,
+        "agreement_rate": 1.0,
+        "component_accuracy": {
+          "classification_correct": 1.0,
+          "confidence_appropriate": 1.0,
+          "evidence_accurate": 1.0,
+          "medication_appropriate": 1.0
+        },
+        "learnable_cases": 3,
+        "cases_with_corrections": 0,
+        "clinical_pearls_count": 3
+      }
+    }
+  ],
+  "total_examples_added": 3,
+  "last_learning_cycle": "2026-02-14T00:19:22.570787",
+  "agreement_rate_history": [
+    {
+      "timestamp": "2026-02-14T00:17:41.256737",
+      "rate": 0.0
+    },
+    {
+      "timestamp": "2026-02-14T00:19:22.570787",
+      "rate": 1.0
+    }
+  ]
+}

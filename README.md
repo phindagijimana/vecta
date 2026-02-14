@@ -48,6 +48,8 @@ module load cuda python gcc
 
 ### Local (vecta)
 
+Auto-detects available resources (GPU preferred, CPU fallback):
+
 ```bash
 ./vecta start          # Start service
 ./vecta status         # Check status
@@ -58,9 +60,21 @@ module load cuda python gcc
 
 ### HPC (vecta-hpc)
 
+Choose resource mode when submitting jobs:
+
 ```bash
-./vecta-hpc install    # Setup (one-time)
-./vecta-hpc run        # Submit job
+# Setup (one-time)
+./vecta-hpc install
+
+# Submit with GPU (default)
+./vecta-hpc run gpu
+./vecta-hpc run gpu --gpus 2 --memory 128G
+
+# Submit CPU-only
+./vecta-hpc run cpu
+./vecta-hpc run cpu --cpus 32 --memory 64G
+
+# Manage jobs
 ./vecta-hpc status     # Check job
 ./vecta-hpc logs       # View logs
 ./vecta-hpc stop       # Cancel job

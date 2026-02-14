@@ -44,6 +44,13 @@ env/
 data/*.db
 data/*.sqlite
 
+# Backup and temporary files
+*.backup
+*.bak
+*_service_*.err
+*_service_*.out
+data/learning_history.json
+
 # Documentation - Keep only README and DEPLOYMENT
 *.md
 !README.md

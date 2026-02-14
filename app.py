@@ -1093,6 +1093,419 @@ def validate_analyze_request():
     
     return errors
 
+LEARNING_DASHBOARD_HTML = r"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vecta AI - Learning Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        .nav-links {
+            margin-top: 15px;
+        }
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        .metric-card h3 {
+            color: #667eea;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .metric-value {
+            font-size: 3em;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+        .metric-label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+        .component-accuracy {
+            margin-top: 15px;
+        }
+        .accuracy-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .accuracy-item:last-child {
+            border-bottom: none;
+        }
+        .learning-history {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            margin-top: 30px;
+        }
+        .learning-history h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .history-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .history-item .timestamp {
+            color: #999;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+        .history-item .details {
+            color: #333;
+            font-size: 1em;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 12px 25px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Vecta AI - Learning Dashboard</h1>
+            <p>Self-Improvement & Validation Metrics</p>
+            <div class="nav-links">
+                <a href="/">Analysis Platform</a>
+                <a href="/validator">Validator Portal</a>
+                <a href="/learning">Learning Dashboard</a>
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>Agreement Rate</h3>
+                <div class="metric-value" id="agreementRate">--</div>
+                <div class="metric-label">AI-Expert Agreement</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="agreementProgress" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <h3>Total Validations</h3>
+                <div class="metric-value" id="totalValidations">--</div>
+                <div class="metric-label">Expert Reviews</div>
+            </div>
+
+            <div class="metric-card">
+                <h3>Examples Added</h3>
+                <div class="metric-value" id="examplesAdded">--</div>
+                <div class="metric-label">Learning Progress</div>
+            </div>
+
+            <div class="metric-card">
+                <h3>Learnable Cases</h3>
+                <div class="metric-value" id="learnableCases">--</div>
+                <div class="metric-label">High-Quality Cases</div>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <h3>Component Accuracy</h3>
+            <div class="component-accuracy" id="componentAccuracy">
+                <div class="accuracy-item">
+                    <span>Classification</span>
+                    <strong id="acc-classification">--</strong>
+                </div>
+                <div class="accuracy-item">
+                    <span>Confidence Level</span>
+                    <strong id="acc-confidence">--</strong>
+                </div>
+                <div class="accuracy-item">
+                    <span>Evidence</span>
+                    <strong id="acc-evidence">--</strong>
+                </div>
+                <div class="accuracy-item">
+                    <span>Medication Analysis</span>
+                    <strong id="acc-medication">--</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <h3>Learning Controls</h3>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="triggerLearning()">
+                    Run Learning Cycle
+                </button>
+                <button class="btn btn-secondary" onclick="reloadExamples()">
+                    Reload Examples
+                </button>
+                <button class="btn btn-secondary" onclick="refreshMetrics()">
+                    Refresh Metrics
+                </button>
+            </div>
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+
+        <div class="learning-history">
+            <h2>Learning History</h2>
+            <div id="historyContainer">
+                <p style="color: #999;">Loading learning history...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let metricsData = null;
+
+        async function fetchMetrics() {
+            try {
+                const response = await fetch('/api/learning/metrics');
+                const data = await response.json();
+                if (data.success) {
+                    metricsData = data.metrics;
+                    updateDashboard(metricsData);
+                }
+            } catch (error) {
+                console.error('Error fetching metrics:', error);
+                showStatus('Failed to load metrics', 'error');
+            }
+        }
+
+        function updateDashboard(metrics) {
+            // Main metrics
+            document.getElementById('agreementRate').textContent = 
+                (metrics.agreement_rate * 100).toFixed(1) + '%';
+            document.getElementById('agreementProgress').style.width = 
+                (metrics.agreement_rate * 100) + '%';
+            document.getElementById('totalValidations').textContent = 
+                metrics.total_validations;
+            document.getElementById('learnableCases').textContent = 
+                metrics.learnable_cases;
+
+            // Component accuracy
+            const components = metrics.component_accuracy || {};
+            document.getElementById('acc-classification').textContent = 
+                ((components.classification_correct || 0) * 100).toFixed(1) + '%';
+            document.getElementById('acc-confidence').textContent = 
+                ((components.confidence_appropriate || 0) * 100).toFixed(1) + '%';
+            document.getElementById('acc-evidence').textContent = 
+                ((components.evidence_accurate || 0) * 100).toFixed(1) + '%';
+            document.getElementById('acc-medication').textContent = 
+                ((components.medication_appropriate || 0) * 100).toFixed(1) + '%';
+
+            // Learning history
+            if (metrics.learning_history && metrics.learning_history.learning_events) {
+                const events = metrics.learning_history.learning_events;
+                document.getElementById('examplesAdded').textContent = 
+                    metrics.learning_history.total_examples_added || 0;
+                
+                const historyHTML = events.slice(-10).reverse().map(event => `
+                    <div class="history-item">
+                        <div class="timestamp">${new Date(event.timestamp).toLocaleString()}</div>
+                        <div class="details">
+                            <strong>${event.examples_added}</strong> examples added from 
+                            <strong>${event.cases_reviewed}</strong> reviewed cases
+                            | Agreement: <strong>${(event.agreement_rate * 100).toFixed(1)}%</strong>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('historyContainer').innerHTML = 
+                    historyHTML || '<p style="color: #999;">No learning events yet</p>';
+            } else {
+                document.getElementById('examplesAdded').textContent = '0';
+                document.getElementById('historyContainer').innerHTML = 
+                    '<p style="color: #999;">No learning events yet</p>';
+            }
+        }
+
+        async function triggerLearning() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Running...';
+            
+            try {
+                const response = await fetch('/api/learning/trigger', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus(data.message, 'success');
+                    await fetchMetrics();
+                } else {
+                    showStatus('Learning cycle failed: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Error triggering learning: ' + error, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Run Learning Cycle';
+            }
+        }
+
+        async function reloadExamples() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Reloading...';
+            
+            try {
+                const response = await fetch('/api/learning/reload', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus(data.message, 'success');
+                } else {
+                    showStatus('Reload failed: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showStatus('Error reloading examples: ' + error, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Reload Examples';
+            }
+        }
+
+        function refreshMetrics() {
+            showStatus('Refreshing metrics...', 'success');
+            fetchMetrics();
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = 'status-message ' + type;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+
+        // Initial load
+        fetchMetrics();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(fetchMetrics, 30000);
+    </script>
+</body>
+</html>
+"""
+
 UI_HTML = r"""
 <!DOCTYPE html>
 <html>
@@ -1642,6 +2055,11 @@ UI_HTML = r"""
       <div class="header">
         <h1>Vecta AI - Medical Analysis Platform</h1>
         <br>
+        <div style="margin: 10px 0;">
+          <a href="/learning" style="color: #667eea; text-decoration: none; font-weight: 500; font-size: 0.9em;">
+            📊 Learning Dashboard
+          </a>
+        </div>
       <div id="serviceStatus" class="status-indicator status-loading">Checking Service Status...</div>
     </div>
 
@@ -2220,6 +2638,11 @@ Apply neuropathy classification, EMG/NCS interpretation, etiology determination,
 def index():
     return render_template_string(UI_HTML)
 
+@app.route("/learning", methods=["GET"])
+def learning_dashboard():
+    """Learning metrics and self-improvement dashboard"""
+    return render_template_string(LEARNING_DASHBOARD_HTML)
+
 @app.route("/test", methods=["GET"])
 def test():
     return jsonify({
@@ -2257,6 +2680,65 @@ def health():
             "model_loaded": False,
             "timestamp": datetime.now().isoformat()
         }), 500
+
+@app.route("/api/learning/metrics", methods=["GET"])
+def learning_metrics():
+    """Get learning and improvement metrics"""
+    try:
+        from learning_engine import LearningEngine
+        engine = LearningEngine()
+        metrics = engine.calculate_improvement_metrics()
+        
+        # Add learning history
+        if Path(APP_HOME) / "data" / "learning_history.json" in Path(APP_HOME).rglob("learning_history.json"):
+            with open(Path(APP_HOME) / "data" / "learning_history.json", 'r') as f:
+                history = json.load(f)
+                metrics['learning_history'] = history
+        
+        return jsonify({
+            "success": True,
+            "metrics": metrics,
+            "timestamp": datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"Learning metrics error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/learning/trigger", methods=["POST"])
+def trigger_learning():
+    """Manually trigger a learning cycle"""
+    try:
+        from learning_engine import LearningEngine
+        engine = LearningEngine()
+        result = engine.run_learning_cycle()
+        
+        return jsonify({
+            "success": True,
+            "result": result,
+            "message": f"Learning cycle completed - added {result['examples_added']} new examples"
+        })
+    except Exception as e:
+        logger.error(f"Learning trigger error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/learning/reload", methods=["POST"])
+def reload_examples():
+    """Reload few-shot examples after learning"""
+    try:
+        global few_shot_loader
+        if few_shot_loader:
+            # Reload examples from file
+            from utils.few_shot_loader import FewShotExampleLoader
+            few_shot_loader = FewShotExampleLoader()
+            logger.info("Few-shot examples reloaded after learning cycle")
+        
+        return jsonify({
+            "success": True,
+            "message": "Few-shot examples reloaded successfully"
+        })
+    except Exception as e:
+        logger.error(f"Reload examples error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/analyze", methods=['POST'])
 def analyze():

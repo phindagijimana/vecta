@@ -134,7 +134,8 @@ def cmd_install(args):
     print("=" * 70)
     print("\nNext steps:")
     print("  1. Submit job:")
-    print("     ./vecta-hpc run")
+    print("     ./vecta-hpc run gpu    # GPU mode (default)")
+    print("     ./vecta-hpc run cpu    # CPU-only mode")
     print("  2. Check status:")
     print("     ./vecta-hpc status")
     print("")
@@ -142,35 +143,61 @@ def cmd_install(args):
     return 0
 
 
-def create_slurm_job_script(args):
-    """Create SLURM job submission script"""
+def create_slurm_job_script(args, resource_mode='gpu'):
+    """Create SLURM job submission script
     
-    partition = args.partition or 'gpu'
-    gpus = args.gpus or 1
-    mem = args.memory or '64G'
+    Args:
+        args: Command arguments
+        resource_mode: 'cpu' or 'gpu' - determines resource allocation
+    """
+    
+    # Set defaults based on resource mode
+    if resource_mode == 'cpu':
+        partition = args.partition or 'standard'
+        gpus = 0
+        mem = args.memory or '32G'
+        cpus = args.cpus or 16
+    else:  # gpu mode
+        partition = args.partition or 'gpu'
+        gpus = args.gpus or 1
+        mem = args.memory or '64G'
+        cpus = args.cpus or 8
+    
     time_limit = args.time or '24:00:00'
-    cpus = args.cpus or 8
     port = args.port or 8085
     
-    script_content = f"""#!/bin/bash
+    # Build SBATCH directives
+    sbatch_directives = f"""#!/bin/bash
 #SBATCH --job-name=vecta-ai
-#SBATCH --partition={partition}
-#SBATCH --gres=gpu:{gpus}
+#SBATCH --partition={partition}"""
+    
+    # Add GPU request only if in GPU mode
+    if resource_mode == 'gpu' and gpus > 0:
+        sbatch_directives += f"""
+#SBATCH --gres=gpu:{gpus}"""
+    
+    sbatch_directives += f"""
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task={cpus}
 #SBATCH --mem={mem}
 #SBATCH --time={time_limit}
 #SBATCH --output=logs/vecta_%j.out
-#SBATCH --error=logs/vecta_%j.err
+#SBATCH --error=logs/vecta_%j.err"""
+    
+    script_content = sbatch_directives + f"""
 
 # Print job information
 echo "=================================================="
-echo "Vecta AI - HPC Job"
+echo "Vecta AI - HPC Job ({resource_mode.upper()} Mode)"
 echo "=================================================="
 echo "Job ID: $SLURM_JOB_ID"
 echo "Node: $SLURM_NODELIST"
-echo "GPUs: $SLURM_JOB_GPUS"
+echo "Resource Mode: {resource_mode.upper()}"
+
+if [ -n "$SLURM_JOB_GPUS" ]; then
+    echo "GPUs: $SLURM_JOB_GPUS"
+fi
 echo "CPUs: $SLURM_CPUS_PER_TASK"
 echo "Memory: {mem}"
 echo "Started: $(date)"
@@ -179,27 +206,55 @@ echo ""
 
 # Load required modules
 echo "Loading modules..."
-module load cuda 2>/dev/null || module load cuda/12.2 2>/dev/null || module load cuda/11.8 2>/dev/null || echo "CUDA module not available"
 module load python 2>/dev/null || module load python/3.9 2>/dev/null || module load python/3.10 2>/dev/null || echo "Python module not available"
 module load gcc 2>/dev/null || module load gcc/11.2 2>/dev/null || module load gcc/10.2 2>/dev/null || echo "GCC module not available"
-
+"""
+    
+    # Add CUDA loading only for GPU mode
+    if resource_mode == 'gpu':
+        script_content += """
+module load cuda 2>/dev/null || module load cuda/12.2 2>/dev/null || module load cuda/11.8 2>/dev/null || echo "CUDA module not available (CPU mode will be used)"
+"""
+    
+    script_content += f"""
 # Set environment variables
-export CUDA_VISIBLE_DEVICES=$SLURM_JOB_GPUS
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export VECTA_PORT={port}
-
+"""
+    
+    # Add GPU-specific environment variables only for GPU mode
+    if resource_mode == 'gpu':
+        script_content += """
+if [ -n "$SLURM_JOB_GPUS" ]; then
+    export CUDA_VISIBLE_DEVICES=$SLURM_JOB_GPUS
+fi
+"""
+    
+    script_content += """
 # Navigate to app directory
 cd $SLURM_SUBMIT_DIR
-
+"""
+    
+    # Add GPU check only for GPU mode
+    if resource_mode == 'gpu':
+        script_content += """
 # Check GPU availability
 echo "Checking GPU..."
 if command -v nvidia-smi &> /dev/null; then
     nvidia-smi
 else
-    echo "nvidia-smi not available"
+    echo "nvidia-smi not available - running in CPU mode"
 fi
 echo ""
-
+"""
+    else:
+        script_content += """
+echo "Running in CPU-only mode (no GPU requested)"
+echo ""
+"""
+    
+    # Add final part of script
+    script_content += f"""
 # Start Vecta AI service
 echo "Starting Vecta AI on port {port}..."
 python3 app.py --host 0.0.0.0 --port {port}
@@ -233,6 +288,9 @@ def cmd_run(args):
         print("[ERROR] SLURM not available.")
         return 1
     
+    # Determine resource mode
+    resource_mode = args.resource_mode if hasattr(args, 'resource_mode') else 'gpu'
+    
     # Check if job already running
     if JOB_ID_FILE.exists():
         with open(JOB_ID_FILE) as f:
@@ -255,10 +313,10 @@ def cmd_run(args):
         except subprocess.CalledProcessError:
             pass
     
-    # Recreate job script with current args
-    create_slurm_job_script(args)
+    # Recreate job script with current args and resource mode
+    create_slurm_job_script(args, resource_mode)
     
-    print("Submitting Vecta AI job to SLURM...")
+    print(f"Submitting Vecta AI job to SLURM ({resource_mode.upper()} mode)...")
     print("")
     
     try:
@@ -562,8 +620,13 @@ Examples:
   # Initial setup
   ./vecta-hpc install
 
-  # Submit job with custom resources
-  ./vecta-hpc run --gpus 2 --memory 128G
+  # Submit job (GPU mode - default)
+  ./vecta-hpc run gpu
+  ./vecta-hpc run gpu --gpus 2 --memory 128G
+
+  # Submit job (CPU-only mode)
+  ./vecta-hpc run cpu
+  ./vecta-hpc run cpu --cpus 32 --memory 64G
 
   # Check job status
   ./vecta-hpc status
@@ -589,12 +652,15 @@ Examples:
     
     # Run command
     run_parser = subparsers.add_parser('run', help='Submit job to SLURM')
-    run_parser.add_argument('--partition', help='SLURM partition')
-    run_parser.add_argument('--gpus', type=int, help='Number of GPUs')
-    run_parser.add_argument('--memory', help='Memory allocation')
-    run_parser.add_argument('--time', help='Time limit')
-    run_parser.add_argument('--cpus', type=int, help='CPUs per task')
-    run_parser.add_argument('--port', type=int, help='Service port')
+    run_parser.add_argument('resource_mode', nargs='?', default='gpu',
+                          choices=['cpu', 'gpu'],
+                          help='Resource mode: cpu (CPU-only) or gpu (CPU+GPU)')
+    run_parser.add_argument('--partition', help='SLURM partition (default: standard for CPU, gpu for GPU)')
+    run_parser.add_argument('--gpus', type=int, help='Number of GPUs (GPU mode only, default: 1)')
+    run_parser.add_argument('--memory', help='Memory allocation (default: 32G for CPU, 64G for GPU)')
+    run_parser.add_argument('--time', help='Time limit (default: 24:00:00)')
+    run_parser.add_argument('--cpus', type=int, help='CPUs per task (default: 16 for CPU, 8 for GPU)')
+    run_parser.add_argument('--port', type=int, help='Service port (default: 8085)')
     
     # Stop command
     subparsers.add_parser('stop', help='Cancel running job')

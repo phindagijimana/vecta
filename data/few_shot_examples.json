@@ -116,13 +116,43 @@
           "evidence": "Febrile seizures persisting with afebrile GTCS, strong family history, generalized EEG pattern",
           "medication_analysis": "Valproate or levetiracetam for GTCS component, genetic counseling, monitor for Dravet if SCN1A+"
         }
+      },
+      {
+        "id": "validated_1_20260214",
+        "source": "Expert Validated",
+        "citation": "Validated by Dr. Test Validator (board_certified_epileptologist)",
+        "source_url": "internal_validation",
+        "condition": "epilepsy",
+        "specialty": "neurology",
+        "input": "35-year-old female with history of brief staring spells lasting 10-15 seconds. EEG shows bilaterally synchronous 3Hz spike-and-wave complexes. Patient experiences loss of awareness with subtle motor arrest. No family history of seizures.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Generalized absence epilepsy with characteristic 3Hz spike-wave pattern per ILAE 2025",
+          "clinical_confidence": "High based on classic EEG findings and clinical semiology",
+          "evidence": "3Hz spike-wave on EEG, brief awareness loss, typical presentation",
+          "medication_analysis": "First-line: Ethosuximide or valproate. Avoid sodium channel blockers like carbamazepine which may worsen absence seizures"
+        },
+        "expert_feedback": {
+          "neurologist": "Dr. Test Validator",
+          "specialty": "Epileptology",
+          "certification": "board_certified_epileptologist",
+          "comments": "Excellent analysis of epilepsy. Clear evidence and appropriate clinical reasoning.",
+          "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of epilepsy. The AI correctly identified critical clinical features.",
+          "validated_on": "2026-02-14 05:19:22"
+        },
+        "quality_scores": {
+          "classification_correct": 1,
+          "confidence_appropriate": 1,
+          "evidence_accurate": 1,
+          "medication_appropriate": 1
+        }
       }
     ],
     "parkinsons": [
       {
         "id": "parkinsons_001",
         "source": "Journal of Medical Case Reports (Open Access)",
-        "citation": "Reiner, G., Skipworth, M. (2025). Symptom improvement in a South Asian patient with Parkinson's disease treated with immediate- and extended-release carbidopa–levodopa: a case report. J Med Case Reports 19, 321. DOI: 10.1186/s13256-025-05385-x",
+        "citation": "Reiner, G., Skipworth, M. (2025). Symptom improvement in a South Asian patient with Parkinson's disease treated with immediate- and extended-release carbidopa\u2013levodopa: a case report. J Med Case Reports 19, 321. DOI: 10.1186/s13256-025-05385-x",
         "source_url": "https://jmedicalcasereports.biomedcentral.com/articles/10.1186/s13256-025-05385-x",
         "condition": "Advanced Parkinson's Disease",
         "input": "85-year-old South Asian male with 13-year Parkinson's disease history. Currently bed-bound, nonverbal, dysphagia requiring feeding tube. On carbidopa-levodopa 25-100mg TID with symptom relief lasting only 2-3 hours. Hypomimia, bradykinesia, postural instability present. No falls due to caregiver supervision.",
@@ -230,6 +260,36 @@
           "clinical_confidence": "High based on temporal relationship to medication, symmetric presentation, normal DaTscan",
           "evidence": "Metoclopramide use 6 months, symmetric parkinsonism, absence of tremor, normal DaTscan",
           "medication_analysis": "Discontinue metoclopramide, switch to PPI or H2-blocker, symptoms should improve over weeks-months"
+        }
+      },
+      {
+        "id": "validated_2_20260214",
+        "source": "Expert Validated",
+        "citation": "Validated by Dr. Test Validator (board_certified_epileptologist)",
+        "source_url": "internal_validation",
+        "condition": "parkinsons",
+        "specialty": "neurology",
+        "input": "68-year-old male with progressive rest tremor affecting right hand for 2 years. Bradykinesia and rigidity noted. Responds well to levodopa therapy. No cognitive impairment.",
+        "analysis_type": "diagnosis",
+        "expected_output": {
+          "classification": "Parkinson's disease with classic motor features",
+          "clinical_confidence": "High based on clinical triad and levodopa response",
+          "evidence": "Rest tremor, bradykinesia, rigidity, excellent levodopa response",
+          "medication_analysis": "Levodopa/carbidopa appropriate as first-line. Consider MAO-B inhibitor as adjunct"
+        },
+        "expert_feedback": {
+          "neurologist": "Dr. Test Validator",
+          "specialty": "Epileptology",
+          "certification": "board_certified_epileptologist",
+          "comments": "Excellent analysis of parkinsons. Clear evidence and appropriate clinical reasoning.",
+          "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of parkinsons. The AI correctly identified critical clinical features.",
+          "validated_on": "2026-02-14 05:19:22"
+        },
+        "quality_scores": {
+          "classification_correct": 1,
+          "confidence_appropriate": 1,
+          "evidence_accurate": 1,
+          "medication_appropriate": 1
         }
       }
     ],
@@ -347,6 +407,36 @@
           "evidence": "Bilateral ptosis, quadriparesis, impaired consciousness, hyperdense basilar sign, CTA confirmation",
           "medication_analysis": "Emergent mechanical thrombectomy (up to 24hr window), consider IV tPA if <4.5hr from last known well"
         }
+      },
+      {
+        "id": "validated_3_20260214",
+        "source": "Expert Validated",
+        "citation": "Validated by Dr. Test Validator (board_certified_epileptologist)",
+        "source_url": "internal_validation",
+        "condition": "stroke",
+        "specialty": "neurology",
+        "input": "72-year-old with sudden onset left hemiparesis 2 hours ago. NIHSS score 14. CT head shows no hemorrhage. BP 160/95. Patient alert and oriented.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Acute ischemic stroke, candidate for thrombolysis",
+          "clinical_confidence": "High based on timeline and imaging",
+          "evidence": "Sudden onset focal deficit, within window, no hemorrhage on CT",
+          "medication_analysis": "Consider IV tPA if no contraindications. Antiplatelet therapy after acute phase"
+        },
+        "expert_feedback": {
+          "neurologist": "Dr. Test Validator",
+          "specialty": "Epileptology",
+          "certification": "board_certified_epileptologist",
+          "comments": "Excellent analysis of stroke. Clear evidence and appropriate clinical reasoning.",
+          "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of stroke. The AI correctly identified critical clinical features.",
+          "validated_on": "2026-02-14 05:19:22"
+        },
+        "quality_scores": {
+          "classification_correct": 1,
+          "confidence_appropriate": 1,
+          "evidence_accurate": 1,
+          "medication_appropriate": 1
+        }
       }
     ],
     "headache": [
@@ -362,7 +452,7 @@
           "classification": "Migraine with visual aura per ICHD-3 criteria, menstrually-related pattern",
           "clinical_confidence": "High based on characteristic aura description and headache features",
           "evidence": "Typical visual aura duration, unilateral throbbing headache, photophobia, nausea, triggers",
-          "medication_analysis": "Acute: Triptan at aura onset, preventive: Consider propranolol or topiramate if ≥4 attacks/month"
+          "medication_analysis": "Acute: Triptan at aura onset, preventive: Consider propranolol or topiramate if \u22654 attacks/month"
         }
       },
       {
@@ -390,8 +480,8 @@
         "analysis_type": "classification",
         "expected_output": {
           "classification": "Chronic tension-type headache (CTTH) per ICHD-3, possible medication overuse developing",
-          "clinical_confidence": "High based on ≥15 days/month, bilateral pressure quality, no migrainous features",
-          "evidence": "Daily bilateral pressure headache, ≥15 days/month x18 months, no autonomic features",
+          "clinical_confidence": "High based on \u226515 days/month, bilateral pressure quality, no migrainous features",
+          "evidence": "Daily bilateral pressure headache, \u226515 days/month x18 months, no autonomic features",
           "medication_analysis": "Amitriptyline 10-75mg nightly for prevention, taper NSAIDs to prevent medication overuse headache, stress management"
         }
       },
@@ -405,7 +495,7 @@
         "expected_output": {
           "diagnosis_support": "Medication overuse headache (MOH) with transformation of episodic to chronic migraine",
           "clinical_confidence": "High based on headache frequency increase correlating with increased analgesic use",
-          "evidence": ">15 headache days/month, combination analgesic ≥10 days/month, transformation from episodic pattern",
+          "evidence": ">15 headache days/month, combination analgesic \u226510 days/month, transformation from episodic pattern",
           "medication_analysis": "Withdraw overused medication (taper over 2 weeks), bridge therapy (steroid or nerve block), start migraine preventive"
         }
       },
@@ -487,7 +577,7 @@
         "source": "Mixed Dementia Literature",
         "citation": "Mixed dementia pathology, Alzheimer's and vascular contributions",
         "condition": "Mixed Dementia",
-        "input": "80-year-old female with 5-year progressive memory loss and executive dysfunction. History of hypertension, prior TIA. MMSE 14/30. Memory and executive deficits both prominent. MRI shows moderate hippocampal atrophy plus moderate-severe white matter hyperintensities. CSF shows AD biomarkers (low Aβ42, elevated tau).",
+        "input": "80-year-old female with 5-year progressive memory loss and executive dysfunction. History of hypertension, prior TIA. MMSE 14/30. Memory and executive deficits both prominent. MRI shows moderate hippocampal atrophy plus moderate-severe white matter hyperintensities. CSF shows AD biomarkers (low A\u03b242, elevated tau).",
         "analysis_type": "diagnosis",
         "expected_output": {
           "diagnosis_support": "Mixed dementia: Alzheimer's disease with significant vascular contribution",
@@ -583,7 +673,7 @@
         "expected_output": {
           "diagnosis_support": "Treatment-induced neuropathy of diabetes (TIND), insulin neuritis, related to rapid glycemic control",
           "clinical_confidence": "High based on temporal relationship to rapid HbA1c improvement and characteristic severe pain",
-          "evidence": "Severe burning pain onset after rapid glucose control, HbA1c drop 12%→7% over 6 weeks, distal neuropathy",
+          "evidence": "Severe burning pain onset after rapid glucose control, HbA1c drop 12%\u21927% over 6 weeks, distal neuropathy",
           "medication_analysis": "Gabapentin or pregabalin for neuropathic pain, duloxetine alternative, pain typically improves over 6-18 months"
         }
       },
@@ -607,11 +697,11 @@
         "source": "Int J Emerg Med (Open Access)",
         "citation": "A Guillain Barre Syndrome (GBS): a case report. Int J Emerg Med. 2025. DOI: 10.1186/s12245-025-00937-w",
         "source_url": "https://intjem.biomedcentral.com/articles/10.1186/s12245-025-00937-w",
-        "condition": "Guillain-Barré Syndrome - AMAN",
+        "condition": "Guillain-Barr\u00e9 Syndrome - AMAN",
         "input": "25-year-old female with 3-day history of rapidly progressive symmetric leg weakness ascending to arms. Now unable to walk. Respiratory rate 28, reduced vital capacity. Preceded by diarrheal illness 10 days ago. Examination shows flaccid quadriplegia, areflexia, no sensory loss. CSF: protein 85 mg/dL, WBC 2. EMG shows motor axonal neuropathy pattern.",
         "analysis_type": "diagnosis",
         "expected_output": {
-          "diagnosis_support": "Guillain-Barré syndrome, acute motor axonal neuropathy (AMAN) variant, respiratory insufficiency",
+          "diagnosis_support": "Guillain-Barr\u00e9 syndrome, acute motor axonal neuropathy (AMAN) variant, respiratory insufficiency",
           "clinical_confidence": "High based on ascending paralysis, areflexia, albuminocytologic dissociation, post-infectious",
           "evidence": "Rapid progressive symmetric weakness, areflexia, high CSF protein with normal cells, motor axonal EMG",
           "medication_analysis": "URGENT: IVIG 0.4g/kg x 5 days OR plasmapheresis, ICU monitoring for respiratory failure, supportive care"
@@ -620,13 +710,13 @@
       {
         "id": "neuropathy_004",
         "source": "Frontiers in Immunology (Open Access)",
-        "citation": "Guillain–Barré syndrome with three episodes: case report. Front. Immunol. 2025. DOI: 10.3389/fimmu.2025.1559937",
+        "citation": "Guillain\u2013Barr\u00e9 syndrome with three episodes: case report. Front. Immunol. 2025. DOI: 10.3389/fimmu.2025.1559937",
         "source_url": "https://www.frontiersin.org/journals/immunology/articles/10.3389/fimmu.2025.1559937/full",
-        "condition": "Recurrent Guillain-Barré Syndrome",
+        "condition": "Recurrent Guillain-Barr\u00e9 Syndrome",
         "input": "49-year-old male presenting with third episode of ascending paralysis over 10 years (2014, 2018, 2024). Each episode preceded by respiratory infection, resolves with IVIG. Current episode: leg weakness progressing to arms over 5 days. EMG shows mixed demyelination and axonal damage. Anti-sulfatide IgG antibodies detected.",
         "analysis_type": "classification",
         "expected_output": {
-          "classification": "Recurrent Guillain-Barré syndrome (RGBS), anti-sulfatide antibody positive, unusual presentation",
+          "classification": "Recurrent Guillain-Barr\u00e9 syndrome (RGBS), anti-sulfatide antibody positive, unusual presentation",
           "clinical_confidence": "High based on three documented GBS episodes, consistent clinical pattern, antibody identification",
           "evidence": "Three episodes of acute inflammatory polyradiculoneuropathy, post-infectious triggers, anti-sulfatide IgG+",
           "medication_analysis": "IVIG 0.4g/kg x 5 days for acute episode, consider immunosuppression between episodes if frequent recurrence"
@@ -715,7 +805,7 @@
         "citation": "Posttraumatic ascending myelopathy after spinal cord injury in a young man. Medicine. 2022;101:e30066. PMC9353859",
         "source_url": "https://ncbi.nlm.nih.gov/pmc/articles/PMC9353859/",
         "condition": "Post-Traumatic Ascending Myelopathy",
-        "input": "29-year-old male with traumatic T10 spinal cord injury from motor vehicle accident 1 week ago. Initial exam: paraplegia with T10 sensory level. Day 5 post-injury: developed ascending weakness to upper extremities, respiratory distress. Fever 38.5°C, elevated WBC. MRI shows cord edema extending from T8 to C5. Blood cultures positive for bacteria.",
+        "input": "29-year-old male with traumatic T10 spinal cord injury from motor vehicle accident 1 week ago. Initial exam: paraplegia with T10 sensory level. Day 5 post-injury: developed ascending weakness to upper extremities, respiratory distress. Fever 38.5\u00b0C, elevated WBC. MRI shows cord edema extending from T8 to C5. Blood cultures positive for bacteria.",
         "analysis_type": "diagnosis",
         "expected_output": {
           "diagnosis_support": "Subacute posttraumatic ascending myelopathy (SPAM) with concurrent bacterial infection",
@@ -769,6 +859,98 @@
           "clinical_confidence": "High for ALS diagnosis; cautious interpretation of diet effect (single case, no control)",
           "evidence": "Bulbar onset with dysarthria/dysphagia, survival >45 months (beyond typical), functional improvement on diet",
           "medication_analysis": "Continue riluzole, ketogenic diet appears well-tolerated, multidisciplinary support, speech therapy, nutrition monitoring"
+        }
+      }
+    ],
+    "validated": [
+      {
+        "id": "validated_1_20260214",
+        "source": "Expert Validated",
+        "citation": "Validated by Dr. Test Validator (board_certified_epileptologist)",
+        "source_url": "internal_validation",
+        "condition": "epilepsy",
+        "specialty": "neurology",
+        "input": "35-year-old female with history of brief staring spells lasting 10-15 seconds. EEG shows bilaterally synchronous 3Hz spike-and-wave complexes. Patient experiences loss of awareness with subtle motor arrest. No family history of seizures.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Generalized absence epilepsy with characteristic 3Hz spike-wave pattern per ILAE 2025",
+          "clinical_confidence": "High based on classic EEG findings and clinical semiology",
+          "evidence": "3Hz spike-wave on EEG, brief awareness loss, typical presentation",
+          "medication_analysis": "First-line: Ethosuximide or valproate. Avoid sodium channel blockers like carbamazepine which may worsen absence seizures"
+        },
+        "expert_feedback": {
+          "neurologist": "Dr. Test Validator",
+          "specialty": "Epileptology",
+          "certification": "board_certified_epileptologist",
+          "comments": "Excellent analysis of epilepsy. Clear evidence and appropriate clinical reasoning.",
+          "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of epilepsy. The AI correctly identified critical clinical features.",
+          "validated_on": "2026-02-14 05:19:22"
+        },
+        "quality_scores": {
+          "classification_correct": 1,
+          "confidence_appropriate": 1,
+          "evidence_accurate": 1,
+          "medication_appropriate": 1
+        }
+      },
+      {
+        "id": "validated_2_20260214",
+        "source": "Expert Validated",
+        "citation": "Validated by Dr. Test Validator (board_certified_epileptologist)",
+        "source_url": "internal_validation",
+        "condition": "parkinsons",
+        "specialty": "neurology",
+        "input": "68-year-old male with progressive rest tremor affecting right hand for 2 years. Bradykinesia and rigidity noted. Responds well to levodopa therapy. No cognitive impairment.",
+        "analysis_type": "diagnosis",
+        "expected_output": {
+          "classification": "Parkinson's disease with classic motor features",
+          "clinical_confidence": "High based on clinical triad and levodopa response",
+          "evidence": "Rest tremor, bradykinesia, rigidity, excellent levodopa response",
+          "medication_analysis": "Levodopa/carbidopa appropriate as first-line. Consider MAO-B inhibitor as adjunct"
+        },
+        "expert_feedback": {
+          "neurologist": "Dr. Test Validator",
+          "specialty": "Epileptology",
+          "certification": "board_certified_epileptologist",
+          "comments": "Excellent analysis of parkinsons. Clear evidence and appropriate clinical reasoning.",
+          "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of parkinsons. The AI correctly identified critical clinical features.",
+          "validated_on": "2026-02-14 05:19:22"
+        },
+        "quality_scores": {
+          "classification_correct": 1,
+          "confidence_appropriate": 1,
+          "evidence_accurate": 1,
+          "medication_appropriate": 1
+        }
+      },
+      {
+        "id": "validated_3_20260214",
+        "source": "Expert Validated",
+        "citation": "Validated by Dr. Test Validator (board_certified_epileptologist)",
+        "source_url": "internal_validation",
+        "condition": "stroke",
+        "specialty": "neurology",
+        "input": "72-year-old with sudden onset left hemiparesis 2 hours ago. NIHSS score 14. CT head shows no hemorrhage. BP 160/95. Patient alert and oriented.",
+        "analysis_type": "classification",
+        "expected_output": {
+          "classification": "Acute ischemic stroke, candidate for thrombolysis",
+          "clinical_confidence": "High based on timeline and imaging",
+          "evidence": "Sudden onset focal deficit, within window, no hemorrhage on CT",
+          "medication_analysis": "Consider IV tPA if no contraindications. Antiplatelet therapy after acute phase"
+        },
+        "expert_feedback": {
+          "neurologist": "Dr. Test Validator",
+          "specialty": "Epileptology",
+          "certification": "board_certified_epileptologist",
+          "comments": "Excellent analysis of stroke. Clear evidence and appropriate clinical reasoning.",
+          "clinical_pearls": "Key teaching point: This case demonstrates classic presentation of stroke. The AI correctly identified critical clinical features.",
+          "validated_on": "2026-02-14 05:19:22"
+        },
+        "quality_scores": {
+          "classification_correct": 1,
+          "confidence_appropriate": 1,
+          "evidence_accurate": 1,
+          "medication_appropriate": 1
         }
       }
     ]
