@@ -2064,6 +2064,7 @@ UI_HTML = r"""
       <ul class="nav-links">
         <li><a href="/" class="nav-link active">Main App</a></li>
         <li><a href="/validate" class="nav-link">Validator</a></li>
+        <li><a href="/learning" class="nav-link">Learning Dashboard</a></li>
       </ul>
     </div>
   </nav>

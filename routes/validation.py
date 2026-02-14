@@ -603,6 +603,7 @@ VALIDATOR_HTML = """
       <ul class="nav-links">
         <li><a href="/" class="nav-link">Main App</a></li>
         <li><a href="/validate" class="nav-link active">Validator</a></li>
+        <li><a href="/learning" class="nav-link">Learning Dashboard</a></li>
       </ul>
     </div>
   </nav>
