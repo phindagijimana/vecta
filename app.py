@@ -2088,12 +2088,7 @@ UI_HTML = r"""
               <label class="form-label" for="specialty">Neurology Specialty:</label>
               <select id="specialty" class="form-select" name="specialty">
                 <option value="">General Neurology</option>
-                <optgroup label="Epilepsy (ILAE Classification)">
-                  <option value="epilepsy_focal">Focal Epilepsy</option>
-                  <option value="epilepsy_generalized">Generalized Epilepsy</option>
-                  <option value="epilepsy_combined">Combined Generalized & Focal</option>
-                  <option value="epilepsy_unknown">Unknown Onset Epilepsy</option>
-                </optgroup>
+                <option value="epilepsy">Epilepsy</option>
               </select>
             </div>
 
@@ -2161,35 +2156,48 @@ UI_HTML = r"""
   <script>
     // Analysis type to prompt mapping
     const analysisPrompts = {
-      epilepsy: `EPILEPSY HIERARCHICAL CLASSIFICATION (ILAE 2017)
+      epilepsy: `EPILEPSY CLASSIFICATION (ILAE 2017) - HIERARCHICAL ANALYSIS
+
+CLASSIFICATION COLUMNS TO EVALUATE:
+1. Focal Epilepsy
+2. Generalized Epilepsy
+3. Combined Generalized & Focal Epilepsy
+4. Unknown Onset Epilepsy
 
 STEP 1: Determine if this is epilepsy
 - Analyze clinical presentation, seizure history, EEG findings
-- If NOT epilepsy: State "Not Epilepsy" and stop
+- If NOT epilepsy: State "Not Epilepsy" in Classification and stop
 - If epilepsy: Continue to STEP 2
 
-STEP 2: Classify seizure onset type (if sufficient evidence)
-- FOCAL: Seizures originating from one brain region
-  → If aware: Focal Aware Seizure
-  → If impaired awareness: Focal Impaired Awareness Seizure
-- GENERALIZED: Seizures affecting both hemispheres from onset
-  → Motor: Tonic-clonic, Absence, Myoclonic, Atonic
-  → Non-motor: Typical/Atypical Absence
-- UNKNOWN: Insufficient evidence to determine onset
-- COMBINED: Both focal and generalized seizures present
+STEP 2: Classify into primary category (CHOOSE ONE COLUMN):
+- FOCAL EPILEPSY: Seizures originating from one brain region
+  → Evidence: Focal EEG abnormalities, focal onset symptoms, focal imaging findings
+  → Subtypes: Focal Aware, Focal Impaired Awareness
+  → Motor vs Non-motor onset
+  
+- GENERALIZED EPILEPSY: Seizures affecting both hemispheres from onset
+  → Evidence: Bilateral synchronous EEG, bilateral symmetric symptoms
+  → Subtypes: Tonic-clonic, Absence, Myoclonic, Atonic, Clonic, Tonic
+  
+- COMBINED GENERALIZED & FOCAL: Both focal and generalized seizures present
+  → Evidence: History of both focal and generalized seizure types
+  → Document both seizure types
+  
+- UNKNOWN ONSET EPILEPSY: Insufficient evidence to determine onset
+  → Use when data is limited or conflicting
 
 STEP 3: Specify seizure subtype (if sufficient evidence exists)
-- For Focal: Motor vs Non-motor onset
+- For Focal: Specify motor/non-motor, aware/impaired awareness
 - For Generalized: Specify exact type (tonic-clonic, absence, myoclonic, etc.)
-- If evidence insufficient: Stop at onset level
+- If evidence insufficient: Stop at category level
 
 MANDATORY OUTPUT FORMAT (4 bullet points, max 25 words each):
-- Classification: [Epilepsy? If yes, seizure type and subtype based on evidence]
+- Classification: [Category (Focal/Generalized/Combined/Unknown) + subtype if evidence supports]
 - Clinical_Confidence: [High/Medium/Low based on available evidence]
-- Evidence: [Key clinical/EEG/imaging findings supporting classification]
-- Medication_Analysis: [AED recommendations based on seizure type classified]
+- Evidence: [Key clinical/EEG/imaging findings supporting this category]
+- Medication_Analysis: [AED recommendations for identified epilepsy type]
 
-CRITICAL: Only classify to the level supported by evidence. If unsure, state limitation.`,
+CRITICAL: Only classify to the level supported by evidence. State limitations clearly.`,
 
       classification: `MANDATORY FORMAT: Respond with exactly 4 bullet points, max 25 words each.
 
@@ -2361,6 +2369,12 @@ Apply neuropathy classification, EMG/NCS interpretation, etiology determination,
 
     function updatePrompt() {
       const analysisType = analysisTypeSelect.value;
+      
+      // Auto-select Epilepsy specialty when Epilepsy Classification is chosen
+      if (analysisType === 'epilepsy') {
+        specialtySelect.value = 'epilepsy';
+      }
+      
       const specialty = specialtySelect.value;
       
       // Get base prompt for analysis type
