@@ -1107,11 +1107,76 @@ LEARNING_DASHBOARD_HTML = r"""
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #e8f4ff 0%, #f0f8ff 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
+            margin: 0;
         }
-        .container {
+        
+        /* Navigation Bar */
+        .nav-bar {
+            background: #004977;
+            box-shadow: 0 4px 15px rgba(0, 73, 119, 0.2);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-container {
             max-width: 1400px;
             margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px 0;
+        }
+        .nav-logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-subtitle {
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+        .nav-links {
+            display: flex;
+            gap: 5px;
+            list-style: none;
+        }
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 73, 119, 0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 30px;
         }
         .main-card {
             background: rgba(255, 255, 255, 0.95);
@@ -1134,21 +1199,6 @@ LEARNING_DASHBOARD_HTML = r"""
         .header p {
             font-size: 1.1em;
             opacity: 0.9;
-            margin-bottom: 15px;
-        }
-        .nav-links {
-            margin-top: 15px;
-        }
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-            font-weight: 500;
-            opacity: 0.9;
-        }
-        .nav-links a:hover {
-            opacity: 1;
-            text-decoration: underline;
         }
         .main-content {
             padding: 30px;
@@ -1295,16 +1345,28 @@ LEARNING_DASHBOARD_HTML = r"""
     </style>
 </head>
 <body>
+  <!-- Navigation Bar -->
+  <nav class="nav-bar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <a href="/" class="nav-logo">
+          Vecta AI
+          <div class="nav-subtitle">MEDICAL ANALYSIS PLATFORM</div>
+        </a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="/" class="nav-link">Main App</a></li>
+        <li><a href="/validate" class="nav-link">Validator</a></li>
+        <li><a href="/learning" class="nav-link active">Learning Dashboard</a></li>
+      </ul>
+    </div>
+  </nav>
+
     <div class="container">
         <div class="main-card">
             <div class="header">
-                <h1>Vecta AI - Learning Dashboard</h1>
+                <h1>Learning Dashboard</h1>
                 <p>Self-Improvement & Validation Metrics</p>
-                <div class="nav-links">
-                    <a href="/">Analysis Platform</a>
-                    <a href="/validate">Validator Portal</a>
-                    <a href="/learning">Learning Dashboard</a>
-                </div>
             </div>
 
             <div class="main-content">
