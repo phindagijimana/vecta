@@ -1,8 +1,10 @@
 # Deployment Guide - Vecta AI
 
-## Quick Deployment
+Complete deployment guide for Vecta AI neurology analysis platform.
 
-### Option 1: One-Command Setup (Recommended)
+## Quick Start
+
+### One-Command Setup (Local)
 
 ```bash
 git clone https://github.com/phindagijimana/vecta.git
@@ -10,111 +12,225 @@ cd vecta
 ./vecta start
 ```
 
-The CLI automatically checks and installs dependencies (Flask, pandas, numpy).
+Access at http://localhost:8085
 
-### Option 2: Manual Setup
+### One-Command Setup (HPC)
 
 ```bash
-# Clone repository
 git clone https://github.com/phindagijimana/vecta.git
 cd vecta
+module load cuda python gcc
+./vecta-hpc install
+./vecta-hpc run
+```
 
-# Install dependencies
+## Deployment Options
+
+### 1. Local Workstation
+
+**Requirements:**
+- Python 3.8+
+- 2GB RAM minimum
+- 16GB+ GPU VRAM (optional, for AI model)
+
+**Quick Start:**
+```bash
+./vecta start          # Auto-installs dependencies
+```
+
+**Manual Setup:**
+```bash
 pip3 install --user flask flask-cors pandas numpy
-
-# Optional: for RAG system
-pip3 install --user chromadb sentence-transformers
-
-# Start service
-./vecta start
+python3 app.py
 ```
 
-## Access URLs
-
-After deployment:
-
-- **Main App**: http://localhost:8085
-- **Validator**: http://localhost:8085/validate
-
-## CLI Management
-
-### Basic Commands
-
+**CLI Commands:**
 ```bash
-./vecta start          # Start in background (port 8085)
-./vecta start -f       # Start in foreground
-./vecta start -p 8090  # Use specific port
-./vecta stop           # Stop service
-./vecta restart        # Restart service
+./vecta start          # Start service
 ./vecta status         # Check status
 ./vecta logs           # View logs
-./vecta help           # Show help
+./vecta stop           # Stop service
+./vecta restart        # Restart service
 ```
 
-### Port Configuration
+**Features:**
+- Auto-installs Flask dependencies
+- Smart port detection (8085-8150)
+- PID tracking
+- Log management
 
-Default port: **8085**
+### 2. HPC Cluster (SLURM)
 
-Auto-detection range: 8085-8150
+**Requirements:**
+- SLURM workload manager
+- Python 3.8+ module
+- CUDA module (optional)
+- GPU partition access
 
-Manual override:
+**Installation:**
 ```bash
-./vecta start -p 8090
-# OR
-export SERVICE_PORT=8090
-./vecta start
+# Load modules
+module load cuda/12.2 python/3.9 gcc/11.2
+
+# One-time setup
+./vecta-hpc install
 ```
 
-## System Requirements
-
-### Minimum Requirements
-
-- Python 3.8+
-- 2GB RAM
-- 1GB disk space
-
-### Required Dependencies
-
-- Flask 3.x
-- Flask-CORS
-- pandas
-- numpy
-
-### Optional Dependencies
-
-For RAG system:
-- chromadb
-- sentence-transformers
-- PyTorch 2.1+ (for AI model)
-
-## Production Deployment
-
-### Using Production WSGI Server
-
+**Submit Job:**
 ```bash
-# Install gunicorn
-pip3 install --user gunicorn
+# Default resources (1 GPU, 64GB, 24h)
+./vecta-hpc run
 
-# Run with gunicorn
+# Custom resources
+./vecta-hpc run --gpus 2 --memory 128G --time 48:00:00
+```
+
+**Monitor Job:**
+```bash
+./vecta-hpc status     # Check job status
+./vecta-hpc logs       # View logs
+./vecta-hpc logs -f    # Follow logs
+```
+
+**Access Application:**
+```bash
+# Get node info
+./vecta-hpc status
+
+# Forward port (from local machine)
+ssh -L 8085:gpu-node-XX:8085 username@hpc-login.edu
+
+# Access in browser
+http://localhost:8085
+```
+
+**Stop Job:**
+```bash
+./vecta-hpc stop
+```
+
+**HPC CLI Options:**
+
+Installation customization:
+```bash
+./vecta-hpc install \
+  --partition gpu \
+  --gpus 1 \
+  --memory 64G \
+  --time 24:00:00 \
+  --cpus 8 \
+  --port 8085
+```
+
+Job submission:
+```bash
+# Large memory job
+./vecta-hpc run --memory 256G --gpus 4
+
+# Extended time
+./vecta-hpc run --time 96:00:00
+
+# Specific partition
+./vecta-hpc run --partition gpu-a100
+```
+
+Monitoring:
+```bash
+./vecta-hpc list       # List all jobs
+./vecta-hpc info       # Environment info
+./vecta-hpc config     # View configuration
+```
+
+**Troubleshooting HPC:**
+
+Job stays PENDING:
+```bash
+squeue -j JOBID --Format=Reason
+sinfo -p gpu
+```
+
+Job fails immediately:
+```bash
+./vecta-hpc logs
+cat logs/vecta_JOBID.err
+```
+
+Port forwarding issues:
+```bash
+# Verify node name
+squeue -j JOBID -o "%N"
+
+# Test on compute node
+ssh compute-node-01
+curl http://localhost:8085
+```
+
+### 3. Docker Deployment
+
+**With GPU:**
+```bash
+# Build image
+docker build -t vecta-ai .
+
+# Run with GPU
+docker run -d \
+  --gpus all \
+  -p 8085:8085 \
+  -v $(pwd)/data:/app/data \
+  vecta-ai
+```
+
+**CPU Only:**
+```bash
+docker run -d \
+  -p 8085:8085 \
+  -v $(pwd)/data:/app/data \
+  vecta-ai
+```
+
+**Dockerfile:**
+```dockerfile
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application
+COPY . .
+
+# Expose port
+EXPOSE 8085
+
+# Run app
+CMD ["python3", "app.py"]
+```
+
+### 4. Production Server
+
+**Using Gunicorn:**
+```bash
+pip3 install gunicorn
 gunicorn -w 4 -b 0.0.0.0:8085 app:app
 ```
 
-### Using systemd Service
+**Systemd Service:**
 
 Create `/etc/systemd/system/vecta.service`:
-
 ```ini
 [Unit]
-Description=Vecta AI Medical Analysis Platform
+Description=Vecta AI Service
 After=network.target
 
 [Service]
 Type=simple
-User=your_user
-WorkingDirectory=/path/to/vecta
-ExecStart=/path/to/vecta/vecta start -f
-ExecStop=/path/to/vecta/vecta stop
-Restart=on-failure
+User=vecta
+WorkingDirectory=/opt/vecta
+ExecStart=/usr/bin/python3 /opt/vecta/app.py
+Restart=always
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
@@ -127,372 +243,616 @@ sudo systemctl start vecta
 sudo systemctl status vecta
 ```
 
-### Nginx Reverse Proxy
+**Nginx Reverse Proxy:**
 
+Configure `/etc/nginx/sites-available/vecta`:
 ```nginx
 server {
     listen 80;
-    server_name your-domain.com;
+    server_name vecta.yourdomain.com;
 
     location / {
-        proxy_pass http://localhost:8085;
+        proxy_pass http://127.0.0.1:8085;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
 
-## Docker Deployment (Optional)
-
-Create `Dockerfile`:
-
-```dockerfile
-FROM python:3.9-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-EXPOSE 8085
-
-CMD ["python3", "app.py"]
+Enable:
+```bash
+sudo ln -s /etc/nginx/sites-available/vecta /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
 ```
 
-Build and run:
+### 5. Cloud GPU Deployment
+
+**AWS EC2 (P3/G5 instances):**
 ```bash
-docker build -t vecta-ai .
-docker run -d -p 8085:8085 vecta-ai
+# Launch GPU instance
+# Install CUDA toolkit
+sudo apt update
+sudo apt install nvidia-cuda-toolkit
+
+# Clone and run
+git clone https://github.com/phindagijimana/vecta.git
+cd vecta
+./vecta start
 ```
 
-## Environment Variables
-
-Optional configuration:
-
+**Google Cloud (A100/T4):**
 ```bash
-export SERVICE_PORT=8085          # Default port
-export LOG_LEVEL=INFO             # Logging level
-export DATABASE_PATH=data/validation.db  # Database location
+# Create GPU instance
+gcloud compute instances create vecta-gpu \
+  --zone=us-central1-a \
+  --machine-type=n1-standard-8 \
+  --accelerator=type=nvidia-tesla-t4,count=1 \
+  --image-family=pytorch-latest-gpu \
+  --image-project=deeplearning-platform-release
+
+# Deploy
+./vecta start
 ```
 
-## Database Setup
-
-The SQLite database is automatically initialized on first run:
-
+**Azure (NC/ND series):**
 ```bash
-# Manual initialization (if needed)
+# Create GPU VM
+az vm create \
+  --resource-group vecta-rg \
+  --name vecta-gpu \
+  --size Standard_NC6 \
+  --image UbuntuLTS
+
+# Deploy
+./vecta start
+```
+
+## GPU Setup
+
+### NVIDIA GPU Requirements
+
+**Hardware:**
+- NVIDIA GPU with 16GB+ VRAM (recommended)
+- CUDA Compute Capability 7.0+
+- RTX 3090, A100, V100, or better
+
+**Software:**
+- CUDA 11.7+
+- cuDNN 8.5+
+- PyTorch 2.1+
+
+**Installation:**
+
+CUDA (Ubuntu/Debian):
+```bash
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin
+sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600
+sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub
+sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/ /"
+sudo apt update
+sudo apt install cuda
+```
+
+PyTorch with CUDA:
+```bash
+pip3 install --user torch>=2.1.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip3 install --user transformers accelerate bitsandbytes
+```
+
+Verify:
+```bash
+python3 -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
+python3 -c "import torch; print(f'GPU count: {torch.cuda.device_count()}')"
+```
+
+### Performance Optimization
+
+**8-bit Quantization** (reduces VRAM by 50%):
+
+In `app.py`, enable:
+```python
+from transformers import BitsAndBytesConfig
+
+quantization_config = BitsAndBytesConfig(
+    load_in_8bit=True,
+    llm_int8_threshold=6.0
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    quantization_config=quantization_config,
+    device_map="auto"
+)
+```
+
+**4-bit Quantization** (reduces VRAM by 75%):
+```python
+quantization_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16,
+    bnb_4bit_quant_type="nf4"
+)
+```
+
+**Batch Processing:**
+```python
+# Process multiple cases at once
+batch_size = 4
+responses = model.generate(
+    input_ids,
+    max_new_tokens=512,
+    batch_size=batch_size
+)
+```
+
+**Flash Attention 2** (2x faster):
+```python
+pip3 install flash-attn --no-build-isolation
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    attn_implementation="flash_attention_2"
+)
+```
+
+**Multi-GPU:**
+```python
+# Automatic multi-GPU
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    device_map="auto"  # Distributes across all GPUs
+)
+```
+
+## Environment Configuration
+
+### Environment Variables
+
+Create `.env` file:
+```bash
+FLASK_ENV=production
+VECTA_PORT=8085
+VECTA_HOST=0.0.0.0
+DEBUG=False
+MODEL_ID=m42-health/Llama3-Med42-8B
+MAX_TOKENS=512
+TEMPERATURE=0.7
+```
+
+Load in `app.py`:
+```python
+from dotenv import load_dotenv
+load_dotenv()
+
+port = int(os.getenv('VECTA_PORT', 8085))
+host = os.getenv('VECTA_HOST', '0.0.0.0')
+```
+
+### Port Configuration
+
+Default: 8085
+Fallback range: 8085-8150
+
+Override:
+```bash
+export VECTA_PORT=9000
+./vecta start
+```
+
+Or in HPC:
+```bash
+./vecta-hpc run --port 9000
+```
+
+## Data Management
+
+### Database Setup
+
+SQLite database auto-created at `data/validation.db`
+
+Initialize validation system:
+```bash
 python3 init_validation_system.py
 ```
 
-Database location: `data/validation.db`
+Schema:
+- `ai_outputs`: Stores AI responses for validation
+- `neurologist_validations`: Expert reviews
+- `validation_history`: Tracks improvements
+- `demo_users`: Validator accounts
 
-Tables created:
-- `ai_outputs` - AI-generated analyses
-- `validations` - Neurologist feedback
-- `neurologists` - User accounts
+### Data Files
 
-## Features Enabled
+**Few-Shot Examples** (`few_shot_examples.py`):
+- 50 neurology cases
+- 10 conditions
+- Expert-curated with citations
+- 224KB
 
-### Core Features
+**Clinical Guidelines** (`clinical_guidelines.py`):
+- ILAE 2025 Epilepsy Classification
+- ICHD-3 Migraine Criteria
+- AAN Guidelines
+- AHA/ASA Stroke Guidelines
+- MDS Parkinson's Criteria
+- 72KB
 
-- 50 few-shot examples across 10 neurology conditions
-- Clinical guidelines (ILAE, ICHD-3, AAN, AHA/ASA)
-- Auto-sampling (10% of outputs for validation)
-- 2-page system (Main App + Validator)
-- SQLite validation tracking
+**Sample Data** (`sample_medical_data.txt`):
+- Neurology cases for testing
+- EEG data examples
+- MRI findings
+- Patient registry data
 
-### Optional Features
+### Backup
 
-Enable RAG system:
 ```bash
-pip3 install --user chromadb sentence-transformers
-./vecta restart
+# Backup database
+cp data/validation.db data/validation.db.backup
+
+# Backup with timestamp
+cp data/validation.db data/validation_$(date +%Y%m%d_%H%M%S).db
+
+# Automated daily backup
+0 2 * * * cd /opt/vecta && cp data/validation.db data/validation_$(date +\%Y\%m\%d).db
 ```
 
-Enable AI model (requires PyTorch 2.1+):
-```bash
-pip3 install --user torch>=2.1
-./vecta restart
-```
+## System Requirements
 
-## Data Files
+### Minimum (Core Features)
+- **CPU**: 2 cores
+- **RAM**: 2GB
+- **Storage**: 1GB
+- **OS**: Linux, macOS, Windows
+- **Python**: 3.8+
+- **Network**: Internet for initial setup
 
-### Required Data
+### Recommended (Full AI Model)
+- **CPU**: 8+ cores
+- **RAM**: 32GB
+- **GPU**: 16GB+ VRAM
+- **Storage**: 20GB
+- **CUDA**: 11.7+
+- **Network**: High bandwidth for model download
 
-- `data/few_shot_examples.json` (224KB) - 50 clinical examples
-- `data/guidelines/neurology_guidelines.json` (72KB) - Clinical guidelines
+### HPC Cluster
+- **SLURM**: 20.11+
+- **GPU**: V100, A100, or newer
+- **Modules**: CUDA, Python, GCC
+- **Network**: Infiniband (recommended)
 
-### Auto-Generated
-
-- `data/validation.db` - Validation database
-- `data/vector_db/` - ChromaDB storage (if RAG enabled)
-- `logs/vecta_ai.log` - Application logs
-- `vecta_ai.pid` - Process ID file
-
-## Security Considerations
+## Security
 
 ### Production Checklist
 
-- [ ] Change default database credentials (if applicable)
-- [ ] Enable HTTPS with SSL certificate
-- [ ] Use gunicorn or uWSGI (not Flask development server)
-- [ ] Set up firewall rules
-- [ ] Configure CORS appropriately
-- [ ] Use environment variables for secrets
-- [ ] Regular backups of validation.db
-- [ ] Monitor logs for security issues
+- [ ] Change default credentials in `init_validation_system.py`
+- [ ] Enable HTTPS (use Nginx with SSL)
+- [ ] Set `DEBUG=False` in production
+- [ ] Restrict access by IP/network
+- [ ] Enable firewall (allow only 8085 or 443)
+- [ ] Regular security updates
+- [ ] Database encryption at rest
+- [ ] Secure PHI according to HIPAA
+- [ ] Regular backups
+- [ ] Audit logging
 
-### File Permissions
+### Firewall Configuration
 
 ```bash
-chmod 700 data/
-chmod 600 data/validation.db
-chmod 755 vecta
+# UFW (Ubuntu)
+sudo ufw allow 8085/tcp
+sudo ufw enable
+
+# Firewalld (RHEL/CentOS)
+sudo firewall-cmd --permanent --add-port=8085/tcp
+sudo firewall-cmd --reload
+
+# iptables
+sudo iptables -A INPUT -p tcp --dport 8085 -j ACCEPT
 ```
+
+### HIPAA Compliance
+
+For PHI:
+1. Use HTTPS only
+2. Encrypt database
+3. Audit all access
+4. Implement role-based access control
+5. Regular security assessments
+6. Data retention policies
+7. Secure backups
 
 ## Monitoring
 
-### Check Logs
+### Application Health
 
-```bash
-./vecta logs           # Recent logs
-./vecta logs 100       # Last 100 lines
-tail -f logs/vecta_ai.log  # Live logs
-```
-
-### Check Status
-
-```bash
-./vecta status         # Service status
-ps aux | grep app.py   # Process details
-netstat -tuln | grep 8085  # Port status
-```
-
-### Health Check Endpoint
-
+Health check endpoint:
 ```bash
 curl http://localhost:8085/health
 ```
 
+Monitor logs:
+```bash
+# Local
+./vecta logs
+
+# HPC
+./vecta-hpc logs -f
+
+# Direct
+tail -f vecta.log
+```
+
+### Performance Monitoring
+
+GPU utilization:
+```bash
+watch -n 1 nvidia-smi
+```
+
+System resources:
+```bash
+htop
+iostat 1
+```
+
+Network:
+```bash
+netstat -tulpn | grep 8085
+ss -tulpn | grep 8085
+```
+
+### Validation System Stats
+
+Access at: http://localhost:8085/validate
+
+Metrics tracked:
+- Total validations
+- Agreement rate
+- Cases pending review
+- Neurologist activity
+
+API endpoint:
+```bash
+curl http://localhost:8085/api/stats
+```
+
 ## Troubleshooting
 
-### Service Won't Start
+### Common Issues
 
-Check logs:
+**Port already in use:**
 ```bash
-./vecta logs
-```
+# Find process
+lsof -ti:8085
 
-Common issues:
-- Port already in use (auto-detects alternative)
-- Missing dependencies (auto-installs on start)
-- PyTorch version (optional, for AI model)
+# Kill process
+kill -9 $(lsof -ti:8085)
 
-### Port Already in Use
-
-The CLI auto-detects and uses next available port (8085-8150).
-
-Manually specify:
-```bash
-./vecta start -p 8090
-```
-
-### Dependencies Not Installing
-
-Manual install:
-```bash
-pip3 install --user flask flask-cors pandas numpy
+# Or use different port
+export VECTA_PORT=8086
 ./vecta start
 ```
 
-### Database Errors
-
-Reinitialize database:
+**Module not found:**
 ```bash
-rm data/validation.db
-python3 init_validation_system.py
+# Reinstall dependencies
+pip3 install --user flask flask-cors pandas numpy
+
+# Or use requirements.txt
+pip3 install --user -r requirements.txt
+```
+
+**PyTorch version error:**
+```bash
+# Upgrade PyTorch
+pip3 install --user --upgrade "torch>=2.1.0"
+
+# Or use CPU version
+pip3 install --user torch torchvision torchaudio
+```
+
+**CUDA not available:**
+```bash
+# Check NVIDIA driver
+nvidia-smi
+
+# Verify CUDA
+nvcc --version
+
+# Reinstall PyTorch with CUDA
+pip3 install --user torch --index-url https://download.pytorch.org/whl/cu118
+```
+
+**Database locked:**
+```bash
+# Close other connections
+pkill -f "python.*app.py"
+
+# Restart app
 ./vecta restart
 ```
 
-### Cannot Access from Browser
-
-Try alternative URLs:
-- http://localhost:8085
-- http://127.0.0.1:8085
-- http://YOUR_SERVER_IP:8085
-
-Check firewall:
+**HPC job fails:**
 ```bash
-sudo firewall-cmd --add-port=8085/tcp --permanent
-sudo firewall-cmd --reload
+# Check logs
+./vecta-hpc logs
+
+# Verify modules
+module list
+
+# Check job details
+scontrol show job JOBID
+
+# Request different resources
+./vecta-hpc run --memory 128G
 ```
 
-## Backup and Recovery
+### Logs
 
-### Backup Important Files
+**Local:**
+- Application: `vecta.log`
+- PID file: `vecta.pid`
+- Location: Project root
+
+**HPC:**
+- Job output: `logs/vecta_JOBID.out`
+- Job errors: `logs/vecta_JOBID.err`
+- SLURM script: `slurm_job.sh`
+
+### Getting Help
+
+1. Check logs first
+2. Verify system requirements
+3. Review error messages
+4. Check GitHub issues
+5. Contact support
+
+## Updates
+
+### Updating Application
 
 ```bash
-# Backup validation data
+# Pull latest changes
+git pull origin main
+
+# Restart service
+./vecta restart
+```
+
+### Updating Dependencies
+
+```bash
+# Update Python packages
+pip3 install --user --upgrade flask flask-cors pandas numpy
+
+# Update PyTorch
+pip3 install --user --upgrade torch
+```
+
+### Database Migrations
+
+```bash
+# Backup first
 cp data/validation.db data/validation.db.backup
 
-# Backup entire data directory
-tar -czf vecta-backup-$(date +%Y%m%d).tar.gz data/
+# Run migrations (if provided)
+python3 migrate_db.py
 ```
 
-### Restore from Backup
+## Performance Benchmarks
 
-```bash
-./vecta stop
-cp data/validation.db.backup data/validation.db
-./vecta start
-```
+### Response Times
+
+**CPU Only:**
+- Simple query: 2-5 seconds
+- Complex analysis: 10-30 seconds
+
+**With GPU (16GB):**
+- Simple query: 0.5-1 second
+- Complex analysis: 2-5 seconds
+
+**With GPU (8-bit quantization):**
+- Simple query: 0.3-0.7 seconds
+- Complex analysis: 1-3 seconds
+
+### Resource Usage
+
+**CPU Mode:**
+- RAM: 2-4GB
+- CPU: 50-100%
+- Storage: 1GB
+
+**GPU Mode:**
+- RAM: 8-16GB
+- GPU VRAM: 12-16GB
+- CPU: 20-40%
+- Storage: 20GB
 
 ## Scaling
 
 ### Horizontal Scaling
 
-Use load balancer (nginx, HAProxy) with multiple instances:
-
+Multiple instances with load balancer:
 ```bash
 # Instance 1
-./vecta start -p 8085
+./vecta start --port 8085
 
 # Instance 2
-./vecta start -p 8086
+./vecta start --port 8086
 
 # Instance 3
-./vecta start -p 8087
+./vecta start --port 8087
+
+# Nginx load balancer
+upstream vecta {
+    server 127.0.0.1:8085;
+    server 127.0.0.1:8086;
+    server 127.0.0.1:8087;
+}
 ```
 
-### Database Optimization
+### Vertical Scaling
 
-For high traffic, consider:
-- PostgreSQL instead of SQLite
-- Redis for caching
-- Separate database server
-
-## Updates and Maintenance
-
-### Update from GitHub
-
+Increase resources:
 ```bash
-./vecta stop
-git pull origin main
-pip3 install --user -r requirements.txt
-./vecta start
+# HPC: More GPUs
+./vecta-hpc run --gpus 4 --memory 256G
+
+# Docker: More resources
+docker run -d \
+  --gpus all \
+  --memory 64g \
+  --cpus 16 \
+  vecta-ai
 ```
 
-### Database Migrations
+## Cost Estimates
 
-When schema changes, backup first:
-```bash
-cp data/validation.db data/validation.db.backup
-# Run migrations if provided
-./vecta start
-```
+### Cloud GPU Pricing (Monthly)
 
-## Performance Optimization
+**AWS:**
+- P3.2xlarge (V100): ~$1,000
+- G5.xlarge (A10G): ~$400
 
-### Recommended Settings
+**Google Cloud:**
+- A100 (40GB): ~$1,200
+- T4: ~$300
 
-For production:
-- Use gunicorn with 4-8 workers
-- Enable caching (Redis)
-- Use CDN for static files
-- Monitor with Prometheus/Grafana
+**Azure:**
+- NC6s v3 (V100): ~$900
+- NCv3 (P100): ~$700
 
-### Resource Requirements by Load
+### HPC Cluster
 
-- **Low** (<100 requests/day): 2GB RAM, 1 CPU
-- **Medium** (<1000 requests/day): 4GB RAM, 2 CPU
-- **High** (>1000 requests/day): 8GB RAM, 4 CPU
+Usually free or minimal cost through institutional access.
 
-## Support and Maintenance
+### Local Deployment
 
-### Regular Tasks
+One-time hardware cost:
+- RTX 3090 (24GB): ~$1,500
+- RTX 4090 (24GB): ~$1,800
+- A100 (40GB): ~$10,000
 
-- Check logs weekly: `./vecta logs`
-- Backup database weekly
-- Update dependencies monthly
-- Monitor disk space
-- Review validation data
+## Support
 
-### Getting Help
+**Documentation:**
+- README.md (Quick start)
+- DEPLOYMENT.md (This file)
 
-- GitHub Issues: https://github.com/phindagijimana/vecta/issues
-- Check logs: `./vecta logs`
-- Status check: `./vecta status`
+**Resources:**
+- GitHub: https://github.com/phindagijimana/vecta
+- Issues: https://github.com/phindagijimana/vecta/issues
 
-## Implementation Details
+**Community:**
+- Report bugs via GitHub Issues
+- Submit feature requests
+- Contribute via pull requests
 
-### Architecture
+---
 
-```
-CLI (vecta) → Flask App (app.py) → Routes
-                ├── Main App (/)
-                ├── Validator (/validate)
-                └── API Endpoints
-                     ├── Few-shot examples
-                     ├── Clinical guidelines
-                     └── RAG system (optional)
-```
-
-### Data Flow
-
-1. User submits medical text
-2. System detects condition
-3. Retrieves few-shot examples
-4. Injects clinical guidelines
-5. RAG retrieves relevant context (if enabled)
-6. AI generates analysis
-7. 10% randomly sampled for validation
-8. Stored in validation.db
-
-### Port Detection Logic
-
-1. Try port 8085
-2. If in use, scan 8086-8150
-3. Select first available port
-4. Log selection
-5. Create PID file with port
-
-## Configuration Files
-
-### requirements.txt
-
-Core dependencies installed by CLI:
-```
-flask>=3.1.0
-flask-cors>=6.0.0
-pandas>=2.0.0
-numpy>=1.24.0
-```
-
-Optional:
-```
-chromadb>=0.4.22
-sentence-transformers>=2.2.2
-torch>=2.1.0
-```
-
-### .gitignore
-
-Already configured to exclude:
-- `__pycache__/`
-- `*.log`
-- `vecta_ai.pid`
-- `data/vector_db/`
-- `*.db-journal`
-
-## License
-
-MIT License - See repository for details.
-
-## Version
-
-Current Version: 2.1
-Last Updated: 2026-02-13
-Status: Production Ready
+**Version**: 1.0  
+**Last Updated**: 2026-02-13  
+**Status**: Production Ready

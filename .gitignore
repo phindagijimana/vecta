@@ -4,9 +4,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
-venv/
-ENV/
 build/
 develop-eggs/
 dist/
@@ -22,6 +19,13 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
 
 # IDE
 .vscode/
@@ -29,38 +33,43 @@ wheels/
 *.swp
 *.swo
 *~
-
-# Logs
-logs/*.log
-*.log
-
-# Database
-*.db-journal
-
-# Runtime
-vecta_ai.pid
-
-# OS
 .DS_Store
-Thumbs.db
 
-# Env files
-.env
-.env.local
+# Logs and databases
+*.log
+*.pid
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+data/*.sqlite
 
-# Vector DB
-data/vector_db/
-
-# Temporary files
-tmp/
-temp/
-
-# Documentation - Keep only README and DEPLOYMENT on GitHub
+# Documentation - Keep only README and DEPLOYMENT
 *.md
 !README.md
 !DEPLOYMENT.md
-!UI_UX_IMPROVEMENTS.md
-!GPU_DEPLOYMENT_GUIDE.md
 
-# Static files - Keep favicon
-!static/favicon.svg
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.pytest_cache/
+
+# Model files (large)
+models/
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# HPC specific
+.hpc_installed
+.hpc_job_id
+slurm_job.sh
+logs/vecta_*.out
+logs/vecta_*.err
