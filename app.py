@@ -1292,64 +1292,6 @@ UI_HTML = r"""
       padding-bottom: 8px;
     }
 
-    .templates {
-      margin-bottom: 20px;
-    }
-
-    .template-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-      margin-top: 10px;
-      background: #f8f9fa;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    .template-btn {
-      background: #ecf0f1;
-      border: 2px solid #bdc3c7;
-      padding: 12px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      text-align: center;
-      font-size: 0.85em;
-      transition: all 0.3s ease;
-      font-weight: 500;
-      position: relative;
-    }
-
-    .template-btn:hover, .template-btn.active {
-      background: #00A9E0;
-      color: white;
-      border-color: #004977;
-      transform: translateY(-2px);
-    }
-
-    .template-btn[data-template="med42_optimized"] {
-      background: linear-gradient(135deg, #e8f5e8, #d4f4dd);
-      border-color: #004977;
-      font-weight: 600;
-    }
-
-    .template-btn[data-template="med42_optimized"]:hover,
-    .template-btn[data-template="med42_optimized"].active {
-      background: linear-gradient(135deg, #004977, #00A9E0);
-      border-color: #004977;
-    }
-
-    .template-btn[data-template="med42_optimized"]::after {
-      content: "Enhanced";
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background: #004977;
-      color: white;
-      font-size: 0.7em;
-      padding: 2px 6px;
-      border-radius: 10px;
-    }
-
     .form-group {
       margin-bottom: 20px;
     }
@@ -1666,9 +1608,6 @@ UI_HTML = r"""
         grid-template-columns: 1fr;
       }
 
-      .template-grid {
-        grid-template-columns: 1fr;
-      }
 
       .header h1 {
         font-size: 1.8em;
@@ -1719,7 +1658,8 @@ UI_HTML = r"""
             <div class="form-group">
               <label class="form-label" for="analysisType">Analysis Type:</label>
               <select id="analysisType" class="form-select" name="analysisType">
-                <option value="classification">Classification</option>
+                <option value="epilepsy">Epilepsy Classification</option>
+                <option value="classification">General Classification</option>
                 <option value="diagnosis">Diagnosis Support</option>
                 <option value="summary">Summarization</option>
                 <option value="extraction">Information Extraction</option>
@@ -1730,15 +1670,25 @@ UI_HTML = r"""
               <label class="form-label" for="specialty">Medical Specialty:</label>
               <select id="specialty" class="form-select" name="specialty">
                 <option value="">General Medical Analysis</option>
-                <option value="neurology" selected>Neurology</option>
-                <!-- Future expansion: Other specialties -->
+                <optgroup label="Epilepsy (ILAE Classification)">
+                  <option value="epilepsy_focal">Focal Epilepsy</option>
+                  <option value="epilepsy_generalized">Generalized Epilepsy</option>
+                  <option value="epilepsy_combined">Combined Generalized & Focal</option>
+                  <option value="epilepsy_unknown">Unknown Onset Epilepsy</option>
+                </optgroup>
+                <option value="stroke">Stroke & Cerebrovascular</option>
+                <option value="parkinsons">Parkinson's Disease</option>
+                <option value="migraine">Migraine & Headache</option>
+                <option value="dementia">Dementia & Cognitive</option>
+                <option value="ms">Multiple Sclerosis</option>
+                <option value="neuropathy">Neuropathy</option>
               </select>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="prompt">Vecta AI Analysis Prompt:</label>
               <textarea id="prompt" class="form-textarea" name="prompt" 
-                        placeholder="Enter your analysis prompt..." 
+                        placeholder="Select an analysis type to auto-populate prompt or enter custom prompt..." 
                         rows="2" required style="min-height: 60px;"></textarea>
             </div>
           </div>
@@ -1797,116 +1747,110 @@ UI_HTML = r"""
   </div>
 
   <script>
-    // Enhanced template definitions with Vecta AI optimization
-    const templates = {
-      med42_optimized: {
-        prompt: `MANDATORY FORMAT REQUIREMENT: Respond ONLY with exactly 4 bullet points, maximum 25 words each. No other text or explanations.
+    // Analysis type to prompt mapping
+    const analysisPrompts = {
+      epilepsy: `EPILEPSY HIERARCHICAL CLASSIFICATION (ILAE 2017)
 
-- Classification: [Your clinical reasoning on the medical analysis task, max 25 words]
-- Clinical_Confidence: [High/Medium/Low based on clinical evidence, max 25 words]
-- Evidence: [Key evidence from the text given, max 25 words]
-- Medication_Analysis: [Your medical reasoning for treatment recommendations, max 25 words]
+STEP 1: Determine if this is epilepsy
+- Analyze clinical presentation, seizure history, EEG findings
+- If NOT epilepsy: State "Not Epilepsy" and stop
+- If epilepsy: Continue to STEP 2
 
-Vecta AI Classification: Apply your specialized medical training to analyze this medical data using evidence-based clinical decision-making.`,
-        type: 'classification'
-      },
-      epilepsy: {
-        prompt: `MANDATORY FORMAT REQUIREMENT: Respond with exactly these 4 bullet points only:
+STEP 2: Classify seizure onset type (if sufficient evidence)
+- FOCAL: Seizures originating from one brain region
+  → If aware: Focal Aware Seizure
+  → If impaired awareness: Focal Impaired Awareness Seizure
+- GENERALIZED: Seizures affecting both hemispheres from onset
+  → Motor: Tonic-clonic, Absence, Myoclonic, Atonic
+  → Non-motor: Typical/Atypical Absence
+- UNKNOWN: Insufficient evidence to determine onset
+- COMBINED: Both focal and generalized seizures present
 
-- Classification: Clinical reasoning on epilepsy classification
-- Clinical_Confidence: High/Medium/Low based on evidence
-- Evidence: Key evidence from the text given
-- Medication_Analysis: Medical reasoning for AED recommendations
+STEP 3: Specify seizure subtype (if sufficient evidence exists)
+- For Focal: Motor vs Non-motor onset
+- For Generalized: Specify exact type (tonic-clonic, absence, myoclonic, etc.)
+- If evidence insufficient: Stop at onset level
 
-Vecta AI Neurology Analysis.`,
-        type: 'classification'
-      },
-      // FUTURE: Cardiology template (Phase 2)
-      // cardiology: {
-      //   prompt: `Vecta AI: Activate your cardiology knowledge module...`,
-      //   type: 'diagnosis'
-      // },
-      neurology: {
-        prompt: `Vecta AI: Activate your medical knowledge for clinical analysis.
+MANDATORY OUTPUT FORMAT (4 bullet points, max 25 words each):
+- Classification: [Epilepsy? If yes, seizure type and subtype based on evidence]
+- Clinical_Confidence: [High/Medium/Low based on available evidence]
+- Evidence: [Key clinical/EEG/imaging findings supporting classification]
+- Medication_Analysis: [AED recommendations based on seizure type classified]
 
-NEUROLOGICAL ANALYSIS PROTOCOL (Vecta AI Enhanced):
-• Apply your neuroanatomy and neurophysiology training
-• Use your neurological examination and localization expertise
-• Access your movement disorders and cognitive assessment knowledge
-• Apply your seizure classification and EEG interpretation training
-• Utilize your neuropharmacology and treatment protocol expertise
+CRITICAL: Only classify to the level supported by evidence. If unsure, state limitation.`,
 
-Analysis Framework:
-1. Use your anatomical localization training for neurological mapping
-2. Apply your clinical neurology expertise for syndrome recognition
-3. Utilize your cognitive assessment training for mental status evaluation
-4. Apply your movement disorder knowledge for motor function analysis
-5. Use your neuropharmacology training for medication assessment
+      classification: `MANDATORY FORMAT: Respond with exactly 4 bullet points, max 25 words each.
 
-For datasets, add Vecta AI neurology columns:
-- VectaAI_Neurological_Localization: Anatomical correlation using your training
-- VectaAI_Cognitive_Assessment: Mental status evaluation
-- VectaAI_Movement_Analysis: Motor function assessment
-- VectaAI_Neuro_Medications: Neuropharmacology-based analysis`,
-        type: 'diagnosis'
-      },
-      diagnosis: {
-        prompt: `MANDATORY FORMAT REQUIREMENT: Respond ONLY with exactly 4 bullet points, maximum 25 words each. No other text or explanations.
+- Classification: [Your clinical reasoning for this classification task]
+- Clinical_Confidence: [High/Medium/Low based on evidence]
+- Evidence: [Key supporting evidence from provided data]
+- Medication_Analysis: [Treatment recommendations with medical reasoning]
 
-- Diagnosis Support: [Your clinical reasoning on differential diagnosis and primary diagnosis, max 25 words]
-- Clinical_Confidence: [High/Medium/Low based on clinical evidence, max 25 words]
-- Evidence: [Key evidence from the text given, max 25 words]
-- Medication_Analysis: [Your medical reasoning for treatment recommendations, max 25 words]
+Apply your medical training for evidence-based classification.`,
 
-Vecta AI Diagnosis Support: Apply your comprehensive diagnostic training for clinical analysis using evidence-based reasoning.`,
-        type: 'diagnosis'
-      },
-      medication: {
-        prompt: `Vecta AI: Apply your pharmacology training for comprehensive medication analysis.
+      diagnosis: `MANDATORY FORMAT: Respond with exactly 4 bullet points, max 25 words each.
 
-CRITICAL: Format your response EXACTLY as 4 bullet points with maximum 25 words each:
+- Diagnosis Support: [Differential diagnosis and primary diagnosis reasoning]
+- Clinical_Confidence: [High/Medium/Low based on clinical evidence]
+- Evidence: [Key diagnostic findings from provided data]
+- Medication_Analysis: [Treatment recommendations based on diagnosis]
 
-- Classification: Your clinical reasoning on medication analysis and recommendations
-- Clinical_Confidence: Assessment based on clinical evidence. Answer as High, Medium, or Low
-- Evidence: Key evidence from the text given supporting your medication analysis
-- Medication_Analysis: Show your medical reasoning for drug selection and dosing
+Apply comprehensive diagnostic protocols for clinical analysis.`,
 
-Apply pharmacological principles and evidence-based medication management.`,
-        type: 'extraction'
-      },
-              summary: {
-        prompt: `MANDATORY FORMAT REQUIREMENT: Respond ONLY with exactly 4 bullet points, maximum 25 words each. No other text or explanations.
+      summary: `MANDATORY FORMAT: Respond with exactly 4 bullet points, max 25 words each.
 
-- Summarization: [Your clinical reasoning on case summarization and key findings, max 25 words]
-- Clinical_Confidence: [High/Medium/Low based on clinical evidence, max 25 words]
-- Evidence: [Key evidence from the text given, max 25 words]
-- Medication_Analysis: [Your medical reasoning for care recommendations, max 25 words]
+- Summarization: [Clinical summary with key findings]
+- Clinical_Confidence: [High/Medium/Low based on documentation]
+- Evidence: [Critical information from medical record]
+- Medication_Analysis: [Medication-related summary and recommendations]
 
-Vecta AI Summarization: Apply your clinical documentation expertise for comprehensive summarization.`,
-        type: 'summary'
-      },
-      extraction: {
-        prompt: `MANDATORY FORMAT REQUIREMENT: Respond ONLY with exactly 4 bullet points, maximum 25 words each. No other text or explanations.
+Apply clinical documentation standards for comprehensive summarization.`,
 
-- Information Extraction: [Your clinical reasoning on information extraction and key findings, max 25 words]
-- Clinical_Confidence: [High/Medium/Low based on clinical evidence, max 25 words]
-- Evidence: [Key evidence from the text given, max 25 words]
-- Medication_Analysis: [Your medical reasoning for extracted medication information, max 25 words]
+      extraction: `MANDATORY FORMAT: Respond with exactly 4 bullet points, max 25 words each.
 
-Vecta AI Information Extraction: Apply your medical information extraction expertise using clinical documentation standards.`,
-        type: 'extraction'
-      },
-      tabular_analysis: {
-        prompt: `MANDATORY FORMAT REQUIREMENT: For each row in tabular data, provide EXACTLY these 4 analysis columns with maximum 25 words each:
+- Information Extraction: [Key medical information identified]
+- Clinical_Confidence: [High/Medium/Low based on data quality]
+- Evidence: [Specific data points extracted from source]
+- Medication_Analysis: [Medication information and recommendations]
 
-- Classification: [Your clinical reasoning on the case analysis, max 25 words]
-- Clinical_Confidence: [High/Medium/Low based on clinical evidence, max 25 words]
-- Evidence: [Key evidence from the row data given, max 25 words]
-- Medication_Analysis: [Your medical reasoning for treatment recommendations, max 25 words]
+Apply medical information extraction expertise using clinical standards.`
+    };
 
-Vecta AI Tabular Analysis: Apply your comprehensive medical training for dataset analysis with epidemiological pattern recognition.`,
-        type: 'custom'
-      },
+    // Specialty-specific prompt enhancements
+    const specialtyContext = {
+      epilepsy_focal: `FOCAL EPILEPSY ANALYSIS (ILAE 2017):
+Apply focal seizure classification: aware vs impaired awareness, motor vs non-motor onset.
+Consider: Focal seizure semiology, EEG localization, structural lesions, AED selection for focal epilepsy.`,
+
+      epilepsy_generalized: `GENERALIZED EPILEPSY ANALYSIS (ILAE 2017):
+Apply generalized seizure classification: motor (tonic-clonic, absence, myoclonic) vs non-motor.
+Consider: Generalized spike-wave patterns, genetic factors, broad-spectrum AEDs, syndrome classification.`,
+
+      epilepsy_combined: `COMBINED EPILEPSY ANALYSIS (ILAE 2017):
+Analyze both focal and generalized seizure types in the same patient.
+Consider: Mixed seizure semiology, complex EEG patterns, dual-action AED selection.`,
+
+      epilepsy_unknown: `UNKNOWN ONSET EPILEPSY ANALYSIS (ILAE 2017):
+Analyze cases with insufficient information for classification.
+Consider: Limited clinical data, ambiguous EEG findings, broad-spectrum AED coverage.`,
+
+      stroke: `STROKE & CEREBROVASCULAR ANALYSIS:
+Apply NIHSS scoring, imaging interpretation (CT/MRI), thrombolytic criteria, hemorrhagic vs ischemic classification.`,
+
+      parkinsons: `PARKINSON'S DISEASE ANALYSIS:
+Apply MDS-UPDRS criteria, motor/non-motor symptoms, dopaminergic therapy, disease staging.`,
+
+      migraine: `MIGRAINE & HEADACHE ANALYSIS:
+Apply ICHD-3 criteria, migraine classification, trigger identification, prophylactic vs abortive therapy.`,
+
+      dementia: `DEMENTIA & COGNITIVE ANALYSIS:
+Apply cognitive assessment, dementia subtype classification, biomarker interpretation, treatment strategies.`,
+
+      ms: `MULTIPLE SCLEROSIS ANALYSIS:
+Apply McDonald criteria, relapsing vs progressive MS, MRI findings, disease-modifying therapy.`,
+
+      neuropathy: `NEUROPATHY ANALYSIS:
+Apply neuropathy classification, EMG/NCS interpretation, etiology determination, treatment approach.`
     };
 
     // DOM elements
@@ -1927,7 +1871,6 @@ Vecta AI Tabular Analysis: Apply your comprehensive medical training for dataset
     document.addEventListener('DOMContentLoaded', function() {
       checkServiceStatus();
       setupEventListeners();
-      loadTemplate('med42_optimized'); // Default to optimized template
     });
 
     function checkServiceStatus() {
@@ -1953,8 +1896,9 @@ Vecta AI Tabular Analysis: Apply your comprehensive medical training for dataset
 
     function updateServiceStatus(healthData) {
       if (healthData.model_loaded) {
-        serviceStatus.textContent = 'Ready';
+        serviceStatus.textContent = '';
         serviceStatus.className = 'status-indicator status-healthy';
+        serviceStatus.style.display = 'none';
         analyzeBtn.disabled = false;
       } else if (healthData.load_error) {
         serviceStatus.textContent = `Vecta AI Error: ${healthData.load_error}`;
@@ -1969,19 +1913,6 @@ Vecta AI Tabular Analysis: Apply your comprehensive medical training for dataset
     }
 
     function setupEventListeners() {
-      // Template buttons
-      document.querySelectorAll('.template-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const template = btn.dataset.template;
-          loadTemplate(template);
-          
-          document.querySelectorAll('.template-btn').forEach(b => {
-            b.classList.remove('active');
-          });
-          btn.classList.add('active');
-        });
-      });
-
       // File upload handling
       fileUpload.addEventListener('change', handleFileSelect);
       
@@ -2005,25 +1936,31 @@ Vecta AI Tabular Analysis: Apply your comprehensive medical training for dataset
         }
       });
 
+      // Auto-populate prompt when analysis type or specialty changes
+      analysisTypeSelect.addEventListener('change', updatePrompt);
+      specialtySelect.addEventListener('change', updatePrompt);
+
       // Form submission
       form.addEventListener('submit', handleFormSubmit);
+      
+      // Initialize with default prompt
+      updatePrompt();
     }
 
-    function loadTemplate(templateName) {
-      const template = templates[templateName];
-      if (template) {
-        promptTextarea.value = template.prompt;
-        analysisTypeSelect.value = template.type;
-        
-        // Set specialty if it's a specialty template
-        if (templateName === 'cardiology') {
-          specialtySelect.value = 'cardiology';
-        } else if (templateName === 'neurology') {
-          specialtySelect.value = 'neurology';
-        } else {
-          specialtySelect.value = '';
-        }
+    function updatePrompt() {
+      const analysisType = analysisTypeSelect.value;
+      const specialty = specialtySelect.value;
+      
+      // Get base prompt for analysis type
+      let prompt = analysisPrompts[analysisType] || analysisPrompts.classification;
+      
+      // Add specialty-specific context if selected
+      if (specialty && specialtyContext[specialty]) {
+        prompt = specialtyContext[specialty] + '\n\n' + prompt;
       }
+      
+      // Update prompt textarea
+      promptTextarea.value = prompt;
     }
 
     function handleFileSelect(event) {
