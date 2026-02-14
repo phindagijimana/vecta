@@ -1,10 +1,10 @@
-# Vecta AI - Neurology Analysis Platform
+# Vecta AI - Medical Analysis Platform
 
-AI-powered neurology analysis with clinical guidelines and expert validation system.
+AI-powered medical analysis with clinical guidelines and expert validation system.
 
 ## Overview
 
-Vecta AI is a specialized neurology analysis platform featuring:
+Vecta AI is a medical analysis platform featuring:
 - Clinical examples across epilepsy, Parkinson's, stroke, dementia, and other neurological conditions
 - Integrated clinical guidelines (ILAE, AAN, AHA/ASA, MDS)
 - Expert validation system for continuous improvement

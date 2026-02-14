@@ -1105,7 +1105,7 @@ LEARNING_DASHBOARD_HTML = r"""
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0a4d68 0%, #004977 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -1113,34 +1113,45 @@ LEARNING_DASHBOARD_HTML = r"""
             max-width: 1400px;
             margin: 0 auto;
         }
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
         .header {
-            background: white;
+            background: #004977;
+            color: white;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 30px;
             text-align: center;
         }
         .header h1 {
-            color: #667eea;
-            font-size: 2.5em;
+            font-size: 2.2em;
             margin-bottom: 10px;
+            font-weight: 300;
         }
         .header p {
-            color: #666;
             font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 15px;
         }
         .nav-links {
             margin-top: 15px;
         }
         .nav-links a {
-            color: #667eea;
+            color: white;
             text-decoration: none;
             margin: 0 15px;
             font-weight: 500;
+            opacity: 0.9;
         }
         .nav-links a:hover {
+            opacity: 1;
             text-decoration: underline;
+        }
+        .main-content {
+            padding: 30px;
         }
         .metrics-grid {
             display: grid;
@@ -1149,13 +1160,13 @@ LEARNING_DASHBOARD_HTML = r"""
             margin-bottom: 30px;
         }
         .metric-card {
-            background: white;
+            background: #f8f9fa;
             padding: 25px;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
         .metric-card h3 {
-            color: #667eea;
+            color: #004977;
             font-size: 1.2em;
             margin-bottom: 15px;
         }
@@ -1181,7 +1192,7 @@ LEARNING_DASHBOARD_HTML = r"""
         }
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            background: linear-gradient(90deg, #0a4d68, #004977);
             transition: width 0.5s ease;
         }
         .component-accuracy {
@@ -1198,22 +1209,22 @@ LEARNING_DASHBOARD_HTML = r"""
             border-bottom: none;
         }
         .learning-history {
-            background: white;
+            background: #f8f9fa;
             padding: 25px;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             margin-top: 30px;
         }
         .learning-history h2 {
-            color: #667eea;
+            color: #004977;
             margin-bottom: 20px;
         }
         .history-item {
             padding: 15px;
-            background: #f8f9fa;
+            background: white;
             border-radius: 10px;
             margin-bottom: 10px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #004977;
         }
         .history-item .timestamp {
             color: #999;
@@ -1239,12 +1250,12 @@ LEARNING_DASHBOARD_HTML = r"""
             transition: all 0.3s ease;
         }
         .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #0a4d68, #004977);
             color: white;
         }
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 73, 119, 0.4);
         }
         .btn-secondary {
             background: #f0f0f0;
@@ -1285,15 +1296,18 @@ LEARNING_DASHBOARD_HTML = r"""
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Vecta AI - Learning Dashboard</h1>
-            <p>Self-Improvement & Validation Metrics</p>
-            <div class="nav-links">
-                <a href="/">Analysis Platform</a>
-                <a href="/validator">Validator Portal</a>
-                <a href="/learning">Learning Dashboard</a>
+        <div class="main-card">
+            <div class="header">
+                <h1>Vecta AI - Learning Dashboard</h1>
+                <p>Self-Improvement & Validation Metrics</p>
+                <div class="nav-links">
+                    <a href="/">Analysis Platform</a>
+                    <a href="/validate">Validator Portal</a>
+                    <a href="/learning">Learning Dashboard</a>
+                </div>
             </div>
-        </div>
+
+            <div class="main-content">
 
         <div class="metrics-grid">
             <div class="metric-card">
@@ -1502,6 +1516,10 @@ LEARNING_DASHBOARD_HTML = r"""
         // Auto-refresh every 30 seconds
         setInterval(fetchMetrics, 30000);
     </script>
+    
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 """
