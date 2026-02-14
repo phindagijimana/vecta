@@ -32,8 +32,13 @@ class Med42ModelService:
         self.config = config
         self.model = None
         self.tokenizer = None
-        # Temporarily force CPU to test if analysis works
-        self.device = "cpu"  # Force CPU until CUDA device issues are resolved
+        # Auto-detect GPU, fallback to CPU
+        if torch and torch.cuda.is_available():
+            self.device = "cuda"
+            logger.info(f"GPU detected: {torch.cuda.get_device_name(0)}")
+        else:
+            self.device = "cpu"
+            logger.info("No GPU detected, using CPU")
         self.model_name = config.model_name
         self.model_loaded = False
         self.load_error = None
