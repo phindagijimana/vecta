@@ -110,7 +110,7 @@ class VectaAIPromptEngine:
 • Neurology guidelines from ILAE, AAN, ICHD-3, AHA/ASA, MDS
 • Evidence-based neurology and neuroscience research
 • Expertise in 10 neurological conditions: epilepsy, Parkinson's disease, stroke, migraine, dementia, multiple sclerosis, peripheral neuropathy, myasthenia gravis, spinal cord disorders, and motor neuron disease
-• Current focus: Neurology & Neuroscience (Phase 1)
+• Comprehensive medical analysis across all specialties
 
 Activate your specialized neurological training to approach this task with the clinical reasoning of an experienced neurologist."""
 
@@ -1098,7 +1098,7 @@ UI_HTML = r"""
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Vecta AI - Neurology & Neuroscience Analysis</title>
+  <title>Vecta AI - Medical Analysis Platform</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
   <style>
@@ -1666,11 +1666,9 @@ UI_HTML = r"""
   <div class="container">
     <div class="main-card">
       <div class="header">
-        <h1>Vecta AI - Neurology & Neuroscience</h1>
-        <p>Specialized neurological analysis powered by AI trained on 50 neurology cases</p>
-        <div class="enhancement-badge">Neurology & Neuroscience AI</div>
-      <div class="enhancement-badge">Enhanced Tabular Analysis</div>
-      <div class="enhancement-badge">Clinical Reasoning Engine</div>
+        <h1>Vecta AI - Medical Analysis Platform</h1>
+        <p>AI-powered medical analysis with clinical guidelines and expert validation</p>
+        <div class="enhancement-badge">Medical AI Platform</div>
       <br>
       <div id="serviceStatus" class="status-indicator status-loading">Checking Vecta AI Service Status...</div>
     </div>
@@ -1684,7 +1682,7 @@ UI_HTML = r"""
         <h2 class="section-title">Vecta AI Analysis Configuration</h2>
 
         <div class="templates">
-          <label class="form-label">Neurology & Neuroscience Templates:</label>
+          <label class="form-label">Medical Specialty Templates:</label>
           <div class="template-grid">
             <div class="template-btn" data-template="neurology">Neurology Analysis</div>
             <div class="template-btn" data-template="epilepsy">Epilepsy Classification</div>
@@ -1713,7 +1711,7 @@ UI_HTML = r"""
             <label class="form-label" for="specialty">Medical Specialty (Optional):</label>
             <select id="specialty" class="form-select" name="specialty">
               <option value="">General Neurological Analysis</option>
-              <option value="neurology" selected>Neurology & Neuroscience</option>
+              <option value="neurology" selected>Neurology</option>
               <!-- PHASE 1: Focused on Neurology/Neuroscience -->
               <!-- Future expansion: Other specialties -->
               <!-- <option value="cardiology">Cardiology</option> -->
@@ -1811,7 +1809,7 @@ Vecta AI Neurology Analysis.`,
       //   type: 'diagnosis'
       // },
       neurology: {
-        prompt: `Vecta AI: Activate your neurology knowledge module for neurological analysis.
+        prompt: `Vecta AI: Activate your medical knowledge for clinical analysis.
 
 NEUROLOGICAL ANALYSIS PROTOCOL (Vecta AI Enhanced):
 • Apply your neuroanatomy and neurophysiology training

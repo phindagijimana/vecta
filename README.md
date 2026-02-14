@@ -1,23 +1,23 @@
-# Vecta AI - Neurology & Neuroscience Analysis Platform
+# Vecta AI - Medical Analysis Platform
 
-AI-powered neurological analysis platform focused exclusively on neurology and neuroscience with expert validation system.
+AI-powered medical analysis platform with expert validation system and clinical guidelines integration.
 
 ## Overview
 
-Vecta AI is a specialized neurological AI system with:
-- 50 curated neurology examples across 10 conditions
+Vecta AI is a comprehensive medical AI system with:
+- 50 curated clinical examples across 10 medical conditions
 - Clinical guidelines (ILAE, ICHD-3, AAN, AHA/ASA, MDS)
-- Neurologist validation system for continuous improvement
+- Medical expert validation system for continuous improvement
 - Dual CLI for local and HPC deployment
 
-**Current Focus**: Neurology & Neuroscience (Phase 1)
+**Current Focus**: Neurology & Neuroscience (Phase 1 - expanding to all medical specialties)
 
 ## Features
 
-- **Neurology-Specific Examples**: 50 clinical cases covering epilepsy, Parkinson's, stroke, migraine, dementia, MS, neuropathy, myasthenia gravis, spinal cord disorders, and motor neuron disease
+- **Clinical Examples**: 50 curated cases covering epilepsy, Parkinson's, stroke, migraine, dementia, MS, neuropathy, myasthenia gravis, spinal cord disorders, and motor neuron disease
 - **Clinical Guidelines**: ILAE 2025, ICHD-3, AAN, AHA/ASA, MDS criteria
-- **Validation System**: Expert neurologist review with 10% auto-sampling
-- **2-Page Interface**: Main analysis app + neurologist validator
+- **Validation System**: Medical expert review with 10% auto-sampling
+- **2-Page Interface**: Main analysis app + expert validator
 - **RAG System**: Semantic search with ChromaDB (optional)
 - **Dual CLI**: Local workstation and HPC cluster deployment
 
@@ -96,7 +96,7 @@ Flask App (app.py)
 
 ## Data
 
-- **Few-shot examples**: 50 neurology cases (224KB)
+- **Few-shot examples**: 50 medical cases (224KB)
 - **Clinical guidelines**: ILAE, ICHD-3, AAN, AHA/ASA, MDS (72KB)
 - **Validation database**: SQLite (auto-created)
 
