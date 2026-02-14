@@ -46,7 +46,7 @@ logger = logging.getLogger("vectaai")
 try:
     from utils.few_shot_loader import FewShotExampleLoader
     few_shot_loader = FewShotExampleLoader()
-    logger.info("✅ Few-shot examples and guidelines loaded successfully (50 examples across 10 conditions)")
+    logger.info("[OK] Few-shot examples and guidelines loaded successfully (50 examples across 10 conditions)")
 except Exception as e:
     few_shot_loader = None
     logger.warning(f"⚠️ Few-shot loader not available: {e}")
@@ -56,7 +56,7 @@ try:
     from utils.rag_system import get_rag_system
     rag_system = get_rag_system()
     if rag_system and rag_system.available:
-        logger.info("✅ RAG system initialized successfully (ChromaDB + semantic search)")
+        logger.info("[OK] RAG system initialized successfully (ChromaDB + semantic search)")
     else:
         rag_system = None
         logger.info("ℹ️ RAG system not initialized (install: pip install chromadb sentence-transformers)")
@@ -78,7 +78,7 @@ app.config.update({
 try:
     from routes.validation import validation_bp
     app.register_blueprint(validation_bp)
-    logger.info("✅ Validation routes registered")
+    logger.info("[OK] Validation routes registered")
 except Exception as e:
     logger.warning(f"⚠️ Validation routes not registered: {e}")
 
@@ -86,7 +86,7 @@ except Exception as e:
 try:
     from core.database import init_db
     init_db()
-    logger.info("✅ Database initialized")
+    logger.info("[OK] Database initialized")
 except Exception as e:
     logger.warning(f"⚠️ Database initialization failed: {e}")
 
@@ -369,9 +369,9 @@ ADAPTIVE MEDICAL ANALYSIS:
         """
         Get enhanced context with few-shot examples, clinical guidelines, and RAG
         
-        Phase 1: Few-Shot Examples (Week 1-2) ✅
-        Phase 2: Context Injection - Static Guidelines (Week 3-4) ✅
-        Phase 3: RAG - Dynamic Retrieval (Week 5-8) ✅
+        Phase 1: Few-Shot Examples (Week 1-2)
+        Phase 2: Context Injection - Static Guidelines (Week 3-4)
+        Phase 3: RAG - Dynamic Retrieval (Week 5-8)
         """
         if not few_shot_loader:
             return ""
@@ -409,7 +409,7 @@ ADAPTIVE MEDICAL ANALYSIS:
                     )
                     if rag_results:
                         context_parts.append(rag_results)
-                        logger.info(f"✅ RAG retrieval successful for condition: {condition}")
+                        logger.info(f"[OK] RAG retrieval successful for condition: {condition}")
                 except Exception as e:
                     logger.warning(f"RAG retrieval failed: {e}")
         
@@ -424,9 +424,9 @@ ADAPTIVE MEDICAL ANALYSIS:
         """Construct optimized Vecta AI prompt with proper formatting
         
         Enhanced with:
-        - Few-shot examples (Phase 1: Week 1-2) ✅
-        - Clinical guidelines (Phase 2: Week 3-4) ✅
-        - RAG retrieval (Phase 3: Week 5-8) ✅
+        - Few-shot examples (Phase 1: Week 1-2)
+        - Clinical guidelines (Phase 2: Week 3-4)
+        - RAG retrieval (Phase 3: Week 5-8)
         """
         
         # Add clinical reasoning activation
@@ -2085,21 +2085,15 @@ UI_HTML = r"""
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="specialty">Medical Specialty:</label>
+              <label class="form-label" for="specialty">Neurology Specialty:</label>
               <select id="specialty" class="form-select" name="specialty">
-                <option value="">General Medical Analysis</option>
+                <option value="">General Neurology</option>
                 <optgroup label="Epilepsy (ILAE Classification)">
                   <option value="epilepsy_focal">Focal Epilepsy</option>
                   <option value="epilepsy_generalized">Generalized Epilepsy</option>
                   <option value="epilepsy_combined">Combined Generalized & Focal</option>
                   <option value="epilepsy_unknown">Unknown Onset Epilepsy</option>
                 </optgroup>
-                <option value="stroke">Stroke & Cerebrovascular</option>
-                <option value="parkinsons">Parkinson's Disease</option>
-                <option value="migraine">Migraine & Headache</option>
-                <option value="dementia">Dementia & Cognitive</option>
-                <option value="ms">Multiple Sclerosis</option>
-                <option value="neuropathy">Neuropathy</option>
               </select>
             </div>
 
@@ -2465,7 +2459,7 @@ Apply neuropathy classification, EMG/NCS interpretation, etiology determination,
     function displayError(message) {
       results.innerHTML = `
         <div class="alert alert-error">
-          ❌ ${message}
+          ERROR: ${message}
         </div>
       `;
     }
@@ -2476,7 +2470,7 @@ Apply neuropathy classification, EMG/NCS interpretation, etiology determination,
 
       let resultsHTML = `
         <div class="alert alert-success">
-          ✅ Vecta AI Analysis completed in ${data.execution_time?.toFixed(2) || 'N/A'} seconds
+          Analysis completed in ${data.execution_time?.toFixed(2) || 'N/A'} seconds
           ${data.validation_notes ? `<br><small style="color: #004977;">INFO: ${data.validation_notes}</small>` : ''}
         </div>
         
@@ -2583,7 +2577,7 @@ Apply neuropathy classification, EMG/NCS interpretation, etiology determination,
       navigator.clipboard.writeText(textToCopy).then(() => {
         const btn = event.target;
         const originalText = btn.textContent;
-        btn.textContent = '✅ Copied!';
+        btn.textContent = 'Copied!';
         btn.style.background = '#004977';
         
         setTimeout(() => {
@@ -2885,7 +2879,7 @@ def analyze():
                             user_id
                         ))
                         db.commit()
-                        logger.info(f"✅ Saved output for validation (ID: {db.execute('SELECT last_insert_rowid()').fetchone()[0]})")
+                        logger.info(f"[OK] Saved output for validation (ID: {db.execute('SELECT last_insert_rowid()').fetchone()[0]})")
             except Exception as e:
                 # Don't fail the request if validation save fails
                 logger.warning(f"Failed to save for validation: {e}")

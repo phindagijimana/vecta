@@ -44,10 +44,10 @@ def add_test_validated_cases():
             ))
             db.commit()
             neurologist_id = 'test_validator'
-            print(f"✅ Created test neurologist (ID: {neurologist_id})")
+            print(f"[OK] Created test neurologist (ID: {neurologist_id})")
         else:
             neurologist_id = neurologist['id']
-            print(f"✅ Using existing neurologist (ID: {neurologist_id})")
+            print(f"[OK] Using existing neurologist (ID: {neurologist_id})")
         
         # Get AI outputs that need validation
         ai_outputs = db.execute("""
@@ -60,7 +60,7 @@ def add_test_validated_cases():
         """).fetchall()
         
         if not ai_outputs:
-            print("❌ No AI outputs available for validation")
+            print("[ERROR] No AI outputs available for validation")
             return 0
         
         # Add validations for these cases
@@ -101,13 +101,13 @@ def add_test_validated_cases():
                 """, (output['id'],))
                 
                 validated_count += 1
-                print(f"✅ Validated case {output['id']}: {output['condition']}")
+                print(f"[OK] Validated case {output['id']}: {output['condition']}")
                 
             except Exception as e:
-                print(f"❌ Failed to validate case {output['id']}: {e}")
+                print(f"[ERROR] Failed to validate case {output['id']}: {e}")
         
         db.commit()
-        print(f"\n✅ Added {validated_count} validated cases")
+        print(f"\n[OK] Added {validated_count} validated cases")
         return validated_count
 
 
@@ -162,7 +162,7 @@ def test_full_learning_cycle():
             
         if 'validated' in examples.get('neurology_few_shot_examples', {}):
             validated_examples = examples['neurology_few_shot_examples']['validated']
-            print(f"✅ Found {len(validated_examples)} validated examples in few-shot library")
+            print(f"[OK] Found {len(validated_examples)} validated examples in few-shot library")
             
             if validated_examples:
                 print("\nMost recent validated example:")
@@ -178,7 +178,7 @@ def test_full_learning_cycle():
     print("="*70)
     
     if result['examples_added'] > 0:
-        print("\n✅ Self-improvement loop is working!")
+        print("\n[OK] Self-improvement loop is working!")
         print("   - Validated cases extracted from database")
         print("   - Examples added to few-shot library")
         print("   - Ready for automatic learning on new validations")

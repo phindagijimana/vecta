@@ -14,7 +14,7 @@ from core.database import init_db, get_db
 
 def add_demo_data():
     """Add some demo AI outputs for testing the validator"""
-    print("\n📝 Adding demo data for testing...")
+    print("\nAdding demo data for testing...")
     
     demo_cases = [
         {
@@ -96,13 +96,13 @@ def add_demo_data():
                     3,  # Medium priority
                     'demo_session'
                 ))
-                print(f"   ✅ Added demo case {i}: {case['condition']}")
+                print(f"   [OK] Added demo case {i}: {case['condition']}")
             except Exception as e:
-                print(f"   ❌ Failed to add case {i}: {e}")
+                print(f"   [ERROR] Failed to add case {i}: {e}")
         
         db.commit()
     
-    print("\n✅ Demo data added successfully!")
+    print("\n[OK] Demo data added successfully!")
 
 def main():
     print("="*70)
@@ -132,7 +132,7 @@ def main():
         print(f"  Neurologists: {neurologists}")
     
     print("\n" + "="*70)
-    print("✅ Validation system ready!")
+    print("[OK] Validation system ready!")
     print("\nNext steps:")
     print("  1. Start the app: python app.py")
     print("  2. Main app: http://localhost:8080")
