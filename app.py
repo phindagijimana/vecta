@@ -1667,10 +1667,8 @@ UI_HTML = r"""
     <div class="main-card">
       <div class="header">
         <h1>Vecta AI - Medical Analysis Platform</h1>
-        <p>AI-powered medical analysis with clinical guidelines and expert validation</p>
-        <div class="enhancement-badge">Medical AI Platform</div>
-      <br>
-      <div id="serviceStatus" class="status-indicator status-loading">Checking Vecta AI Service Status...</div>
+        <br>
+      <div id="serviceStatus" class="status-indicator status-loading">Checking Service Status...</div>
     </div>
 
     <div class="disclaimer">
@@ -1935,7 +1933,7 @@ Vecta AI Tabular Analysis: Apply your comprehensive medical training for dataset
 
     function updateServiceStatus(healthData) {
       if (healthData.model_loaded) {
-        serviceStatus.textContent = 'Vecta AI Ready';
+        serviceStatus.textContent = 'Ready';
         serviceStatus.className = 'status-indicator status-healthy';
         analyzeBtn.disabled = false;
       } else if (healthData.load_error) {
