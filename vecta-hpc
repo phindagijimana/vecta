@@ -158,7 +158,7 @@ def create_slurm_job_script(args, resource_mode='gpu'):
         mem = args.memory or '32G'
         cpus = args.cpus or 16
     else:  # gpu mode
-        partition = args.partition or 'gpu'
+        partition = args.partition or 'general'  # Default GPU partition
         gpus = args.gpus or 1
         mem = args.memory or '64G'
         cpus = args.cpus or 8
@@ -643,7 +643,7 @@ Examples:
     
     # Install command
     install_parser = subparsers.add_parser('install', help='Install Vecta AI on HPC')
-    install_parser.add_argument('--partition', default='gpu', help='SLURM partition')
+    install_parser.add_argument('--partition', default='general', help='SLURM partition')
     install_parser.add_argument('--gpus', type=int, default=1, help='Number of GPUs')
     install_parser.add_argument('--memory', default='64G', help='Memory allocation')
     install_parser.add_argument('--time', default='24:00:00', help='Time limit')
@@ -655,7 +655,7 @@ Examples:
     run_parser.add_argument('resource_mode', nargs='?', default='gpu',
                           choices=['cpu', 'gpu'],
                           help='Resource mode: cpu (CPU-only) or gpu (CPU+GPU)')
-    run_parser.add_argument('--partition', help='SLURM partition (default: standard for CPU, gpu for GPU)')
+    run_parser.add_argument('--partition', help='SLURM partition (default: standard for CPU, general for GPU)')
     run_parser.add_argument('--gpus', type=int, help='Number of GPUs (GPU mode only, default: 1)')
     run_parser.add_argument('--memory', help='Memory allocation (default: 32G for CPU, 64G for GPU)')
     run_parser.add_argument('--time', help='Time limit (default: 24:00:00)')

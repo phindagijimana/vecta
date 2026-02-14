@@ -1,0 +1,107 @@
+{
+  "timestamp": "2026-02-14 02:11:24",
+  "total_tests": 12,
+  "passed": 4,
+  "failed": 8,
+  "tests": [
+    {
+      "name": "Health Check",
+      "passed": true,
+      "details": "Model: m42-health/Llama3-Med42-8B",
+      "response_time": 0.008559226989746094,
+      "output": {
+        "device": "cpu",
+        "load_error": null,
+        "max_concurrent": 10,
+        "model_loaded": true,
+        "model_name": "m42-health/Llama3-Med42-8B",
+        "prompt_engine": "Vecta-AI-Optimized",
+        "queue_size": 0,
+        "stats": {
+          "avg_time": 0,
+          "requests": 0,
+          "successes": 0
+        },
+        "status": "healthy",
+        "timestamp": "2026-02-14T02:11:24.622465"
+      }
+    },
+    {
+      "name": "Epilepsy Classification",
+      "passed": false,
+      "details": "Status: 400",
+      "response_time": 0.006779909133911133,
+      "output": null
+    },
+    {
+      "name": "General Classification",
+      "passed": false,
+      "details": "HTTPConnectionPool(host='localhost', port=8085): Read timed out. (read timeout=180)",
+      "response_time": 0,
+      "output": null
+    },
+    {
+      "name": "Diagnosis Support",
+      "passed": false,
+      "details": "HTTPConnectionPool(host='localhost', port=8085): Read timed out. (read timeout=180)",
+      "response_time": 0,
+      "output": null
+    },
+    {
+      "name": "Text Summarization",
+      "passed": false,
+      "details": "HTTPConnectionPool(host='localhost', port=8085): Read timed out. (read timeout=180)",
+      "response_time": 0,
+      "output": null
+    },
+    {
+      "name": "Information Extraction",
+      "passed": false,
+      "details": "HTTPConnectionPool(host='localhost', port=8085): Read timed out. (read timeout=180)",
+      "response_time": 0,
+      "output": null
+    },
+    {
+      "name": "Validator Portal",
+      "passed": true,
+      "details": "",
+      "response_time": 0.12717962265014648,
+      "output": null
+    },
+    {
+      "name": "Learning Dashboard",
+      "passed": true,
+      "details": "",
+      "response_time": 0.02410745620727539,
+      "output": null
+    },
+    {
+      "name": "Learning Metrics API",
+      "passed": false,
+      "details": "Status: 200",
+      "response_time": 0.061988115310668945,
+      "output": null
+    },
+    {
+      "name": "Validation System & Learning Loop",
+      "passed": false,
+      "details": "NOT NULL constraint failed: validations.neurologist_id",
+      "response_time": 0,
+      "output": null
+    },
+    {
+      "name": "Error Handling",
+      "passed": true,
+      "details": "Graceful handling of empty input",
+      "response_time": 0.023390769958496094,
+      "output": null
+    },
+    {
+      "name": "Concurrent Request Handling",
+      "passed": false,
+      "details": "HTTPConnectionPool(host='localhost', port=8085): Read timed out. (read timeout=180)",
+      "response_time": 0,
+      "output": null
+    }
+  ]
+}
