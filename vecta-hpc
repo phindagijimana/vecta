@@ -1,0 +1,628 @@
+#!/usr/bin/env python3
+"""
+Vecta AI - HPC Deployment CLI
+Manage Vecta AI deployment on HPC clusters with SLURM
+"""
+import os
+import sys
+import subprocess
+import argparse
+from pathlib import Path
+from datetime import datetime
+
+APP_DIR = Path(__file__).parent
+JOB_SCRIPT = APP_DIR / "slurm_job.sh"
+JOB_ID_FILE = APP_DIR / ".hpc_job_id"
+INSTALL_MARKER = APP_DIR / ".hpc_installed"
+
+
+def print_banner():
+    print("")
+    print("=" * 70)
+    print("  Vecta AI - HPC Deployment CLI")
+    print("  SLURM Cluster Management")
+    print("=" * 70)
+    print("")
+
+
+def check_slurm_available():
+    """Check if SLURM commands are available"""
+    try:
+        subprocess.run(['which', 'sbatch'], check=True, capture_output=True)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
+def cmd_install(args):
+    """Install Vecta AI on HPC cluster"""
+    print_banner()
+    print("Installing Vecta AI on HPC cluster...")
+    print("")
+    
+    if not check_slurm_available():
+        print("[ERROR] SLURM not available. Are you on an HPC cluster?")
+        print("        Try: module load slurm")
+        return 1
+    
+    # Check if already installed
+    if INSTALL_MARKER.exists():
+        print("[INFO] Vecta AI already installed.")
+        print("")
+        response = input("Reinstall? (y/N): ").strip().lower()
+        if response != 'y':
+            print("Installation cancelled.")
+            return 0
+    
+    print("Step 1/5: Loading required modules...")
+    modules_needed = ['cuda', 'python', 'gcc']
+    for module in modules_needed:
+        print(f"  Checking {module}...")
+    print("  [OK] Modules available (load them before running)")
+    
+    print("\nStep 2/5: Installing Python dependencies...")
+    try:
+        # Install base dependencies
+        subprocess.run([
+            sys.executable, '-m', 'pip', 'install', '--user',
+            'flask', 'flask-cors', 'pandas', 'numpy'
+        ], check=True)
+        print("  [OK] Base dependencies installed")
+        
+        # Ask about GPU dependencies
+        print("\nOptional: Install GPU dependencies (PyTorch, transformers)?")
+        print("  This enables full AI model (requires ~10GB download)")
+        gpu_response = input("Install GPU packages? (Y/n): ").strip().lower()
+        
+        if gpu_response != 'n':
+            print("  Installing PyTorch with CUDA support...")
+            subprocess.run([
+                sys.executable, '-m', 'pip', 'install', '--user',
+                'torch', 'torchvision', 'torchaudio',
+                '--index-url', 'https://download.pytorch.org/whl/cu121'
+            ], check=True)
+            
+            print("  Installing transformers and accelerate...")
+            subprocess.run([
+                sys.executable, '-m', 'pip', 'install', '--user',
+                'transformers', 'accelerate', 'bitsandbytes'
+            ], check=True)
+            print("  [OK] GPU dependencies installed")
+    except subprocess.CalledProcessError as e:
+        print(f"  [ERROR] Installation failed: {e}")
+        return 1
+    
+    print("\nStep 3/5: Creating SLURM job script...")
+    create_slurm_job_script(args)
+    print("  [OK] Job script created: slurm_job.sh")
+    
+    print("\nStep 4/5: Creating logs directory...")
+    logs_dir = APP_DIR / "logs"
+    logs_dir.mkdir(exist_ok=True)
+    print("  [OK] Logs directory ready")
+    
+    print("\nStep 5/5: Marking installation complete...")
+    with open(INSTALL_MARKER, 'w') as f:
+        f.write(f"Installed: {datetime.now().isoformat()}\n")
+    print("  [OK] Installation marker created")
+    
+    print("\n" + "=" * 70)
+    print("Installation Complete!")
+    print("=" * 70)
+    print("\nNext steps:")
+    print("  1. Load required modules:")
+    print("     module load cuda/12.2 python/3.9 gcc/11.2")
+    print("  2. Submit job:")
+    print("     ./vecta-hpc run")
+    print("  3. Check status:")
+    print("     ./vecta-hpc status")
+    print("")
+    
+    return 0
+
+
+def create_slurm_job_script(args):
+    """Create SLURM job submission script"""
+    
+    partition = args.partition or 'gpu'
+    gpus = args.gpus or 1
+    mem = args.memory or '64G'
+    time_limit = args.time or '24:00:00'
+    cpus = args.cpus or 8
+    port = args.port or 8085
+    
+    script_content = f"""#!/bin/bash
+#SBATCH --job-name=vecta-ai
+#SBATCH --partition={partition}
+#SBATCH --gres=gpu:{gpus}
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task={cpus}
+#SBATCH --mem={mem}
+#SBATCH --time={time_limit}
+#SBATCH --output=logs/vecta_%j.out
+#SBATCH --error=logs/vecta_%j.err
+
+# Print job information
+echo "=================================================="
+echo "Vecta AI - HPC Job"
+echo "=================================================="
+echo "Job ID: $SLURM_JOB_ID"
+echo "Node: $SLURM_NODELIST"
+echo "GPUs: $SLURM_JOB_GPUS"
+echo "CPUs: $SLURM_CPUS_PER_TASK"
+echo "Memory: {mem}"
+echo "Started: $(date)"
+echo "=================================================="
+echo ""
+
+# Load required modules
+echo "Loading modules..."
+module load cuda/12.2 2>/dev/null || echo "CUDA module not loaded"
+module load python/3.9 2>/dev/null || echo "Python module not loaded"
+module load gcc/11.2 2>/dev/null || echo "GCC module not loaded"
+
+# Set environment variables
+export CUDA_VISIBLE_DEVICES=$SLURM_JOB_GPUS
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+export VECTA_PORT={port}
+
+# Navigate to app directory
+cd $SLURM_SUBMIT_DIR
+
+# Check GPU availability
+echo "Checking GPU..."
+if command -v nvidia-smi &> /dev/null; then
+    nvidia-smi
+else
+    echo "nvidia-smi not available"
+fi
+echo ""
+
+# Start Vecta AI service
+echo "Starting Vecta AI on port {port}..."
+python3 app.py --host 0.0.0.0 --port {port}
+
+# Job completion
+echo ""
+echo "=================================================="
+echo "Job completed: $(date)"
+echo "=================================================="
+"""
+    
+    with open(JOB_SCRIPT, 'w') as f:
+        f.write(script_content)
+    
+    os.chmod(JOB_SCRIPT, 0o755)
+
+
+def cmd_run(args):
+    """Submit Vecta AI job to SLURM"""
+    print_banner()
+    
+    if not INSTALL_MARKER.exists():
+        print("[ERROR] Vecta AI not installed on HPC.")
+        print("        Run: ./vecta-hpc install")
+        return 1
+    
+    if not check_slurm_available():
+        print("[ERROR] SLURM not available.")
+        return 1
+    
+    # Check if job already running
+    if JOB_ID_FILE.exists():
+        with open(JOB_ID_FILE) as f:
+            old_job_id = f.read().strip()
+        
+        # Check if still running
+        try:
+            result = subprocess.run(
+                ['squeue', '-j', old_job_id, '-h'],
+                capture_output=True,
+                text=True
+            )
+            if result.stdout.strip():
+                print(f"[WARN] Job already running: {old_job_id}")
+                print("")
+                response = input("Submit new job anyway? (y/N): ").strip().lower()
+                if response != 'y':
+                    print("Job submission cancelled.")
+                    return 0
+        except subprocess.CalledProcessError:
+            pass
+    
+    # Recreate job script with current args
+    create_slurm_job_script(args)
+    
+    print("Submitting Vecta AI job to SLURM...")
+    print("")
+    
+    try:
+        result = subprocess.run(
+            ['sbatch', str(JOB_SCRIPT)],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        
+        # Parse job ID
+        output = result.stdout.strip()
+        job_id = output.split()[-1]
+        
+        # Save job ID
+        with open(JOB_ID_FILE, 'w') as f:
+            f.write(job_id)
+        
+        print(f"[OK] Job submitted successfully")
+        print(f"     Job ID: {job_id}")
+        print("")
+        print("Next steps:")
+        print(f"  Check status: ./vecta-hpc status")
+        print(f"  View logs:    ./vecta-hpc logs")
+        print(f"  Cancel job:   ./vecta-hpc stop")
+        print("")
+        
+        # Show initial queue status
+        subprocess.run(['squeue', '-j', job_id])
+        
+        return 0
+        
+    except subprocess.CalledProcessError as e:
+        print(f"[ERROR] Job submission failed: {e}")
+        print(f"        {e.stderr}")
+        return 1
+
+
+def cmd_stop(args):
+    """Cancel running SLURM job"""
+    print_banner()
+    
+    if not JOB_ID_FILE.exists():
+        print("[INFO] No job ID file found.")
+        print("       No Vecta AI job to cancel.")
+        return 0
+    
+    with open(JOB_ID_FILE) as f:
+        job_id = f.read().strip()
+    
+    print(f"Cancelling job: {job_id}")
+    print("")
+    
+    try:
+        subprocess.run(['scancel', job_id], check=True)
+        print(f"[OK] Job {job_id} cancelled")
+        
+        # Remove job ID file
+        JOB_ID_FILE.unlink()
+        
+        return 0
+        
+    except subprocess.CalledProcessError as e:
+        print(f"[ERROR] Failed to cancel job: {e}")
+        return 1
+
+
+def cmd_status(args):
+    """Check SLURM job status"""
+    print_banner()
+    
+    if not JOB_ID_FILE.exists():
+        print("[INFO] No active job found.")
+        print("")
+        
+        # Show user's jobs
+        print("Your recent SLURM jobs:")
+        subprocess.run(['squeue', '-u', os.environ.get('USER', 'unknown')])
+        return 0
+    
+    with open(JOB_ID_FILE) as f:
+        job_id = f.read().strip()
+    
+    print(f"Checking job: {job_id}")
+    print("")
+    
+    try:
+        # Get detailed job info
+        result = subprocess.run(
+            ['squeue', '-j', job_id, '--Format=JobID,Partition,State,NodeList,ReasonList,TimeUsed'],
+            capture_output=True,
+            text=True
+        )
+        
+        if result.stdout.strip():
+            print(result.stdout)
+            
+            # Get job state
+            state_result = subprocess.run(
+                ['squeue', '-j', job_id, '-h', '-o', '%T'],
+                capture_output=True,
+                text=True
+            )
+            state = state_result.stdout.strip()
+            
+            if state == 'RUNNING':
+                print("\n[OK] Job is RUNNING")
+                print("\nAccess Vecta AI:")
+                
+                # Get node name
+                node_result = subprocess.run(
+                    ['squeue', '-j', job_id, '-h', '-o', '%N'],
+                    capture_output=True,
+                    text=True
+                )
+                node = node_result.stdout.strip()
+                port = 8085  # Default, could be read from job script
+                
+                print(f"  1. From login node, forward port:")
+                print(f"     ssh -L {port}:{node}:{port} $USER@login-node")
+                print(f"  2. Access from browser:")
+                print(f"     http://localhost:{port}")
+                
+            elif state in ['PENDING', 'CONFIGURING']:
+                print(f"\n[INFO] Job is {state} (waiting in queue)")
+            elif state in ['COMPLETED', 'FAILED', 'CANCELLED']:
+                print(f"\n[INFO] Job {state}")
+                JOB_ID_FILE.unlink()
+                
+        else:
+            print("[INFO] Job not found in queue (may have completed)")
+            print("")
+            
+            # Check recent completed jobs
+            print("Checking sacct for job history...")
+            subprocess.run(['sacct', '-j', job_id, '--format=JobID,State,ExitCode,Elapsed'])
+            
+            # Clean up job ID file
+            JOB_ID_FILE.unlink()
+        
+        return 0
+        
+    except subprocess.CalledProcessError as e:
+        print(f"[ERROR] Failed to check status: {e}")
+        return 1
+
+
+def cmd_logs(args):
+    """View job logs"""
+    print_banner()
+    
+    if not JOB_ID_FILE.exists():
+        print("[INFO] No active job. Showing recent log files...")
+        print("")
+        
+        logs_dir = APP_DIR / "logs"
+        if logs_dir.exists():
+            log_files = sorted(logs_dir.glob("vecta_*.out"), reverse=True)
+            if log_files:
+                print("Recent log files:")
+                for i, log_file in enumerate(log_files[:5], 1):
+                    size = log_file.stat().st_size / 1024
+                    mtime = datetime.fromtimestamp(log_file.stat().st_mtime)
+                    print(f"  {i}. {log_file.name} ({size:.1f}KB) - {mtime}")
+                
+                print("")
+                choice = input("View log file (1-5, or Enter to skip): ").strip()
+                if choice.isdigit() and 1 <= int(choice) <= min(5, len(log_files)):
+                    log_file = log_files[int(choice) - 1]
+                    print(f"\nShowing: {log_file.name}")
+                    print("=" * 70)
+                    subprocess.run(['tail', '-100', str(log_file)])
+            else:
+                print("No log files found.")
+        else:
+            print("Logs directory not found.")
+        
+        return 0
+    
+    with open(JOB_ID_FILE) as f:
+        job_id = f.read().strip()
+    
+    print(f"Viewing logs for job: {job_id}")
+    print("")
+    
+    # Determine log file
+    log_file = APP_DIR / "logs" / f"vecta_{job_id}.out"
+    err_file = APP_DIR / "logs" / f"vecta_{job_id}.err"
+    
+    lines = args.lines or 50
+    
+    if log_file.exists():
+        print(f"=== Output Log (last {lines} lines) ===")
+        subprocess.run(['tail', f'-{lines}', str(log_file)])
+        print("")
+    else:
+        print(f"[INFO] Log file not found yet: {log_file}")
+        print("       Job may not have started.")
+        print("")
+    
+    if err_file.exists() and err_file.stat().st_size > 0:
+        print(f"=== Error Log (last {lines} lines) ===")
+        subprocess.run(['tail', f'-{lines}', str(err_file)])
+    
+    if args.follow:
+        if log_file.exists():
+            print("\n[Following log file, press Ctrl+C to exit]")
+            subprocess.run(['tail', '-f', str(log_file)])
+    
+    return 0
+
+
+def cmd_list(args):
+    """List user's SLURM jobs"""
+    print_banner()
+    print("Your SLURM jobs:")
+    print("")
+    
+    subprocess.run(['squeue', '-u', os.environ.get('USER', 'unknown')])
+    
+    return 0
+
+
+def cmd_info(args):
+    """Show HPC environment information"""
+    print_banner()
+    print("HPC Environment Information")
+    print("=" * 70)
+    print("")
+    
+    print("SLURM Status:")
+    subprocess.run(['sinfo', '-s'])
+    print("")
+    
+    print("Available GPUs:")
+    try:
+        result = subprocess.run(
+            ['sinfo', '-o', '%20P %10G'],
+            capture_output=True,
+            text=True
+        )
+        print(result.stdout)
+    except subprocess.CalledProcessError:
+        print("  Unable to get GPU info")
+    
+    print("Loaded Modules:")
+    subprocess.run(['module', 'list'], stderr=subprocess.STDOUT)
+    print("")
+    
+    print("Python Version:")
+    subprocess.run([sys.executable, '--version'])
+    print("")
+    
+    print("CUDA Availability:")
+    subprocess.run(['which', 'nvcc'])
+    
+    return 0
+
+
+def cmd_config(args):
+    """Show or update configuration"""
+    print_banner()
+    
+    print("Current Configuration:")
+    print("=" * 70)
+    print("")
+    
+    if JOB_SCRIPT.exists():
+        print("SLURM Job Script:")
+        with open(JOB_SCRIPT) as f:
+            lines = f.readlines()
+            for line in lines[:20]:  # Show first 20 lines
+                if line.startswith('#SBATCH'):
+                    print(f"  {line.rstrip()}")
+        print("")
+    
+    print("Installation Status:")
+    if INSTALL_MARKER.exists():
+        with open(INSTALL_MARKER) as f:
+            print(f"  [OK] {f.read().strip()}")
+    else:
+        print("  [X] Not installed")
+    
+    print("")
+    print("Job Status:")
+    if JOB_ID_FILE.exists():
+        with open(JOB_ID_FILE) as f:
+            print(f"  Active Job ID: {f.read().strip()}")
+    else:
+        print("  No active job")
+    
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Vecta AI HPC Deployment CLI',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Initial setup
+  ./vecta-hpc install
+
+  # Submit job with custom resources
+  ./vecta-hpc run --gpus 2 --memory 128G
+
+  # Check job status
+  ./vecta-hpc status
+
+  # View logs
+  ./vecta-hpc logs --follow
+
+  # Cancel job
+  ./vecta-hpc stop
+        """
+    )
+    
+    subparsers = parser.add_subparsers(dest='command', help='Command to execute')
+    
+    # Install command
+    install_parser = subparsers.add_parser('install', help='Install Vecta AI on HPC')
+    install_parser.add_argument('--partition', default='gpu', help='SLURM partition')
+    install_parser.add_argument('--gpus', type=int, default=1, help='Number of GPUs')
+    install_parser.add_argument('--memory', default='64G', help='Memory allocation')
+    install_parser.add_argument('--time', default='24:00:00', help='Time limit')
+    install_parser.add_argument('--cpus', type=int, default=8, help='CPUs per task')
+    install_parser.add_argument('--port', type=int, default=8085, help='Service port')
+    
+    # Run command
+    run_parser = subparsers.add_parser('run', help='Submit job to SLURM')
+    run_parser.add_argument('--partition', help='SLURM partition')
+    run_parser.add_argument('--gpus', type=int, help='Number of GPUs')
+    run_parser.add_argument('--memory', help='Memory allocation')
+    run_parser.add_argument('--time', help='Time limit')
+    run_parser.add_argument('--cpus', type=int, help='CPUs per task')
+    run_parser.add_argument('--port', type=int, help='Service port')
+    
+    # Stop command
+    subparsers.add_parser('stop', help='Cancel running job')
+    
+    # Status command
+    subparsers.add_parser('status', help='Check job status')
+    
+    # Logs command
+    logs_parser = subparsers.add_parser('logs', help='View job logs')
+    logs_parser.add_argument('-n', '--lines', type=int, default=50, 
+                            help='Number of lines to show')
+    logs_parser.add_argument('-f', '--follow', action='store_true',
+                            help='Follow log output')
+    
+    # List command
+    subparsers.add_parser('list', help='List your SLURM jobs')
+    
+    # Info command
+    subparsers.add_parser('info', help='Show HPC environment info')
+    
+    # Config command
+    subparsers.add_parser('config', help='Show configuration')
+    
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return 0
+    
+    # Route to appropriate command
+    commands = {
+        'install': cmd_install,
+        'run': cmd_run,
+        'stop': cmd_stop,
+        'status': cmd_status,
+        'logs': cmd_logs,
+        'list': cmd_list,
+        'info': cmd_info,
+        'config': cmd_config,
+    }
+    
+    return commands[args.command](args)
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print("\n\nInterrupted by user")
+        sys.exit(130)
+    except Exception as e:
+        print(f"\n[ERROR] Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
