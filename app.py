@@ -1105,7 +1105,7 @@ LEARNING_DASHBOARD_HTML = r"""
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #0a4d68 0%, #004977 100%);
+            background: linear-gradient(135deg, #e8f4ff 0%, #f0f8ff 100%);
             min-height: 100vh;
             padding: 20px;
         }
