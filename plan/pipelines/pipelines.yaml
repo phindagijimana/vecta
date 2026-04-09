@@ -1,0 +1,76 @@
+# Registry of neuroimaging pipelines used in this project.
+# Each entry may reference BIDS layout expectations and documentation paths.
+
+version: 1
+
+pipelines:
+  - id: hippunfold
+    name: HippUnfold
+    description: >
+      Automated modeling of hippocampal folding topology and computational unfolding
+      for visualization, surface-based registration, subfield parcellation, morphometry,
+      and quantitative mapping to unfolded coordinates.
+    documentation_urls:
+      - https://hippunfold.khanlab.ca/en/latest/
+      - https://hippunfold.readthedocs.io/en/latest/
+    source_code: https://github.com/khanlab/hippunfold
+    related_tools:
+      - name: hippunfold_toolbox
+        url: https://github.com/jordandekraker/hippunfold_toolbox
+        note: Plotting, mapping fMRI/DWI, surface manipulation
+      - name: Hippo_Spin_Testing
+        url: https://github.com/Bradley-Karat/Hippo_Spin_Testing
+        note: Spin tests in unfolded space
+    bids:
+      role: derivative
+      typical_inputs:
+        modalities:
+          - anat
+      derivative_folder_suggestion: derivatives/hippunfold
+    citations:
+      - label: HippUnfold (any version)
+        doi: https://doi.org/10.7554/eLife.77945
+      - label: HippUnfold >= 1.3.0 (unfolded registration / multihist7)
+        doi: https://doi.org/10.7554/eLife.88404.3
+    notes:
+      - "Version 1.3.x default includes unfolded-space registration; legacy with --atlas bigbrain or --no-unfolded-reg."
+      - "Docker images 1.3+ download nnU-Net models at run time (not pre-shipped)."
+
+# All URLs used as normative or background references for recent pipelines (BIDS + HippUnfold).
+reference_resources:
+  - category: BIDS specification
+    items:
+      - title: Dataset description (dataset_description.json, README, derivatives)
+        url: https://bids-specification.readthedocs.io/en/stable/modality-agnostic-files/dataset-description.html
+      - title: Data summary files (participants, samples, scans, sessions)
+        url: https://bids-specification.readthedocs.io/en/stable/modality-agnostic-files/data-summary-files.html
+      - title: Scans file (_scans.tsv / _scans.json)
+        url: https://bids-specification.readthedocs.io/en/stable/modality-agnostic-files/data-summary-files.html#scans-file
+      - title: Common principles (incl. tabular files, BIDS URIs, units)
+        url: https://bids-specification.readthedocs.io/en/stable/common-principles.html
+      - title: BIDS glossary
+        url: https://bids-specification.readthedocs.io/en/stable/glossary.html
+      - title: BIDS starter kit (README templates and examples)
+        url: https://github.com/bids-standard/bids-starter-kit
+  - category: HippUnfold
+    items:
+      - title: Project landing (overview, workflow, publications)
+        url: https://hippunfold.khanlab.ca/en/latest/
+      - title: Full documentation (Read the Docs)
+        url: https://hippunfold.readthedocs.io/en/latest/
+      - title: Source repository
+        url: https://github.com/khanlab/hippunfold
+      - title: Docker Hub (khanlab/hippunfold)
+        url: https://hub.docker.com/r/khanlab/hippunfold
+      - title: hippunfold_toolbox (surfaces, fMRI/DWI mapping)
+        url: https://github.com/jordandekraker/hippunfold_toolbox
+      - title: Hippo_Spin_Testing (spin tests in unfolded space)
+        url: https://github.com/Bradley-Karat/Hippo_Spin_Testing
+      - title: SynthSeg (optional contrast-agnostic segmentation; cited by HippUnfold 1.3+ docs)
+        url: https://github.com/BBillot/SynthSeg
+  - category: Publications (HippUnfold)
+    items:
+      - title: "DeKraker et al., 2022 — HippUnfold methods (cite for any version)"
+        url: https://doi.org/10.7554/eLife.77945
+      - title: "DeKraker et al., 2023 — Unfolded registration / multihist7 (cite for HippUnfold >= 1.3.0)"
+        url: https://doi.org/10.7554/eLife.88404.3

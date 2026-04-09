@@ -1,0 +1,27 @@
+{
+  "Name": "HippUnfold outputs",
+  "BIDSVersion": "1.10.1",
+  "DatasetType": "derivative",
+  "GeneratedBy": [
+    {
+      "Name": "hippunfold",
+      "Version": "1.3.x",
+      "Description": "Hippocampal unfolding and surface-based segmentation",
+      "CodeURL": "https://github.com/khanlab/hippunfold",
+      "Container": {
+        "Type": "docker",
+        "Tag": "khanlab/hippunfold:latest"
+      }
+    }
+  ],
+  "SourceDatasets": [
+    {
+      "URL": "bids::/",
+      "Version": "describe matching raw BIDS dataset version"
+    }
+  ],
+  "ReferencesAndLinks": [
+    "https://hippunfold.khanlab.ca/en/latest/",
+    "https://doi.org/10.7554/eLife.77945"
+  ]
+}
