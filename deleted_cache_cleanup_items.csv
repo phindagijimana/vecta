@@ -1,0 +1,29 @@
+category,path_relative_to_home,description,approx_size_gb,notes
+Hugging Face cache,.cache/huggingface/models--m42-health--Llama3-Med42-8B,Duplicate top-level Med42-8B model cache (copy retained under hub/),17,Kept hub/models--m42-health--Llama3-Med42-8B as canonical copy
+Hugging Face cache,.cache/huggingface/hub/models--stanford-crfm--biomedlm,BioMedLM model hub cache,12,
+Hugging Face cache,.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2,MiniLM sentence-transformers hub cache,0.1,Removal may be incomplete if .nfs* file held open by a process; delete remainder after process exits
+Hugging Face cache,.cache/huggingface/transformers,Transformers library download cache,17,
+Hugging Face cache,.cache/huggingface/xet,Hugging Face Xet blob storage cache,11,
+Hugging Face cache,.cache/huggingface/datasets,Hugging Face datasets cache directory,0,Was small or empty
+pip,.cache/pip,Pip HTTP and wheel download cache,39,Recreates on pip install
+General cache,.cache/Microsoft,Microsoft-related cache,n/a,
+General cache,.cache/chromium,Chromium browser cache,n/a,
+General cache,.cache/conda,Conda package cache,n/a,
+General cache,.cache/conda-anaconda-tos,Anaconda terms-of-service cache,n/a,
+General cache,.cache/containers,Containers cache,n/a,
+General cache,.cache/electron,Electron runtime cache,n/a,
+General cache,.cache/electron-builder,Electron-builder cache,n/a,
+General cache,.cache/flatpak,Flatpak cache,n/a,
+General cache,.cache/fmriprep,fMRIPrep workflow cache,n/a,
+General cache,.cache/fontconfig,Font configuration cache,n/a,
+General cache,.cache/gstreamer-1.0,GStreamer cache,n/a,
+General cache,.cache/matplotlib,Matplotlib font/cache,n/a,
+General cache,.cache/mesa_shader_cache,Mesa shader cache,n/a,
+General cache,.cache/mozilla,Mozilla/Firefox profile cache,0.6,Approx from prior scan
+General cache,.cache/node-gyp,node-gyp build artifacts,0.2,Approx from prior scan
+General cache,.cache/rhsm,Red Hat Subscription Manager cache,n/a,
+General cache,.cache/sessions,Desktop session cache,n/a,
+General cache,.cache/templateflow,TemplateFlow neuroimaging templates,0.6,Approx from prior scan
+General cache,.cache/thumbnails,Image thumbnail cache,n/a,
+General cache,.cache/torch,PyTorch hub small cache,0.01,Approx from prior scan
+General cache,.cache/typescript,TypeScript compiler cache,0.07,Approx from prior scan
