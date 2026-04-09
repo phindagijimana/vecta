@@ -10,7 +10,7 @@ Per-modality BIDS documentation (Training library) lives here:
 
   /mnt/nfs/Gugger_Lab/Infra/Training/Pipelines/BIDS
 
-See BIDS/README.docx for the index (dataset-level .docx files, modalities/*.docx, HippUnfold under BIDS/pipelines/). README.txt in that folder is a short pointer.
+See BIDS/README.docx for the index. Content is BIDS-only; regenerate with python3 build_bids_training_docx.py. README.txt in that folder explains the layout.
 
 HippUnfold-only pipeline documentation (Word):
 
