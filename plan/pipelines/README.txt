@@ -2,9 +2,13 @@ Canonical pipeline documentation and BIDS examples for Gugger Lab Infra live her
 
   /mnt/nfs/Gugger_Lab/Infra/pipelines
 
-Edit files there (or sync from here after local edits). Regenerate the Word doc with:
+Edit files there (or sync from here after local edits). Canonical build scripts live under Training USER_GUIDE:
 
-  python3 /mnt/nfs/Gugger_Lab/Infra/pipelines/build_pipelines_docx.py
+  /mnt/nfs/Gugger_Lab/Infra/Training/USER_GUIDE/Scripts/
+
+Regenerate combined pipelines doc (wrapper also works at Infra/pipelines):
+
+  python3 /mnt/nfs/Gugger_Lab/Infra/Training/USER_GUIDE/Scripts/build_pipelines_docx.py
 
 Per-modality BIDS documentation (Training library) lives here:
 
