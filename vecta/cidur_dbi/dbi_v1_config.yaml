@@ -1,0 +1,156 @@
+# DBI v1 — machine-readable parameters (Phase 1 deliverable)
+# Cohort: CIDUR-style XNAT export; series unit = one scan folder with DICOM/files/*.dcm
+# Version: 1.0.4
+
+version: "1.0.4"
+spec_date: "2026-04-10"
+
+# Composite score: weighted mean over applicable components (N/A excluded from denominator).
+# Weights must sum to 1.0 for components that are always applicable; when a component is N/A,
+# renormalize over applicable weights (see specification).
+weights:
+  metadata_completeness: 0.28
+  protocol_naming: 0.18
+  gradient_integrity: 0.22
+  spatial_consistency: 0.17
+  naming_compliance: 0.15
+  drift_control: 0.00   # v1 retrospective: not scored (see spec); keep 0 or omit from sum
+
+# Minimum physical plausibility (millimeters)
+spatial:
+  min_pixel_spacing_mm: 0.05
+  max_pixel_spacing_mm: 15.0
+  min_slice_thickness_mm: 0.05
+  max_slice_thickness_mm: 20.0
+
+# Universal DICOM tags (keyword, group-element hex) — informative; reader uses pydicom Tag
+tags_universal:
+  - ["Modality", "00080060"]
+  - ["Manufacturer", "00080070"]
+  - ["ManufacturerModelName", "00081090"]
+  - ["MagneticFieldStrength", "00180087"]
+  - ["SeriesInstanceUID", "0020000E"]
+  - ["StudyInstanceUID", "0020000D"]
+  - ["SeriesDescription", "0008103E"]
+  - ["ProtocolName", "00181030"]
+
+tags_spatial:
+  - ["PixelSpacing", "00280030"]
+  - ["ImagerPixelSpacing", "00181164"]
+  - ["SliceThickness", "00180050"]
+  - ["SpacingBetweenSlices", "00180088"]
+
+# Diffusion encoding: see DBI_v1_SPECIFICATION.md §4.3 (multiframe, Enhanced MR, private tags).
+
+# Regex: scan folder basename (e.g. 6-SAG_3D_T2_FLAIR)
+naming:
+  scan_folder_pattern: '^[0-9]+-'
+  derivative_tokens: ["ADC", "FA", "TRACE", "TRACEW", "ColFA", "MD", "RGB", "mIP", "MIP", "ORIG"]
+
+  # AI / automation-inspired naming checks (optional extra binary tests for component N).
+  # Evaluated only when combined text (folder basename + SeriesDescription + ProtocolName) is non-empty.
+  # Each passes if regex search matches that combined string. Tune or disable (enabled: false) per site.
+  automation_conventions:
+    - id: no_control_chars
+      rationale: "Strings safe for logs, JSON sidecars, and shell pipelines (no ASCII control chars incl. tab/newline)."
+      regex: '^[^\x00-\x1f]*\Z'
+      enabled: true
+    - id: bids_style_entity_tokens
+      rationale: "Hints of BIDS-style entity keys (run-, acq-, dir-, echo-, …) used in cleaning & ML pipelines."
+      regex: '(?i)(?<![A-Za-z0-9])(?:run|acq|dir|echo|flip|inv|ses|sub)[_-][A-Za-z0-9]'
+      enabled: true
+    - id: modality_or_contrast_lexicon
+      rationale: "Recognizable modality / contrast tokens aligned with common neuroimaging shorthand (incl. BIDS suffix spirit)."
+      regex: '(?i)\b(T1w|T2w|FLAIR|DWI|DTI|BOLD|fMRI|rsfMRI|ASL|MPRAGE|SWI|EPI|field\s*map|fmap|anat|func|dwi)\b'
+      enabled: true
+    - id: token_separators
+      rationale: "Machine-parseable token boundaries (hyphen/underscore between alphanumerics), typical of curated exports."
+      regex: '[A-Za-z0-9][-_][A-Za-z0-9]'
+      enabled: true
+
+  # Per-class SeriesDescription compliance (component N): after heuristic classification, ALL listed
+  # regexes must match trimmed SeriesDescription alone. Empty description → this check fails (0).
+  # Omitted classes: no extra check. See DBI_v1_SPECIFICATION.md §4.5.
+  class_series_description_compliance:
+    dwi:
+      all_match:
+        - '(?i)(DTI|DWI|dwi|dti)'
+        - '(?i)AP[_\s-]*\d+.*(DIRECTION|DIR|direction)s?'
+    fmap:
+      all_match:
+        - '(?i)(field[\s_-]*map|fmap|gre_field|GRE_FIELD|FMRI.*field)'
+        - '(?i)PA[_\s-]*\d+.*(DIRECTION|DIR|direction)s?'
+    bold:
+      all_match:
+        - '(?i)(fMRI|fmri|BOLD|RESTING|TASK|EPI|rsfMRI)'
+    asl:
+      all_match:
+        - '(?i)ASL'
+    flair:
+      all_match:
+        - '(?i)(FLAIR|flair)\s*\Z'
+    perf:
+      all_match:
+        - '(?i)(perf|DSC|DCE|CBF)'
+    t1_anat:
+      all_match:
+        - '(?i)(MPRAGE|SPGR|FSPGR|BRAVO|IR[\s_]FSPGR)\s*\Z'
+    localizer:
+      all_match:
+        - '(?i)(localizer|Localizer|LOC|scout|Scout)'
+    t2_anat:
+      all_match:
+        - '(?i)(T2|BLADE)'
+        - '(?i)THIN\s*\Z'
+    swi:
+      all_match:
+        - '(?i)(SWI|SWAN)'
+
+  # If combined folder + SeriesDescription + ProtocolName matches a marker (delimiter-bounded, same logic
+  # as DWI derivative tokens), SeriesDescription must end with "reformat" or "derived" (case-insensitive).
+  # Keep markers in sync with derivative_tokens where applicable. Disable with enabled: false if too strict.
+  derived_scan_naming:
+    enabled: true
+    markers:
+      - "ADC"
+      - "FA"
+      - "TRACE"
+      - "TRACEW"
+      - "ColFA"
+      - "MD"
+      - "RGB"
+      - "mIP"
+      - "MIP"
+      - "ORIG"
+    series_description_suffix_regex: '(?i)(reformat|derived)\s*\Z'
+
+# Optional prospective protocol token (legacy CIDUR expected to fail — scored separately as P_ideal)
+protocol_token:
+  required_for_full_credit: false
+  pattern: 'PROTO_[A-Z0-9_]+'   # example; team may replace
+
+# Series classification (folder basename + SeriesDescription). Substring unless pattern looks like regex.
+# Order matters: first match wins (more specific first).
+classification_rules:
+  - class: dwi
+    patterns: ["DTI", "DWI", "DIFFUSION", "dwi", "dti", "DIFF"]
+  - class: bold
+    patterns: ["fMRI", "fmri", "BOLD", "RESTING", "rsfMRI", "TASK", "EPI"]
+  - class: asl
+    patterns: ["ASL", "PCASL", "PASL"]
+  - class: fmap
+    patterns: ["field_map", "field map", "gre_field", "FMRI.*field"]
+  - class: swi
+    patterns: ["SWI", "SWAN", "SWI_"]
+  - class: flair
+    patterns: ["(?i).*(FLAIR|flair)\\s*$"]
+  - class: perf
+    patterns: ["perf", "Perf", "DSC", "DCE", "perfusion", "CBF"]
+  - class: t1_anat
+    patterns: ["MPRAGE", "SPGR", "FSPGR", "BRAVO", "IR FSPGR", "IR_FSPGR"]
+  - class: t2_anat
+    patterns: ["T2", "BLADE"]
+  - class: localizer
+    patterns: ["localizer", "Localizer", "LOC", "scout", "Scout"]
+  - class: other
+    patterns: []

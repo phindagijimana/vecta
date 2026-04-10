@@ -1,0 +1,6 @@
+scanner_cluster,n,n_pass,pass_rate
+GE MEDICAL SYSTEMS |  | T,2,2,1.0
+GE MEDICAL SYSTEMS | SIGNA Artist | 1.5T,66,0,0.0
+GE MEDICAL SYSTEMS | SIGNA Premier | 3T,789,165,0.2091
+SIEMENS | Skyra | 3T,330,154,0.4667
+Siemens Healthineers | MAGNETOM Vida Fit | 3T,258,40,0.155

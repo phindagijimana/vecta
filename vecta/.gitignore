@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+*.egg
+
+# Large NIfTI output (19 GB) — keep CSVs/figures, exclude converted images
+cidur_dbi/outputs_dcm2niix_v1freeze/nifti/
+
+# IDE
+.vscode/
+.idea/

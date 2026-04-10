@@ -1,0 +1,13 @@
+{
+  "phase": "3_dcm2niix_batch_backfill",
+  "run_utc": "2026-04-10T03:29:34.490995+00:00",
+  "cohort_root": "/mnt/nfs/home/URMC-SH/pndagiji/Documents/CIDUR_data",
+  "nifti_root": "/mnt/nfs/home/URMC-SH/pndagiji/Documents/vecta/cidur_dbi/outputs_dcm2niix_v1freeze/nifti",
+  "dcm2niix_exe": "dcm2niix",
+  "dcm2niix_version": "v1.0.20250505",
+  "cli_pattern": "dcm2niix -z y -f '%n_%s' -o <out_dir> <dicom_dir>",
+  "rubric": "convert_pass = (exit_code == 0) and (n_nifti >= 1); skip_no_dicom excluded from Table 2. Rows with status=backfill_from_nifti: outcomes inferred from files under nifti_root (exit_code 0 if rubric holds else 1); not a live dcm2niix invocation.",
+  "n_rows": 1445,
+  "dry_run": false,
+  "backfill_from_nifti": true
+}

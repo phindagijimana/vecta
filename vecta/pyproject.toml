@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cidur-dbi"
+version = "1.0.4"
+description = "Data Birth Integrity (DBI) — a modular 0-1 scoring framework for assessing automation-readiness of clinical DICOM series in neuroimaging research."
+readme = "cidur_dbi/README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "CIDUR Team"},
+]
+keywords = ["DICOM", "neuroimaging", "data-quality", "BIDS", "MRI", "metadata", "automation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+dependencies = [
+    "pydicom>=2.4.0",
+    "PyYAML>=6.0",
+    "pandas>=2.0.0",
+    "matplotlib>=3.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "seaborn>=0.12",
+]
+
+[project.urls]
+Homepage = "https://github.com/cidur-team/cidur-dbi"
+Documentation = "https://github.com/cidur-team/cidur-dbi#readme"
+
+[project.scripts]
+dbi-audit = "cidur_dbi.run_audit:main"
+dbi-convert = "cidur_dbi.run_dcm2niix_batch:main"
+
+[tool.setuptools.packages.find]
+include = ["cidur_dbi*"]
+
+[tool.setuptools.package-data]
+cidur_dbi = [
+    "dbi_v1_config.yaml",
+    "DBI_v1_SPECIFICATION.md",
+    "qc_spotcheck_template.csv",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["cidur_dbi/tests"]

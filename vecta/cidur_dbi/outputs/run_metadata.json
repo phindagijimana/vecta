@@ -1,0 +1,11 @@
+{
+  "run_utc": "2026-04-10T05:55:41.183742+00:00",
+  "root": "/mnt/nfs/home/URMC-SH/pndagiji/Documents/CIDUR_data",
+  "layout": "xnat",
+  "n_mr_sessions": 81,
+  "dbi_spec_version": "1.0.4",
+  "n_series_rows": 1445,
+  "n_session_rows": 81,
+  "mean_dbi_series": 0.809944202567905,
+  "mean_dbi_session": 0.8108324351164872
+}

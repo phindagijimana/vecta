@@ -1,0 +1,37 @@
+scanner_cluster,series_class,n,n_pass,pass_rate
+GE MEDICAL SYSTEMS |  | T,other,2,2,1.0
+GE MEDICAL SYSTEMS | SIGNA Artist | 1.5T,asl,3,0,0.0
+GE MEDICAL SYSTEMS | SIGNA Artist | 1.5T,dwi,5,0,0.0
+GE MEDICAL SYSTEMS | SIGNA Artist | 1.5T,localizer,3,0,0.0
+GE MEDICAL SYSTEMS | SIGNA Artist | 1.5T,other,20,0,0.0
+GE MEDICAL SYSTEMS | SIGNA Artist | 1.5T,perf,3,0,0.0
+GE MEDICAL SYSTEMS | SIGNA Artist | 1.5T,swi,11,0,0.0
+GE MEDICAL SYSTEMS | SIGNA Artist | 1.5T,t1_anat,9,0,0.0
+GE MEDICAL SYSTEMS | SIGNA Artist | 1.5T,t2_anat,12,0,0.0
+GE MEDICAL SYSTEMS | SIGNA Premier | 3T,asl,37,8,0.2162
+GE MEDICAL SYSTEMS | SIGNA Premier | 3T,bold,35,9,0.2571
+GE MEDICAL SYSTEMS | SIGNA Premier | 3T,dwi,55,13,0.2364
+GE MEDICAL SYSTEMS | SIGNA Premier | 3T,flair,20,3,0.15
+GE MEDICAL SYSTEMS | SIGNA Premier | 3T,localizer,32,7,0.2188
+GE MEDICAL SYSTEMS | SIGNA Premier | 3T,other,312,61,0.1955
+GE MEDICAL SYSTEMS | SIGNA Premier | 3T,perf,28,8,0.2857
+GE MEDICAL SYSTEMS | SIGNA Premier | 3T,swi,101,28,0.2772
+GE MEDICAL SYSTEMS | SIGNA Premier | 3T,t1_anat,49,0,0.0
+GE MEDICAL SYSTEMS | SIGNA Premier | 3T,t2_anat,120,28,0.2333
+SIEMENS | Skyra | 3T,asl,16,8,0.5
+SIEMENS | Skyra | 3T,dwi,90,40,0.4444
+SIEMENS | Skyra | 3T,flair,20,9,0.45
+SIEMENS | Skyra | 3T,other,45,23,0.5111
+SIEMENS | Skyra | 3T,perf,8,3,0.375
+SIEMENS | Skyra | 3T,swi,18,8,0.4444
+SIEMENS | Skyra | 3T,t1_anat,59,27,0.4576
+SIEMENS | Skyra | 3T,t2_anat,74,36,0.4865
+Siemens Healthineers | MAGNETOM Vida Fit | 3T,asl,13,2,0.1538
+Siemens Healthineers | MAGNETOM Vida Fit | 3T,dwi,64,10,0.1562
+Siemens Healthineers | MAGNETOM Vida Fit | 3T,flair,15,4,0.2667
+Siemens Healthineers | MAGNETOM Vida Fit | 3T,fmap,23,4,0.1739
+Siemens Healthineers | MAGNETOM Vida Fit | 3T,other,6,0,0.0
+Siemens Healthineers | MAGNETOM Vida Fit | 3T,perf,16,2,0.125
+Siemens Healthineers | MAGNETOM Vida Fit | 3T,swi,40,6,0.15
+Siemens Healthineers | MAGNETOM Vida Fit | 3T,t1_anat,38,6,0.1579
+Siemens Healthineers | MAGNETOM Vida Fit | 3T,t2_anat,43,6,0.1395
