@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
-Phase 4 — Compare human true_role to predicted_series_class (filled manifest).
+Phase 4 -- Compare human true_role to predicted_series_class (filled manifest).
 
-Reads only the manifest CSV; writes metrics and confusion table under --out.
-Does not touch CIDUR_data.
+Reads only the manifest CSV; writes metrics, confusion matrix, and per-class
+precision/recall/F1 under --out.  Does not touch CIDUR_data.
 
 Usage:
-  python phase4_compare_labels.py --manifest ./outputs_phase4/sample_manifest_filled.csv --out ./outputs_phase4
+  python phase4_compare_labels.py \
+      --manifest ./outputs_phase4/phase4_labeling_manifest_filled.csv \
+      --out ./outputs_phase4
 """
 
 from __future__ import annotations
@@ -25,7 +27,7 @@ except ImportError:
 
 
 def cohen_kappa_multiclass(y_true: list[str], y_pred: list[str]) -> float:
-    """Unweighted Cohen's κ from aligned label lists (same length)."""
+    """Unweighted Cohen kappa from aligned label lists (same length)."""
     labels = sorted(set(y_true) | set(y_pred))
     if not labels:
         return 1.0
@@ -45,6 +47,38 @@ def cohen_kappa_multiclass(y_true: list[str], y_pred: list[str]) -> float:
     if abs(1.0 - p_e) < 1e-12:
         return 0.0
     return (p_o - p_e) / (1.0 - p_e)
+
+
+def per_class_metrics(
+    y_true: list[str], y_pred: list[str], labels: list[str]
+) -> list[dict]:
+    """Compute precision, recall, F1 per class from aligned label lists."""
+    results = []
+    for lab in labels:
+        tp = sum(1 for t, p in zip(y_true, y_pred) if t == lab and p == lab)
+        fp = sum(1 for t, p in zip(y_true, y_pred) if t != lab and p == lab)
+        fn = sum(1 for t, p in zip(y_true, y_pred) if t == lab and p != lab)
+        support = tp + fn
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+        f1 = (
+            2 * precision * recall / (precision + recall)
+            if (precision + recall) > 0
+            else 0.0
+        )
+        results.append(
+            {
+                "class": lab,
+                "precision": round(precision, 4),
+                "recall": round(recall, 4),
+                "f1": round(f1, 4),
+                "support": support,
+                "tp": tp,
+                "fp": fp,
+                "fn": fn,
+            }
+        )
+    return results
 
 
 def main() -> None:
@@ -87,35 +121,100 @@ def main() -> None:
     correct = sum(1 for a, b in zip(y_true, y_pred) if a == b)
     acc = correct / len(y_true)
     kappa = cohen_kappa_multiclass(y_true, y_pred)
+    pc = per_class_metrics(y_true, y_pred, labels)
+
+    macro_precision = sum(r["precision"] for r in pc) / len(pc) if pc else 0
+    macro_recall = sum(r["recall"] for r in pc) / len(pc) if pc else 0
+    macro_f1 = sum(r["f1"] for r in pc) / len(pc) if pc else 0
 
     out.mkdir(parents=True, exist_ok=True)
+
     cm.to_csv(out / "phase4_confusion_matrix.csv")
 
+    pc_df = pd.DataFrame(pc)
+    pc_df.to_csv(out / "phase4_per_class_metrics.csv", index=False)
+
+    mismatches = work[work["true_role"] != work["predicted_series_class"]]
+    if not mismatches.empty:
+        mis_cols = [
+            "sample_id", "scan_folder", "series_description",
+            "predicted_series_class", "true_role", "notes",
+        ]
+        mis_cols = [c for c in mis_cols if c in mismatches.columns]
+        mismatches[mis_cols].to_csv(out / "phase4_misclassifications.csv", index=False)
+
     metrics = {
-        "phase": "4_human_labels",
+        "phase": "4_human_label_validation",
         "run_utc": datetime.now(timezone.utc).isoformat(),
         "n_labeled": len(work),
+        "n_correct": correct,
+        "n_misclassified": len(work) - correct,
         "accuracy": round(acc, 4),
         "cohen_kappa_unweighted": round(kappa, 4),
+        "macro_precision": round(macro_precision, 4),
+        "macro_recall": round(macro_recall, 4),
+        "macro_f1": round(macro_f1, 4),
+        "per_class": pc,
         "labels": labels,
         "manifest": str(args.manifest.resolve()),
     }
     with open(out / "phase4_metrics.json", "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2)
 
-    # Plain-text summary for supplement paste
     lines = [
-        f"n_labeled={len(work)}",
-        f"accuracy={acc:.4f}",
-        f"cohen_kappa={kappa:.4f}",
+        "=" * 60,
+        "Phase 4 -- Heuristic Classification Validation",
+        "=" * 60,
         "",
-        str(cm),
+        f"  n_labeled           = {len(work)}",
+        f"  accuracy            = {acc:.4f}  ({correct}/{len(work)})",
+        f"  Cohen's kappa       = {kappa:.4f}",
+        f"  macro precision     = {macro_precision:.4f}",
+        f"  macro recall        = {macro_recall:.4f}",
+        f"  macro F1            = {macro_f1:.4f}",
+        "",
+        "-" * 60,
+        "Per-class metrics:",
+        "-" * 60,
+        f"  {'Class':<15} {'Prec':>6} {'Recall':>7} {'F1':>6} {'Support':>8}",
     ]
-    (out / "phase4_summary.txt").write_text("\n".join(lines), encoding="utf-8")
+    for r in pc:
+        lines.append(
+            f"  {r['class']:<15} {r['precision']:>6.3f} "
+            f"{r['recall']:>7.3f} {r['f1']:>6.3f} {r['support']:>8d}"
+        )
+    lines.extend([
+        "",
+        "-" * 60,
+        "Confusion matrix (rows=true, cols=predicted):",
+        "-" * 60,
+        str(cm),
+    ])
+    if not mismatches.empty:
+        lines.extend([
+            "",
+            "-" * 60,
+            f"Misclassifications ({len(mismatches)}):",
+            "-" * 60,
+        ])
+        for _, row in mismatches.iterrows():
+            sid = row.get("sample_id", "?")
+            sf = row.get("scan_folder", "?")
+            pred = row.get("predicted_series_class", "?")
+            true = row.get("true_role", "?")
+            lines.append(f"  {sid}: {sf}  predicted={pred}  true={true}")
 
+    summary_text = "\n".join(lines)
+    (out / "phase4_summary.txt").write_text(summary_text, encoding="utf-8")
+
+    print(summary_text)
+    print()
     print(f"Wrote {out / 'phase4_confusion_matrix.csv'}")
+    print(f"Wrote {out / 'phase4_per_class_metrics.csv'}")
     print(f"Wrote {out / 'phase4_metrics.json'}")
-    print(f"accuracy={acc:.4f} kappa={kappa:.4f}")
+    print(f"Wrote {out / 'phase4_summary.txt'}")
+    if not mismatches.empty:
+        print(f"Wrote {out / 'phase4_misclassifications.csv'}")
 
 
 if __name__ == "__main__":

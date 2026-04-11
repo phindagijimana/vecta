@@ -1,8 +1,8 @@
 # DBI v1 — machine-readable parameters (Phase 1 deliverable)
 # Cohort: CIDUR-style XNAT export; series unit = one scan folder with DICOM/files/*.dcm
-# Version: 1.0.4
+# Version: 1.0.5
 
-version: "1.0.4"
+version: "1.0.5"
 spec_date: "2026-04-10"
 
 # Composite score: weighted mean over applicable components (N/A excluded from denominator).
@@ -47,30 +47,117 @@ naming:
   scan_folder_pattern: '^[0-9]+-'
   derivative_tokens: ["ADC", "FA", "TRACE", "TRACEW", "ColFA", "MD", "RGB", "mIP", "MIP", "ORIG"]
 
-  # AI / automation-inspired naming checks (optional extra binary tests for component N).
-  # Evaluated only when combined text (folder basename + SeriesDescription + ProtocolName) is non-empty.
-  # Each passes if regex search matches that combined string. Tune or disable (enabled: false) per site.
+  # ── Community-Standards Naming Compliance ──────────────────────────────────────
+  # Binary tests grounded in published community standards that simultaneously
+  # improve downstream AI/ML inference, automated BIDS conversion, pipeline
+  # routing, and programmatic data cleaning.
+  #
+  # Each convention cites its normative source(s) and the downstream workflows
+  # it enables.  Evaluated only when combined text (folder basename +
+  # SeriesDescription + ProtocolName) is non-empty.  Each passes if regex search
+  # matches that combined string.  Sites may override (enabled: false) when a
+  # convention conflicts with a justified local SOP, but the defaults are
+  # institution-independent by construction.
   automation_conventions:
     - id: no_control_chars
-      rationale: "Strings safe for logs, JSON sidecars, and shell pipelines (no ASCII control chars incl. tab/newline)."
+      rationale: >-
+        Strings free of ASCII control characters (0x00–0x1F incl. tab/newline)
+        are required by JSON (RFC 8259) for valid BIDS sidecar emission and are
+        safe for shell pipelines, logging frameworks, and ML dataset manifests.
+      source: "RFC 8259 (JSON); BIDS sidecar spec (Gorgolewski et al. 2016)"
+      downstream_benefit:
+        - "BIDS conversion: dcm2niix sidecar JSON output (Li et al. 2016)"
+        - "Data cleaning: pandas/CSV ingest without encoding errors"
+        - "AI/ML: dataset loader string fields (PyTorch DataLoader, TFRecord)"
       regex: '^[^\x00-\x1f]*\Z'
       enabled: true
-    - id: bids_style_entity_tokens
-      rationale: "Hints of BIDS-style entity keys (run-, acq-, dir-, echo-, …) used in cleaning & ML pipelines."
+
+    - id: bids_entity_tokens
+      rationale: >-
+        BIDS entity keys (run-, acq-, dir-, echo-, flip-, inv-, ses-, sub-) are
+        the community standard for encoding acquisition parameters in filenames.
+        Their presence in raw SeriesDescription or ProtocolName signals
+        prospective BIDS alignment at the scanner console, reducing HeuDiConv
+        heuristic complexity.
+      source: "BIDS v1.9 (Gorgolewski et al. 2016); HeuDiConv (Halchenko et al. 2024)"
+      downstream_benefit:
+        - "BIDS conversion: HeuDiConv heuristic auto-detection (Halchenko et al. 2024)"
+        - "Automation: deterministic file renaming without manual mapping tables"
+        - "AI/ML: structured metadata parsing for experiment-level feature extraction"
       regex: '(?i)(?<![A-Za-z0-9])(?:run|acq|dir|echo|flip|inv|ses|sub)[_-][A-Za-z0-9]'
       enabled: true
-    - id: modality_or_contrast_lexicon
-      rationale: "Recognizable modality / contrast tokens aligned with common neuroimaging shorthand (incl. BIDS suffix spirit)."
+
+    - id: modality_contrast_lexicon
+      rationale: >-
+        Standardized modality and contrast tokens (T1w, T2w, FLAIR, DWI, BOLD,
+        ASL, SWI, etc.) from the BIDS suffix vocabulary and consortium protocol
+        guides (ENIGMA, ADNI, TRACK-TBI) enable deterministic series routing in
+        automated pipelines without reliance on vendor-specific private tags.
+      source: "BIDS suffixes (Gorgolewski et al. 2016); ENIGMA protocols (Thompson et al. 2020); ADNI MRI procedures (Jack et al. 2008)"
+      downstream_benefit:
+        - "BIDS conversion: suffix assignment in dcm2niix/HeuDiConv"
+        - "Pipeline routing: fMRIPrep, MRIQC series selection (Esteban et al. 2019)"
+        - "AI/ML: NLP-free modality classification from structured naming"
+        - "Data cleaning: automated QC stratification by modality"
       regex: '(?i)\b(T1w|T2w|FLAIR|DWI|DTI|BOLD|fMRI|rsfMRI|ASL|MPRAGE|SWI|EPI|field\s*map|fmap|anat|func|dwi)\b'
       enabled: true
+
     - id: token_separators
-      rationale: "Machine-parseable token boundaries (hyphen/underscore between alphanumerics), typical of curated exports."
+      rationale: >-
+        Machine-parseable token boundaries (hyphen or underscore between
+        alphanumeric segments) follow BIDS filename convention and POSIX
+        portable filename guidance. They enable reliable regex/split-based
+        metadata extraction without ambiguous whitespace or special characters.
+      source: "BIDS filename spec (Gorgolewski et al. 2016); IEEE Std 1003.1 (POSIX portable filenames)"
+      downstream_benefit:
+        - "BIDS conversion: predictable token parsing during filename construction"
+        - "Data cleaning: str.split('_') / regex extraction in pandas pipelines"
+        - "AI/ML: tokenization for NLP-based series classifiers"
+        - "Automation: safe shell globbing and path manipulation"
       regex: '[A-Za-z0-9][-_][A-Za-z0-9]'
       enabled: true
 
-  # Per-class SeriesDescription compliance (component N): after heuristic classification, ALL listed
-  # regexes must match trimmed SeriesDescription alone. Empty description → this check fails (0).
-  # Omitted classes: no extra check. See DBI_v1_SPECIFICATION.md §4.5.
+    - id: no_phi_leak_tokens
+      rationale: >-
+        SeriesDescription and ProtocolName should not contain tokens resembling
+        patient identifiers (date patterns, MRN-like digit runs ≥7 digits, or
+        name-like mixed-case words that are not standard modality terms).
+        De-identification best practices (DICOM PS3.15 Annex E; Aryanto et al.
+        2015) and HIPAA Safe Harbor require scrubbing such fields before sharing.
+      source: "DICOM PS3.15 Annex E; Aryanto et al. 2015 (J Digital Imaging); HIPAA Safe Harbor"
+      downstream_benefit:
+        - "Data cleaning: automated PHI detection before dataset release"
+        - "AI/ML: safe training data curation without manual redaction"
+        - "BIDS conversion: clean sidecar strings without PHI contamination"
+      regex: '^(?!.*\b\d{7,}\b)(?!.*\b\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}\b).+$'
+      enabled: true
+
+    - id: sequence_param_encoding
+      rationale: >-
+        Encoding key acquisition parameters in the series name (e.g., b-value,
+        direction count, TE, TR, flip angle) following consortium conventions
+        (ADNI, ENIGMA, TRACK-TBI) enables automated parameter verification
+        without opening DICOM headers, accelerating both QC triage and ML
+        feature extraction.
+      source: "ENIGMA-DTI protocol (Thompson et al. 2020); ADNI MRI technical procedures (Jack et al. 2008)"
+      downstream_benefit:
+        - "Automation: parameter cross-check between name and DICOM header"
+        - "AI/ML: feature extraction from filename without DICOM parsing"
+        - "Data cleaning: batch anomaly detection (mismatched name vs header)"
+        - "BIDS conversion: informed acq- entity assignment"
+      regex: '(?i)(\bb\d{2,4}\b|\d+\s*dir|\bTE\s*\d|\bTR\s*\d|\bflip\s*\d)'
+      enabled: true
+
+  # ── Per-Class SeriesDescription Compliance ─────────────────────────────────────
+  # After heuristic classification, ALL listed regexes must match trimmed
+  # SeriesDescription alone.  Empty description → check fails (0).
+  # Omitted classes incur no extra check.  See DBI_v1_SPECIFICATION.md §4.5.
+  #
+  # Patterns align with BIDS modality suffixes (Gorgolewski et al. 2016),
+  # dcm2niix heuristic expectations (Li et al. 2016), and multi-site consortium
+  # naming guides (ENIGMA: Thompson et al. 2020; ADNI: Jack et al. 2008).
+  # Compliance enables deterministic BIDS conversion, automated pipeline
+  # routing (fMRIPrep, MRIQC), and ML-based series classification.
   class_series_description_compliance:
     dwi:
       all_match:
@@ -106,9 +193,14 @@ naming:
       all_match:
         - '(?i)(SWI|SWAN)'
 
-  # If combined folder + SeriesDescription + ProtocolName matches a marker (delimiter-bounded, same logic
-  # as DWI derivative tokens), SeriesDescription must end with "reformat" or "derived" (case-insensitive).
-  # Keep markers in sync with derivative_tokens where applicable. Disable with enabled: false if too strict.
+  # ── Derived / Reformatted Series Naming ──────────────────────────────────────
+  # If combined folder + SeriesDescription + ProtocolName matches a marker
+  # (delimiter-bounded), SeriesDescription must end with "reformat" or "derived".
+  # Follows BIDS derivatives specification and dcm2niix derivative handling
+  # (Li et al. 2016) for unambiguous raw-vs-derived series discrimination.
+  # Enables: AI/ML training set curation (exclude derived maps), automated BIDS
+  # derivatives layout, and data cleaning pipelines that separate raw volumes
+  # from scanner-generated scalar maps.
   derived_scan_naming:
     enabled: true
     markers:

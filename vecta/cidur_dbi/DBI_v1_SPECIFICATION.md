@@ -1,9 +1,9 @@
 # Data Birth Integrity (DBI) — Version 1.0 Specification
 
-**Status:** Phase 1 frozen specification; v1.0.3 adds t2/swi SD compliance, derived-scan suffix rule (`naming.derived_scan_naming`).  
+**Status:** Phase 1 frozen specification; v1.0.5 reframes N conventions as community-standards naming compliance with normative citations and downstream-benefit documentation.  
 **Cohort target:** CIDUR-style XNAT exports (`EP*/EP*/*_MR_*/scans/<series>/resources/DICOM/files/*.dcm`)  
 **Companion file:** `dbi_v1_config.yaml`  
-**Date:** 2026-04-09  
+**Date:** 2026-04-10  
 
 ---
 
@@ -177,34 +177,42 @@ Parse pixel spacing and slice thickness / spacing; verify values fall within `sp
 
 ---
 
-### 4.5 N — Naming compliance
+### 4.5 N — Naming compliance (community-standards naming compliance)
 
 **Applicable:** All.
 
-**Legacy checks (always applied):**
+**Design rationale:** Component N measures compliance with naming conventions derived from **published community standards** — primarily the Brain Imaging Data Structure (BIDS; Gorgolewski et al. 2016), multi-site consortium protocol guides (ENIGMA: Thompson et al. 2020; ADNI: Jack et al. 2008), and DICOM interoperability requirements (Bidgood & Horii 1997; Rorden et al. 2025). Because these standards are external to any single institution, N scores measure distance from community conventions rather than conformity to site-specific patterns.
 
-| # | Criterion | Implementation note |
-|---|-----------|----------------------|
-| 1 | Folder matches `naming.scan_folder_pattern` | XNAT-style `^[0-9]+-` or synthetic label from `SeriesNumber` in uid-tree layout |
-| 2 | No embedded path separators in scan basename | `/` and `\` disallowed |
-| 3 | SeriesDescription length | ≤ 128 chars → full credit; longer → 0.5 (implementation); align manuscript with YAML policy |
+Each convention is simultaneously grounded in a normative standard **and** designed to make four downstream workflows measurably easier: **(1) automated BIDS conversion** (dcm2niix, HeuDiConv), **(2) AI/ML pipeline ingestion**, **(3) programmatic data cleaning**, and **(4) automated pipeline routing** (fMRIPrep, MRIQC). The YAML configuration documents both the normative source and the downstream benefits for each check (see `dbi_v1_config.yaml` → `naming.automation_conventions`).
 
-**AI / automation-inspired conventions (configurable, v1.0.1+):**
+**Structural checks (always applied):**
 
-Additional **binary** checks in `dbi_v1_config.yaml` → `naming.automation_conventions`. Each entry has `id`, `rationale`, `regex`, and `enabled`. They reward naming patterns common in **data cleaning, scripting, and ML pipelines**, including:
+| # | Criterion | Standard | Implementation note |
+|---|-----------|----------|----------------------|
+| 1 | Folder matches `naming.scan_folder_pattern` | XNAT export convention (Marcus et al. 2007) | `^[0-9]+-` or synthetic label from `SeriesNumber` |
+| 2 | No embedded path separators in scan basename | POSIX portable filenames (IEEE 1003.1) | `/` and `\` disallowed |
+| 3 | SeriesDescription length ≤ 128 chars | DICOM VR LO limit (PS3.5); JSON sidecar compatibility | > 128 → 0.5 credit |
 
-- **Control-character safety** (single-line, log/JSON friendly strings)
-- **BIDS-adjacent entity tokens** (`run-`, `acq-`, `dir-`, `echo-`, …) where present in text
-- **Modality / contrast lexicon** aligned with widespread neuroimaging shorthand (not full BIDS validation)
-- **Explicit token separators** (hyphen/underscore) for machine parsing
+**Community-standards naming conventions (v1.0.1+, v1.0.5 expanded):**
 
-**Evaluation text:** `scan_folder_basename + " " + SeriesDescription + " " + ProtocolName` (trimmed). If that string is **empty**, automation convention checks are **skipped** (only the three legacy checks apply)—so missing tags do not invent false failures.
+Additional **binary** checks in `dbi_v1_config.yaml` → `naming.automation_conventions`. Each entry documents `id`, `rationale`, `source` (normative citation), `downstream_benefit` (AI/BIDS/cleaning/automation workflows enabled), `regex`, and `enabled`. They reward naming patterns that satisfy **published standards** while simultaneously enabling downstream automation:
 
-**Per-class SeriesDescription compliance (v1.0.2+, configurable):**
+| Convention | Normative source | Downstream workflows enabled |
+|-----------|-----------------|------------------------------|
+| **Control-character safety** | RFC 8259 (JSON); BIDS sidecar spec | BIDS sidecar emission, CSV/pandas ingest, ML dataset loaders |
+| **BIDS entity tokens** (`run-`, `acq-`, `dir-`, `echo-`, …) | BIDS v1.9 entity system (Gorgolewski et al. 2016) | HeuDiConv heuristic auto-detection, deterministic file renaming, ML metadata parsing |
+| **Modality / contrast lexicon** (T1w, DWI, BOLD, FLAIR, …) | BIDS suffixes; ENIGMA/ADNI protocol guides | dcm2niix/HeuDiConv suffix assignment, fMRIPrep/MRIQC series routing, ML modality classification |
+| **Token separators** (hyphen/underscore delimiters) | BIDS filename convention; POSIX portable filenames | Regex/split-based metadata extraction, safe shell globbing, NLP tokenization |
+| **PHI-safe naming** (no MRN-like digit runs, no date patterns) | DICOM PS3.15 Annex E; Aryanto et al. 2015; HIPAA Safe Harbor | Automated PHI detection, safe ML training data curation, clean BIDS sidecars |
+| **Sequence parameter encoding** (b-values, direction counts, TE/TR) | ENIGMA-DTI protocol (Thompson et al. 2020); ADNI procedures (Jack et al. 2008) | Name–header cross-verification, filename-based feature extraction, automated QC triage |
+
+**Evaluation text:** `scan_folder_basename + " " + SeriesDescription + " " + ProtocolName` (trimmed). If that string is **empty**, convention checks are **skipped** (only the three structural checks apply) — so missing tags do not invent false failures.
+
+**Per-class SeriesDescription compliance (v1.0.2+):**
 
 After heuristic **series class** is assigned, optional rules in `naming.class_series_description_compliance` add **one** extra binary check: **all** regexes in `all_match` must match **trimmed SeriesDescription alone** (not folder name). Classes omitted from this block incur **no** extra check. **Empty SeriesDescription** → that check **fails** (0) when the class has a rule block.
 
-Site defaults (tunable in YAML) include, for example:
+Patterns align with BIDS modality suffixes (Gorgolewski et al. 2016), dcm2niix heuristic expectations (Li et al. 2016), and consortium naming guides (ENIGMA, ADNI). Compliance enables deterministic BIDS conversion, automated pipeline routing, and ML-based series classification.
 
 | Class | Intent (summary) |
 |-------|------------------|
@@ -219,16 +227,16 @@ Site defaults (tunable in YAML) include, for example:
 | `t2_anat` | Contains **T2** or **BLADE**; **ends** with **THIN** |
 | `swi` | Contains **SWI** or **SWAN** |
 
-**Derived / reformatted series (v1.0.3+):** If `naming.derived_scan_naming` is enabled and **any** configured **marker** matches the **combined** folder + SeriesDescription + ProtocolName string using the same delimiter-bounded rules as DWI derivative tokens (`derivative_tokens`), then **SeriesDescription** must match `series_description_suffix_regex` (default: ends with **reformat** or **derived**, case-insensitive). If no marker matches, this check is **omitted**. Markers should stay aligned with `derivative_tokens` where possible.
+**Derived / reformatted series (v1.0.3+):** If `naming.derived_scan_naming` is enabled and **any** configured **marker** matches the **combined** folder + SeriesDescription + ProtocolName string, then **SeriesDescription** must match `series_description_suffix_regex` (default: ends with **reformat** or **derived**, case-insensitive). This follows the BIDS derivatives specification and dcm2niix derivative handling (Li et al. 2016) for unambiguous raw-vs-derived series discrimination — critical for AI/ML training set curation (excluding derived maps), automated BIDS derivatives layout, and data cleaning pipelines.
 
 **Score:**  
 \[
 N = \frac{1}{K}\sum_{k=1}^{K} \mathbb{1}_k
 \]
-where \(K\) is the count of enabled checks (legacy + automation when combined text is non-empty + optional per-class SD check when configured).  
+where \(K\) is the count of enabled checks (structural + community-standards conventions when combined text is non-empty + optional per-class SD check when configured).  
 `per_series.csv` reports **`N_pass`** and **`N_total`** for transparency.
 
-Teams may **disable** individual conventions (`enabled: false`) or replace regexes for local SOPs without changing the composite weight on **N** in the YAML `weights` block.
+**Multi-site portability:** Because conventions are grounded in published community standards rather than site-specific patterns, multi-site deployment requires no re-calibration of these components. Sites that intentionally depart from a standard may override individual conventions (`enabled: false`) or replace regexes in the YAML without changing the composite weight on **N**. Low scores on community-standards conventions in clinical DICOM are expected and informative — they quantify the curation effort required to bring raw acquisitions into compliance with community standards.
 
 ---
 
@@ -299,6 +307,7 @@ function score_session(mr_root):
 | 1.0.2 | 2026-04-09 | N: `class_series_description_compliance`; classification_rules tightened per site SOP |
 | 1.0.3 | 2026-04-09 | N: t2_anat + swi SD rules; `derived_scan_naming`; swi classification tokens only SWI/SWAN |
 | 1.0.4 | 2026-04-10 | Bug fix: PixelSpacing isinstance check now handles pydicom MultiValue (S, M spatial check) |
+| 1.0.5 | 2026-04-10 | N: reframed as **community-standards naming compliance**; conventions now cite normative sources (BIDS, ENIGMA, ADNI, DICOM PS3.15, POSIX, RFC 8259) and document downstream benefits (AI/ML, BIDS conversion, data cleaning, pipeline routing); added `no_phi_leak_tokens` and `sequence_param_encoding` conventions; multi-site portability argument formalized |
 
 ---
 

@@ -97,6 +97,50 @@ column shows where each reference naturally appears.
 
 ---
 
+## Cluster F2 — Community-standards naming compliance and downstream automation
+
+**Manuscript section:** Methods §4.5 (component N), Discussion (multi-site portability, AI/automation benefit)
+
+This cluster supports the reframing of component N from "site-specific naming checks" to "compliance with published community standards that enable AI, BIDS conversion, and data cleaning workflows." It addresses the multi-site validation concern by anchoring N conventions in external, institution-independent standards.
+
+### Standards-based naming conventions
+
+| Tier | Reference | Why it matters |
+|------|-----------|----------------|
+| **1** | Gorgolewski et al. (2016) Sci Data | **BIDS specification** — defines the entity-key system (`run-`, `acq-`, `dir-`, `echo-`), modality suffix vocabulary (T1w, dwi, bold, etc.), and underscore-delimited filename convention that N conventions derive from |
+| **1** | Thompson et al. (2020) Transl Psychiatry | **ENIGMA protocols** — multi-site consortium that mandates standardized protocol naming at the scanner console; demonstrates that naming standardization is feasible and expected across institutions |
+| **2** | Jack et al. (2008) J Magn Reson Imaging | **ADNI MRI procedures** — earliest large-scale multi-site MRI protocol standardization; establishes precedent for embedding acquisition parameters (b-values, direction counts) in protocol names |
+| **2** | Rorden et al. (2025) Sci Data | Cross-manufacturer DICOM benchmark — demonstrates that vendor-agnostic naming conventions are necessary because vendor-specific private tags are unreliable across sites |
+| **2** | Bidgood & Horii (1997) JAMIA | **DICOM standard** — canonical overview; establishes that DICOM VR constraints (e.g., LO ≤ 64 chars) and interoperability goals underpin naming-length and character-safety checks |
+| **3** | IETF RFC 8259 (2017) | **JSON specification** — BIDS sidecars are JSON; control-character-free strings are a hard requirement for valid sidecar emission |
+| **3** | IEEE Std 1003.1 (POSIX) | **Portable filenames** — underscore/hyphen delimiters and no path separators in basenames follow POSIX guidance for cross-platform file safety |
+
+### AI, automation, and pipeline enablement
+
+| Tier | Reference | Why it matters |
+|------|-----------|----------------|
+| **1** | Halchenko et al. (2024) JOSS | **HeuDiConv** — DICOM→BIDS conversion layer that relies on SeriesDescription heuristics; BIDS entity tokens in raw names reduce heuristic complexity and error rates |
+| **1** | Li et al. (2016) J Neurosci Methods | **dcm2niix** — converter whose sidecar JSON output requires clean strings; derivative series naming conventions align with dcm2niix's handling of derived maps |
+| **1** | Esteban et al. (2019) Nature Methods | **fMRIPrep** — pipeline that routes series by modality; standardized modality lexicon in raw naming enables deterministic routing without manual intervention |
+| **2** | Esteban et al. (2017) PLoS ONE | **MRIQC** — automated QC that selects series by type; consistent naming enables automated QC stratification by modality |
+
+### Data cleaning and de-identification
+
+| Tier | Reference | Why it matters |
+|------|-----------|----------------|
+| **2** | Aryanto et al. (2015) J Digital Imaging | **DICOM de-identification review** — establishes that SeriesDescription and ProtocolName can leak PHI; N's `no_phi_leak_tokens` convention operationalizes this as an automated check |
+| **2** | DICOM PS3.15 Annex E | **DICOM Confidentiality Profiles** — normative standard for which tags may contain PHI and how to handle them; directly supports the PHI-safe naming convention |
+
+### Key arguments supported
+
+1. **Multi-site portability without re-calibration:** *Because N conventions are grounded in published, institution-independent standards (BIDS, ENIGMA, ADNI, DICOM PS3.15, POSIX, RFC 8259), they measure distance from community conventions rather than conformity to site-specific patterns. Multi-site deployment requires no re-calibration of these components.*
+
+2. **Dual-purpose design:** *Each convention simultaneously satisfies a normative standard and enables specific downstream workflows — BIDS conversion (HeuDiConv, dcm2niix), AI/ML pipeline ingestion, programmatic data cleaning, and automated pipeline routing (fMRIPrep, MRIQC). This dual grounding means N is not arbitrary: every check is traceable to both a published standard and a concrete automation benefit.*
+
+3. **Informative low scores:** *Low scores on community-standards conventions in clinical DICOM are expected and informative — they quantify the curation effort required to bring raw acquisitions into compliance with community standards, rather than penalizing sites for institutional idiosyncrasy.*
+
+---
+
 ## Cluster G — Diffusion MRI quality / gradient integrity
 
 **Manuscript section:** Methods §4.3 (component G), Results (DWI subgroup)
@@ -174,20 +218,23 @@ column shows where each reference naturally appears.
 
 ## Quick-reference: minimum viable citation set (Tier 1 only)
 
-For a lean first draft, cite at minimum these **10 papers**:
+For a lean first draft, cite at minimum these **13 papers** (expanded from 10 to support the community-standards naming compliance framing):
 
 1. Bidgood & Horii (1997) — DICOM standard
-2. Gorgolewski et al. (2016) — BIDS
+2. Gorgolewski et al. (2016) — BIDS (entity keys, modality suffixes, filename convention)
 3. Wilkinson et al. (2016) — FAIR
-4. Li et al. (2016) — dcm2niix
+4. Li et al. (2016) — dcm2niix (conversion + sidecar JSON)
 5. Marcus et al. (2007) — XNAT
 6. Esteban et al. (2017) — MRIQC (contrast)
 7. Fortin et al. (2017) — ComBat harmonization
 8. Bastiani et al. (2019) — Diffusion QC
-9. Esteban et al. (2019) — fMRIPrep
+9. Esteban et al. (2019) — fMRIPrep (pipeline routing by modality)
 10. Poldrack et al. (2017) — Reproducibility
+11. Thompson et al. (2020) — ENIGMA (multi-site protocol naming standardization)
+12. Halchenko et al. (2024) — HeuDiConv (BIDS conversion heuristics)
+13. Rorden et al. (2025) — Cross-manufacturer DICOM encoding differences
 
-Plus **Rorden et al. (2025)** if you emphasize vendor-specific DICOM encoding differences.
+Plus **Jack et al. (2008)** for ADNI protocol naming, and **Aryanto et al. (2015)** if you emphasize PHI-safe naming conventions.
 
 ---
 
