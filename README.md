@@ -1,42 +1,40 @@
-# data-birth-integrity (DBI)
+# Data Birth Integrity (DBI)
 
-Python package and CLIs for **Data Birth Integrity** — scoring DICOM series for automation-readiness before image processing.
+**DBI** is a 0–1 score for raw DICOM MRI series: it checks metadata, protocol structure, diffusion evidence (when relevant), spatial consistency, and naming—**before** heavy processing—so you can see whether data is ready for automated workflows.
 
-## Quick start
+- **Python:** 3.9+  
+- **License:** [MIT](LICENSE)  
+- **Rules / version:** [`dbi/dbi_v1_config.yaml`](dbi/dbi_v1_config.yaml)
+
+## Install
 
 ```bash
-git clone git@github.com:phindagijimana/vecta.git
+git clone https://github.com/phindagijimana/vecta.git
 cd vecta
-chmod +x scripts/vecta
-ln -sf scripts/vecta ./vecta    # adds ./vecta at repo root (skip if a ./vecta path already exists)
-./vecta install
-./vecta --help
-dbi-audit --help
-pytest dbi/tests -v
+python3 -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -e ".[dev]"
 ```
 
-**Repo CLI** (after `ln -sf scripts/vecta ./vecta` or run `./scripts/vecta` directly):
+This installs the **`dbi-audit`** and **`dbi-convert`** commands.
 
-| Command | Purpose |
-|--------|---------|
-| `./vecta install` | Create `.venv` and `pip install -e ".[dev]"` |
-| `./vecta start -- --root /path/to/dicom --out ./results` | Run `dbi-audit` in the background; logs under `.vecta/logs/` |
-| `./vecta stop` | Stop the last background audit |
-| `./vecta logs` | `tail -f` the background log |
+## Run (minimal)
 
-Use `VECTA_RUN=dbi-convert` for batch conversion instead of audit.
+```bash
+dbi-audit --root /path/to/dicom --out ./results
+dbi-convert --root /path/to/dicom --out ./run_logs --nifti-root /path/to/nifti
+```
+
+Use `--help` on either command for options (layouts, config file, etc.).
 
 ## Documentation
 
-- **Package overview and CLI:** [`dbi/README.md`](dbi/README.md)
-- **Formal spec:** [`dbi/DBI_v1_SPECIFICATION.md`](dbi/DBI_v1_SPECIFICATION.md)
-- **Contributing:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- **License:** [`LICENSE`](LICENSE)
-
-Audit outputs under `dbi/outputs*` are gitignored; run `dbi-audit` / `dbi-convert` locally after clone.
-
-**Maintainers:** manuscript tooling (`writing/`, `build_*.py`, generated `*.docx`) is listed in `.gitignore` so it stays on your machine but is not pushed to GitHub.
+| | |
+|---|---|
+| **Installation variants, repo CLI, outputs, API, configuration** | [**USER_GUIDE.md**](USER_GUIDE.md) |
+| **Package overview (PyPI / `pip`)** | [`dbi/README.md`](dbi/README.md) |
+| **Formal specification** | [`dbi/DBI_v1_SPECIFICATION.md`](dbi/DBI_v1_SPECIFICATION.md) |
+| **Contributing** | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 
 ## Citation
 
-When using DBI in publications, cite the version in `dbi/dbi_v1_config.yaml` and the accompanying paper when available.
+In publications, cite the **`version`** field in `dbi/dbi_v1_config.yaml` (and a hash of that file if you need exact reproducibility).

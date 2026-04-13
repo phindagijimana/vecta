@@ -2,7 +2,7 @@
 
 ## Repository layout
 
-The installable Python package **`data-birth-integrity`** (import name **`dbi`**) lives at the **repository root**: **`pyproject.toml`** and **`dbi/`**.
+The installable Python package **`data-birth-integrity`** (import name **`dbi`**) lives at the **repository root**: **`pyproject.toml`** and **`dbi/`**. End-user documentation is **[`USER_GUIDE.md`](USER_GUIDE.md)**; the landing page is **[`README.md`](README.md)**.
 
 If you maintain the NeuroImage manuscript locally, keep `writing/` and `build_*.py` on disk; they are **gitignored** so clones and GitHub show only the runnable DBI package. Update those scripts if you move `dbi/` or output paths.
 
