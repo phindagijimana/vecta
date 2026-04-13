@@ -7,11 +7,24 @@ Python package and CLIs for **Data Birth Integrity** — scoring DICOM series fo
 ```bash
 git clone git@github.com:phindagijimana/vecta.git
 cd vecta
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
+chmod +x scripts/vecta
+ln -sf scripts/vecta ./vecta    # adds ./vecta at repo root (skip if a ./vecta path already exists)
+./vecta install
+./vecta --help
 dbi-audit --help
 pytest dbi/tests -v
 ```
+
+**Repo CLI** (after `ln -sf scripts/vecta ./vecta` or run `./scripts/vecta` directly):
+
+| Command | Purpose |
+|--------|---------|
+| `./vecta install` | Create `.venv` and `pip install -e ".[dev]"` |
+| `./vecta start -- --root /path/to/dicom --out ./results` | Run `dbi-audit` in the background; logs under `.vecta/logs/` |
+| `./vecta stop` | Stop the last background audit |
+| `./vecta logs` | `tail -f` the background log |
+
+Use `VECTA_RUN=dbi-convert` for batch conversion instead of audit.
 
 ## Documentation
 

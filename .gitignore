@@ -1,6 +1,9 @@
 # Local-only — not part of the public DBI repository surface
 plan/
 
+# Runtime state for ./scripts/vecta (start/stop/logs)
+.vecta/
+
 # Legacy local folder (optional); package now lives at repo root
 content/
 

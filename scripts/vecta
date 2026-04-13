@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# VECTA repo helper: install toolchain, run dbi-audit in the background, stop, tail logs.
+# Usage: ./scripts/vecta install
+#        ./scripts/vecta start -- --root /path/to/dicom --out ./results
+#        ./scripts/vecta stop
+#        ./scripts/vecta logs
+#
+# From a clean clone (no extra vecta/ folder), symlink: ln -sf scripts/vecta ./vecta
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+VECTA_DIR="$ROOT/.vecta"
+PID_FILE="$VECTA_DIR/vecta.pid"
+LOG_DIR="$VECTA_DIR/logs"
+LOG_FILE="${VECTA_LOG_FILE:-$LOG_DIR/vecta.log}"
+VENV="${VECTA_VENV:-$ROOT/.venv}"
+
+die() {
+  echo "vecta: $*" >&2
+  exit 1
+}
+
+ensure_repo_root() {
+  [[ -f "$ROOT/pyproject.toml" ]] || die "run from repository root (missing pyproject.toml)"
+}
+
+have_venv() {
+  [[ -x "$VENV/bin/python" ]]
+}
+
+cmd_install() {
+  ensure_repo_root
+  local py="${VECTA_PYTHON:-python3}"
+  command -v "$py" >/dev/null || die "need $py on PATH (or set VECTA_PYTHON)"
+  "$py" -m venv "$VENV"
+  "$VENV/bin/pip" install -U pip
+  "$VENV/bin/pip" install -e ".[dev]"
+  echo "vecta: installed editable package into $VENV"
+}
+
+cmd_start() {
+  ensure_repo_root
+  have_venv || die "run ./scripts/vecta install first (or ./vecta install if you symlink scripts/vecta)"
+  mkdir -p "$LOG_DIR"
+
+  if [[ -f "$PID_FILE" ]]; then
+    local old
+    old="$(cat "$PID_FILE")"
+    if kill -0 "$old" 2>/dev/null; then
+      die "already running (pid $old). ./vecta stop first."
+    fi
+    rm -f "$PID_FILE"
+  fi
+
+  local runner="${VECTA_RUN:-dbi-audit}"
+  if ! [[ -x "$VENV/bin/$runner" ]]; then
+    die "no $VENV/bin/$runner (set VECTA_RUN to dbi-audit or dbi-convert)"
+  fi
+
+  if [[ $# -ge 1 && "$1" == "--" ]]; then
+    shift
+  fi
+
+  [[ $# -ge 1 ]] || die "start needs arguments for $runner, e.g. ./vecta start -- --root /data --out ./out"
+
+  echo "vecta: starting $runner $* (log: $LOG_FILE)" | tee -a "$LOG_FILE"
+  nohup "$VENV/bin/$runner" "$@" >>"$LOG_FILE" 2>&1 &
+  echo $! >"$PID_FILE"
+  echo "vecta: pid $(cat "$PID_FILE")"
+}
+
+cmd_stop() {
+  ensure_repo_root
+  [[ -f "$PID_FILE" ]] || die "not running (no $PID_FILE)"
+  local pid
+  pid="$(cat "$PID_FILE")"
+  if kill -0 "$pid" 2>/dev/null; then
+    kill -TERM "$pid" 2>/dev/null || true
+    echo "vecta: sent SIGTERM to $pid"
+  else
+    echo "vecta: stale pid file (process not found)"
+  fi
+  rm -f "$PID_FILE"
+}
+
+cmd_logs() {
+  ensure_repo_root
+  mkdir -p "$LOG_DIR"
+  [[ -f "$LOG_FILE" ]] || touch "$LOG_FILE"
+  tail -f "$LOG_FILE"
+}
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ./vecta install              Create .venv and pip install -e ".[dev]"
+  ./vecta start [ -- ] ARGS... Run dbi-audit ARGS in background (override: VECTA_RUN=dbi-convert)
+  ./vecta stop                 Stop background process from last ./vecta start
+  ./vecta logs                 Tail background log (.vecta/logs/vecta.log)
+
+If ./vecta is not in your PATH, use ./scripts/vecta … or: ln -sf scripts/vecta ./vecta
+
+Environment:
+  VECTA_VENV       Virtualenv path (default: ./.venv)
+  VECTA_PYTHON     Python for venv creation (default: python3)
+  VECTA_RUN        Entry script under .venv/bin (default: dbi-audit)
+  VECTA_LOG_FILE   Log file for start/logs (default: .vecta/logs/vecta.log)
+EOF
+}
+
+main() {
+  case "${1:-}" in
+    install) shift || true; cmd_install "$@" ;;
+    start) shift || true; cmd_start "$@" ;;
+    stop) cmd_stop ;;
+    logs) cmd_logs ;;
+    -h | --help | help) usage ;;
+    "")
+      usage
+      exit 1
+      ;;
+    *)
+      die "unknown command: ${1:-}. Try ./vecta --help"
+      ;;
+  esac
+}
+
+main "$@"
