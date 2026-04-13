@@ -175,13 +175,13 @@ naming:
         - '(?i)ASL'
     flair:
       all_match:
-        - '(?i)(FLAIR|flair)\s*\Z'
+        - '(?i)\bFLAIR\b'
     perf:
       all_match:
         - '(?i)(perf|DSC|DCE|CBF)'
     t1_anat:
       all_match:
-        - '(?i)(MPRAGE|SPGR|FSPGR|BRAVO|IR[\s_]FSPGR)\s*\Z'
+        - '(?i)(MPRAGE|MP[\s_-]RAGE|SPGR|FSPGR|BRAVO|IR[\s_]FSPGR)\s*\Z'
     localizer:
       all_match:
         - '(?i)(localizer|Localizer|LOC|scout|Scout)'
@@ -223,23 +223,25 @@ protocol_token:
 
 # Series classification (folder basename + SeriesDescription). Substring unless pattern looks like regex.
 # Order matters: first match wins (more specific first).
+# PA reverse-PE scans precede DWI so they route to fmap.
+# FLAIR precedes T2 so "T2 FLAIR" does not misclassify as t2_anat.
 classification_rules:
+  - class: fmap
+    patterns: ["field_map", "field map", "gre_field", "FMRI.*field", "(?i)\\bPA[_\\s-]*\\d+.*(DIRECTION|DIR)"]
   - class: dwi
     patterns: ["DTI", "DWI", "DIFFUSION", "dwi", "dti", "DIFF"]
   - class: bold
     patterns: ["fMRI", "fmri", "BOLD", "RESTING", "rsfMRI", "TASK", "EPI"]
   - class: asl
     patterns: ["ASL", "PCASL", "PASL"]
-  - class: fmap
-    patterns: ["field_map", "field map", "gre_field", "FMRI.*field"]
   - class: swi
     patterns: ["SWI", "SWAN", "SWI_"]
   - class: flair
-    patterns: ["(?i).*(FLAIR|flair)\\s*$"]
+    patterns: ["FLAIR", "flair"]
   - class: perf
     patterns: ["perf", "Perf", "DSC", "DCE", "perfusion", "CBF"]
   - class: t1_anat
-    patterns: ["MPRAGE", "SPGR", "FSPGR", "BRAVO", "IR FSPGR", "IR_FSPGR"]
+    patterns: ["MPRAGE", "MP-RAGE", "MP_RAGE", "MP RAGE", "SPGR", "FSPGR", "BRAVO", "IR FSPGR", "IR_FSPGR"]
   - class: t2_anat
     patterns: ["T2", "BLADE"]
   - class: localizer

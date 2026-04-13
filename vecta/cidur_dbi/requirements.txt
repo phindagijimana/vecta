@@ -1,4 +1,0 @@
-pydicom>=2.4.0
-PyYAML>=6.0
-pandas>=2.0.0
-matplotlib>=3.7.0

@@ -1,4 +1,4 @@
-# cidur-dbi — Data Birth Integrity for DICOM Series
+# data-birth-integrity — Data Birth Integrity for DICOM Series
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
@@ -19,18 +19,35 @@ DBI scores five components per series:
 
 ## Installation
 
-```bash
-# From the repository root (editable / development install)
-pip install -e ".[dev]"
+Clone the repository and install from its root:
 
-# Or standard install
+```bash
+git clone <repo-url> vecta
+cd vecta
+```
+
+Then install in editable mode for development (includes `pytest`):
+
+```bash
+pip install -e ".[dev]"
+```
+
+Or install without dev tools:
+
+```bash
 pip install .
+```
+
+To install from `requirements.txt` only (core runtime deps, no console scripts metadata):
+
+```bash
+pip install -r dbi/requirements.txt
 ```
 
 Once published to PyPI (future):
 
 ```bash
-pip install cidur-dbi
+pip install data-birth-integrity
 ```
 
 ## Quick start — CLI
@@ -68,12 +85,12 @@ dbi-convert --backfill-from-nifti \
 ## Quick start — Python API
 
 ```python
-from cidur_dbi import composite_dbi, load_yaml_config, score_M, score_S
+from dbi import composite_dbi, load_yaml_config, score_M, score_S
 from pathlib import Path
 import pydicom
 
 # Load bundled configuration
-import cidur_dbi.scoring as sc
+import dbi.scoring as sc
 cfg = load_yaml_config(Path(sc.__file__).parent / "dbi_v1_config.yaml")
 weights = {k: float(v) for k, v in cfg["weights"].items()}
 
@@ -129,9 +146,19 @@ dbi-audit --config /path/to/my_config.yaml --root /data --out ./results
 
 ## Tests
 
+From the repository root (same directory as `pyproject.toml`):
+
 ```bash
-pytest cidur_dbi/tests/ -v
+pytest dbi/tests -v
 ```
+
+## Contributing
+
+See [`CONTRIBUTING.md`](../CONTRIBUTING.md) in the repository root.
+
+## Outputs and Git
+
+Default audit directories (`outputs/`, `outputs_phase4/`, `outputs_dcm2niix_v1freeze/`, large `nifti/` trees) are listed in `.gitignore`. After cloning, run `dbi-audit` and `dbi-convert` locally to regenerate tables and figures. Do not commit raw DICOM or identifiers.
 
 ## Specification
 

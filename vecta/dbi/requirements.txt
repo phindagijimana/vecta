@@ -1,0 +1,6 @@
+# Runtime dependencies for data-birth-integrity (mirrors pyproject.toml [project.dependencies]).
+# Install from repo root for CLI entry points: pip install -e ".[dev]"
+pydicom>=2.4.0
+PyYAML>=6.0
+pandas>=2.0.0
+matplotlib>=3.7.0

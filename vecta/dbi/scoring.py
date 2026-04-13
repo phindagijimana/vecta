@@ -50,6 +50,105 @@ def load_yaml_config(path: Path) -> dict:
         return yaml.safe_load(f)
 
 
+def standards_classify(
+    sd: str, class_sd_compliance: dict[str, dict]
+) -> str:
+    """
+    Strict classification using only the class_sd_compliance rules.
+    ALL regexes for a class must match the SeriesDescription for it to be
+    assigned.  Returns the class name or 'unclassifiable'.
+    Order: iterate classes alphabetically; first full match wins.
+    """
+    text = sd.strip()
+    if not text:
+        return "unclassifiable"
+    for cls in sorted(class_sd_compliance.keys()):
+        rule = class_sd_compliance[cls]
+        all_match = rule.get("all_match") or []
+        if not all_match:
+            continue
+        ok = True
+        for pat in all_match:
+            try:
+                if not re.search(pat, text, re.DOTALL):
+                    ok = False
+                    break
+            except re.error:
+                ok = False
+                break
+        if ok:
+            return cls
+    return "unclassifiable"
+
+
+_RULE_DESCRIPTIONS: dict[str, list[str]] = {
+    "dwi": ["contains DTI/DWI keyword", "has AP + direction count (e.g. AP_64_DIRECTIONS)"],
+    "bold": ["contains fMRI/BOLD/RESTING/TASK/EPI keyword"],
+    "asl": ["contains ASL keyword"],
+    "fmap": ["contains field_map/fmap/gre_field keyword", "has PA + direction count"],
+    "swi": ["contains SWI/SWAN keyword"],
+    "flair": ["ends with FLAIR"],
+    "perf": ["contains perf/DSC/DCE/CBF keyword"],
+    "t1_anat": ["ends with MPRAGE/SPGR/FSPGR/BRAVO"],
+    "t2_anat": ["contains T2/BLADE keyword", "ends with THIN"],
+    "localizer": ["contains localizer/LOC/scout keyword"],
+}
+
+
+def standards_gap_reason(
+    sd: str,
+    heuristic_class: str,
+    class_sd_compliance: dict[str, dict],
+) -> str:
+    """
+    Explain why standards_classify did not match heuristic_class.
+    Returns a human-readable reason string.
+    """
+    text = sd.strip()
+    if not text:
+        return "SeriesDescription is empty"
+    if heuristic_class == "other":
+        return "Classified as 'other' (no modality keyword found)"
+    if heuristic_class not in class_sd_compliance:
+        return f"No standards rule defined for class '{heuristic_class}'"
+
+    rule = class_sd_compliance[heuristic_class]
+    all_match = rule.get("all_match") or []
+    descriptions = _RULE_DESCRIPTIONS.get(heuristic_class, [])
+
+    failed = []
+    for i, pat in enumerate(all_match):
+        try:
+            if not re.search(pat, text, re.DOTALL):
+                desc = descriptions[i] if i < len(descriptions) else f"pattern {pat}"
+                failed.append(desc)
+        except re.error:
+            failed.append(f"invalid pattern: {pat}")
+
+    if not failed:
+        return "Already compliant"
+    return "Missing: " + "; ".join(failed)
+
+
+_RECOMMENDED_PATTERNS: dict[str, str] = {
+    "dwi": "<PLANE>_DTI_AP_<N>_DIRECTIONS",
+    "bold": "<PLANE>_fMRI_<TASK>",
+    "asl": "<PLANE>_3D_ASL",
+    "fmap": "<PLANE>_field_map_PA_<N>_DIRECTIONS",
+    "swi": "<PLANE>_SWI",
+    "flair": "<PLANE>_3D_T2_FLAIR",
+    "perf": "<PLANE>_Perfusion",
+    "t1_anat": "<PLANE>_3D_MPRAGE",
+    "t2_anat": "<PLANE>_T2_THIN",
+    "localizer": "3_Plane_Localizer",
+}
+
+
+def recommended_name_for_class(series_class: str) -> str:
+    """Return a recommended naming pattern for the given class."""
+    return _RECOMMENDED_PATTERNS.get(series_class, "")
+
+
 def classify_series(text: str, rules: list[dict]) -> str:
     t = text
     for rule in rules:
@@ -403,3 +502,7 @@ class SeriesRow:
     DBI: float
     has_bvalue_evidence: bool
     has_gradient_direction: bool
+    standards_compliant_class: str
+    naming_compliant: bool
+    recommended_name_pattern: str
+    standards_gap: str

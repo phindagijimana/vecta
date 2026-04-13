@@ -1,7 +1,7 @@
 """
-cidur_dbi — Data Birth Integrity scoring for DICOM series.
+dbi — Data Birth Integrity scoring for DICOM series.
 
-Install:  pip install .          (from the vecta/ root)
+Install:  pip install .          (from the repository root)
 Audit:    dbi-audit --root /path/to/data --out ./results
 Convert:  dbi-convert --root /path/to/data --out ./results_nifti --nifti-root ./nifti
 """
@@ -9,7 +9,7 @@ Convert:  dbi-convert --root /path/to/data --out ./results_nifti --nifti-root ./
 from importlib.metadata import version as _version, PackageNotFoundError
 
 try:
-    __version__ = _version("cidur-dbi")
+    __version__ = _version("data-birth-integrity")
 except PackageNotFoundError:
     __version__ = "0.0.0-dev"
 

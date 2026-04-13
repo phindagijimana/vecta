@@ -6,7 +6,7 @@ import pydicom
 from pydicom.dataset import Dataset, FileMetaDataset
 
 try:
-    from cidur_dbi.scoring import composite_dbi, elem_value, score_N, series_description
+    from dbi.scoring import composite_dbi, elem_value, score_N, series_description
 except ImportError:
     import sys
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))

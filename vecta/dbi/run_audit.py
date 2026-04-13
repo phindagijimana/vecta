@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CIDUR DBI v1 audit — Phase 2.
+DBI v1 audit — Phase 2.
 Walks MR DICOM trees, scores each series, writes CSVs and optional figures.
 
 Layouts:
@@ -32,6 +32,7 @@ try:
         composite_dbi,
         elem_value,
         load_yaml_config,
+        recommended_name_for_class,
         scanner_cluster_from_ds,
         score_G,
         score_M,
@@ -39,6 +40,8 @@ try:
         score_P,
         score_S,
         series_description,
+        standards_classify,
+        standards_gap_reason,
     )
 except ImportError:
     from scoring import (
@@ -46,6 +49,7 @@ except ImportError:
         composite_dbi,
         elem_value,
         load_yaml_config,
+        recommended_name_for_class,
         scanner_cluster_from_ds,
         score_G,
         score_M,
@@ -53,6 +57,8 @@ except ImportError:
         score_P,
         score_S,
         series_description,
+        standards_classify,
+        standards_gap_reason,
     )
 
 
@@ -186,6 +192,15 @@ def _row_from_dataset(
     }
     dbi = composite_dbi(scores, weights)
 
+    std_cls = standards_classify(sd, class_sd_compliance) if class_sd_compliance else "unclassifiable"
+    naming_ok = cls == std_cls and cls != "other"
+    rec_name = recommended_name_for_class(cls)
+    gap = (
+        standards_gap_reason(sd, cls, class_sd_compliance)
+        if class_sd_compliance and not naming_ok
+        else "Already compliant"
+    )
+
     return {
         "session_path": session_path,
         "session_id": session_id,
@@ -211,6 +226,10 @@ def _row_from_dataset(
         "DBI": dbi,
         "has_bvalue_evidence": has_b,
         "has_gradient_direction": has_dir,
+        "standards_compliant_class": std_cls,
+        "naming_compliant": naming_ok,
+        "recommended_name_pattern": rec_name,
+        "standards_gap": gap,
     }
 
 
@@ -419,6 +438,10 @@ def _empty_row(
         "DBI": float("nan"),
         "has_bvalue_evidence": False,
         "has_gradient_direction": False,
+        "standards_compliant_class": "",
+        "naming_compliant": False,
+        "recommended_name_pattern": "",
+        "standards_gap": "",
     }
 
 
@@ -458,8 +481,153 @@ def write_figures(series_df: pd.DataFrame, session_df: pd.DataFrame, out_dir: Pa
     plt.close()
 
 
+def write_compliance_report(series_df: pd.DataFrame, out_dir: Path) -> Path:
+    """
+    Generate an actionable naming-compliance report showing the gap between
+    heuristic classification and standards-based classification.
+
+    Outputs:
+      - compliance_report.csv  (full table for programmatic use)
+      - compliance_report.txt  (human-readable summary)
+    """
+    ok = series_df[series_df["read_error"].fillna("") == ""].copy()
+    if ok.empty:
+        return out_dir / "compliance_report.txt"
+
+    required_cols = {"series_class", "standards_compliant_class", "naming_compliant",
+                     "recommended_name_pattern", "standards_gap"}
+    if not required_cols.issubset(ok.columns):
+        return out_dir / "compliance_report.txt"
+
+    report_cols = [
+        "scan_folder", "series_class", "standards_compliant_class",
+        "naming_compliant", "standards_gap", "recommended_name_pattern",
+        "N", "DBI", "scanner_cluster", "session_id",
+    ]
+    report_cols = [c for c in report_cols if c in ok.columns]
+    report_df = ok[report_cols].copy()
+    report_df = report_df.rename(columns={
+        "series_class": "heuristic_class",
+        "standards_compliant_class": "standards_class",
+    })
+    report_df = report_df.sort_values(
+        ["naming_compliant", "heuristic_class", "scan_folder"]
+    )
+
+    csv_path = out_dir / "compliance_report.csv"
+    report_df.to_csv(csv_path, index=False)
+
+    n_total = len(ok)
+    n_classified = len(ok[ok["series_class"] != "other"])
+    n_compliant = int(ok["naming_compliant"].sum())
+    n_gap = n_classified - n_compliant
+    n_other = n_total - n_classified
+
+    lines = [
+        "=" * 72,
+        "  VECTA DBI -- Naming Compliance Report",
+        "=" * 72,
+        "",
+        f"  Total series scanned:              {n_total}",
+        f"  Heuristic classified (non-other):   {n_classified}",
+        f"  Standards-compliant:                {n_compliant}  ({n_compliant/n_classified*100:.1f}%)" if n_classified else "",
+        f"  Needs fixing:                       {n_gap}  ({n_gap/n_classified*100:.1f}%)" if n_classified else "",
+        f"  Unclassified (other):               {n_other}",
+        "",
+    ]
+
+    gap_df = ok[(ok["series_class"] != "other") & (~ok["naming_compliant"])]
+    compliant_df = ok[ok["naming_compliant"]]
+
+    if n_classified:
+        lines.extend([
+            "-" * 72,
+            "  Compliance by class:",
+            "-" * 72,
+            f"  {'Class':<12} {'Total':>6} {'Compliant':>10} {'Gap':>6} {'Rate':>7}",
+        ])
+        for cls in sorted(ok["series_class"].unique()):
+            if cls == "other":
+                continue
+            sub = ok[ok["series_class"] == cls]
+            comp = sub["naming_compliant"].sum()
+            tot = len(sub)
+            rate = comp / tot * 100 if tot else 0
+            lines.append(f"  {cls:<12} {tot:>6} {int(comp):>10} {tot - int(comp):>6} {rate:>6.1f}%")
+        lines.append("")
+
+    if not gap_df.empty:
+        lines.extend([
+            "=" * 72,
+            "  SERIES NEEDING NAMING FIXES",
+            "=" * 72,
+            "",
+            f"  {'scan_folder':<45} {'heuristic':>10} {'standards':>15}  gap_reason",
+            f"  {'-'*44} {'-'*10} {'-'*15}  {'-'*30}",
+        ])
+        for _, r in gap_df.iterrows():
+            sf = str(r.get("scan_folder", ""))[:44]
+            hc = str(r.get("series_class", ""))
+            sc = str(r.get("standards_compliant_class", ""))
+            gap = str(r.get("standards_gap", ""))
+            lines.append(f"  {sf:<45} {hc:>10} {sc:>15}  {gap}")
+
+        lines.extend([
+            "",
+            "-" * 72,
+            "  Recommended naming patterns (adopt at scanner console):",
+            "-" * 72,
+        ])
+        seen = set()
+        for _, r in gap_df.iterrows():
+            cls = r.get("series_class", "")
+            rec = r.get("recommended_name_pattern", "")
+            if cls not in seen and rec:
+                lines.append(f"    {cls:<12}  -->  {rec}")
+                seen.add(cls)
+        lines.append("")
+
+    if not compliant_df.empty:
+        lines.extend([
+            "=" * 72,
+            "  ALREADY COMPLIANT SERIES (no action needed)",
+            "=" * 72,
+            "",
+            f"  {'scan_folder':<45} {'class':>10} {'N':>5} {'DBI':>6}",
+            f"  {'-'*44} {'-'*10} {'-'*5} {'-'*6}",
+        ])
+        for _, r in compliant_df.head(20).iterrows():
+            sf = str(r.get("scan_folder", ""))[:44]
+            cls = str(r.get("series_class", ""))
+            n_val = r.get("N", 0)
+            dbi_val = r.get("DBI", 0)
+            lines.append(f"  {sf:<45} {cls:>10} {n_val:>5.3f} {dbi_val:>6.3f}")
+        if len(compliant_df) > 20:
+            lines.append(f"  ... and {len(compliant_df) - 20} more compliant series")
+        lines.append("")
+
+    lines.extend([
+        "=" * 72,
+        "  HOW TO FIX",
+        "=" * 72,
+        "",
+        "  1. Adopt the recommended naming patterns at the scanner console",
+        "  2. Use the 'recommended_name_pattern' column as a template",
+        "  3. Re-run DBI audit to verify compliance improvements",
+        "",
+        "  Standards referenced: BIDS v1.9, ENIGMA protocols, ADNI MRI",
+        "  procedures, DICOM PS3.3/PS3.5/PS3.15, POSIX filenames, RFC 8259",
+        "",
+    ])
+
+    txt_path = out_dir / "compliance_report.txt"
+    txt_path.write_text("\n".join(lines), encoding="utf-8")
+
+    return txt_path
+
+
 def main() -> None:
-    ap = argparse.ArgumentParser(description="CIDUR DBI v1 audit")
+    ap = argparse.ArgumentParser(description="DBI v1 audit")
     ap.add_argument(
         "--root",
         type=Path,
@@ -530,10 +698,14 @@ def main() -> None:
 
     write_figures(series_df, session_df, args.out)
 
+    report_path = write_compliance_report(series_df, args.out)
+
     print(f"Wrote {series_path} ({len(series_df)} rows)")
     print(f"Wrote {session_path} ({len(session_df)} rows)")
     print(f"Wrote {args.out / 'table1_dbi_by_scanner.csv'}")
     print(f"Wrote {args.out / 'run_metadata.json'}")
+    print(f"Wrote {report_path}")
+    print(f"Wrote {args.out / 'compliance_report.csv'}")
     flines = fail_log.read_text(encoding="utf-8").splitlines()
     n_fail_lines = max(0, len(flines) - 1)
     print(f"Wrote {fail_log} ({n_fail_lines} failure row(s))")

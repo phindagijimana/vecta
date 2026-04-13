@@ -1,5 +1,0 @@
-Wrote outputs_dcm2niix_v1freeze/conversion_log.csv (1445 rows)
-Wrote outputs_dcm2niix_v1freeze/dcm2niix_environment.json
-NIfTI under /mnt/nfs/home/URMC-SH/pndagiji/Documents/vecta/cidur_dbi/outputs_dcm2niix_v1freeze/nifti
-Wrote outputs_dcm2niix_v1freeze/table2_conversion_by_scanner_class.csv
-Wrote outputs_dcm2niix_v1freeze/figure2_dcm2niix_pass_rate_heatmap.png

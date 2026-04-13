@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 try:
-    from cidur_dbi.run_dcm2niix_batch import _rows_for_table2, count_niftis, rubric_pass
+    from dbi.run_dcm2niix_batch import _rows_for_table2, count_niftis, rubric_pass
 except ImportError:
     from run_dcm2niix_batch import _rows_for_table2, count_niftis, rubric_pass
 
