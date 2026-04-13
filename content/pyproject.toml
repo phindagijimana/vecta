@@ -38,11 +38,10 @@ dev = [
 ]
 
 [project.urls]
-# Replace with your public GitHub URLs before release.
-Homepage = "https://github.com/your-org/your-repo"
-Documentation = "https://github.com/your-org/your-repo/blob/main/dbi/README.md"
-Repository = "https://github.com/your-org/your-repo"
-Issues = "https://github.com/your-org/your-repo/issues"
+Homepage = "https://github.com/phindagijimana/vecta"
+Documentation = "https://github.com/phindagijimana/vecta/blob/main/content/dbi/README.md"
+Repository = "https://github.com/phindagijimana/vecta"
+Issues = "https://github.com/phindagijimana/vecta/issues"
 
 [project.scripts]
 dbi-audit = "dbi.run_audit:main"

@@ -2,11 +2,13 @@
 
 Python package and CLIs for **Data Birth Integrity** — scoring DICOM series for automation-readiness before image processing.
 
+In this repository, the installable project lives in **`content/`** (so paths are `github.com/phindagijimana/vecta` → `content/…`, not `vecta/vecta/…`).
+
 ## Quick start
 
 ```bash
-git clone <repo-url> vecta
-cd vecta
+git clone git@github.com:phindagijimana/vecta.git vecta
+cd vecta/content
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 dbi-audit --help
@@ -22,7 +24,7 @@ pytest dbi/tests -v
 
 Audit outputs under `dbi/outputs*` are gitignored; run `dbi-audit` / `dbi-convert` locally after clone.
 
-**Maintainers:** manuscript tooling (`writing/`, root `build_*.py`, generated `*.docx`) is listed in `.gitignore` so it stays on your checkout but is not pushed to GitHub. Public users only need `dbi/`, `pyproject.toml`, and the repo metadata above.
+**Maintainers:** manuscript tooling (`writing/`, `build_*.py`, generated `*.docx`) is listed in `content/.gitignore` so it stays on your checkout but is not pushed to GitHub. Public users only need `content/dbi/`, `content/pyproject.toml`, and the metadata above.
 
 ## Citation
 

@@ -22,8 +22,8 @@ DBI scores five components per series:
 Clone the repository and install from its root:
 
 ```bash
-git clone <repo-url> vecta
-cd vecta
+git clone git@github.com:phindagijimana/vecta.git vecta
+cd vecta/content
 ```
 
 Then install in editable mode for development (includes `pytest`):
@@ -146,7 +146,7 @@ dbi-audit --config /path/to/my_config.yaml --root /data --out ./results
 
 ## Tests
 
-From the repository root (same directory as `pyproject.toml`):
+From **`content/`** (directory that contains `pyproject.toml`):
 
 ```bash
 pytest dbi/tests -v
@@ -154,7 +154,7 @@ pytest dbi/tests -v
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](../CONTRIBUTING.md) in the repository root.
+See [`CONTRIBUTING.md`](../CONTRIBUTING.md) next to this package (`content/`).
 
 ## Outputs and Git
 

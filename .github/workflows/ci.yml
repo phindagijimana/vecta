@@ -1,4 +1,4 @@
-# CI for data-birth-integrity (package at repo root)
+# CI for data-birth-integrity (package under content/)
 name: CI
 
 on:
@@ -6,6 +6,10 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+
+defaults:
+  run:
+    working-directory: content
 
 jobs:
   test:

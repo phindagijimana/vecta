@@ -1,7 +1,7 @@
 """
 dbi — Data Birth Integrity scoring for DICOM series.
 
-Install:  pip install .          (from the repository root)
+Install:  pip install .          (from the content/ directory)
 Audit:    dbi-audit --root /path/to/data --out ./results
 Convert:  dbi-convert --root /path/to/data --out ./results_nifti --nifti-root ./nifti
 """
