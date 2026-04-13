@@ -1,9 +1,0 @@
-{
-  "filename": {
-    "Description": "Relative path from the subject (or session) directory to each data file listed in this session."
-  },
-  "acq_time": {
-    "Description": "Acquisition time of the first data point in each run; ISO8601 format per BIDS Units section.",
-    "Units": "datetime"
-  }
-}
