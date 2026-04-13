@@ -2,9 +2,9 @@
 
 ## Repository layout
 
-The installable Python package **`data-birth-integrity`** (import name **`dbi`**) lives under **`content/`**: **`content/pyproject.toml`** and **`content/dbi/`**.
+The installable Python package **`data-birth-integrity`** (import name **`dbi`**) lives at the **repository root**: **`pyproject.toml`** and **`dbi/`**.
 
-If you maintain the NeuroImage manuscript locally, keep `writing/` and the `build_*.py` scripts under `content/` on disk; they are **gitignored** so clones and GitHub show only the runnable DBI package. Update those scripts if you move `dbi/` or output paths.
+If you maintain the NeuroImage manuscript locally, keep `writing/` and `build_*.py` on disk; they are **gitignored** so clones and GitHub show only the runnable DBI package. Update those scripts if you move `dbi/` or output paths.
 
 | Path | Purpose |
 |------|---------|
@@ -20,7 +20,7 @@ Generated audit outputs are gitignored under `dbi/outputs*`.
 ## Development setup
 
 ```bash
-cd content   # directory containing pyproject.toml
+# repository root (directory containing pyproject.toml)
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
@@ -35,7 +35,7 @@ pytest dbi/tests -v
 
 ## Pull requests
 
-1. Run `pytest dbi/tests` from **`content/`** (all green).
+1. Run `pytest dbi/tests` from the repository root (all green).
 2. Describe what changed and why (Methods-level clarity helps reproducibility).
 3. Do not commit raw DICOM, patient identifiers, or large NIfTI trees.
 
@@ -45,7 +45,7 @@ If `outputs/` or similar paths were committed before `.gitignore` was updated, s
 git rm -r --cached dbi/outputs dbi/outputs_phase4 dbi/outputs_dcm2niix_v1freeze 2>/dev/null || true
 ```
 
-Before publishing to PyPI, set real URLs in **`pyproject.toml`** under `[project.urls]`.
+Before publishing to PyPI, set real URLs in **`pyproject.toml`** under `[project.urls]` if they change.
 
 ## Reporting issues
 

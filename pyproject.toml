@@ -39,7 +39,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/phindagijimana/vecta"
-Documentation = "https://github.com/phindagijimana/vecta/blob/main/content/dbi/README.md"
+Documentation = "https://github.com/phindagijimana/vecta/blob/main/dbi/README.md"
 Repository = "https://github.com/phindagijimana/vecta"
 Issues = "https://github.com/phindagijimana/vecta/issues"
 

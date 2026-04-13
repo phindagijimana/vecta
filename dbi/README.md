@@ -23,7 +23,7 @@ Clone the repository and install from its root:
 
 ```bash
 git clone git@github.com:phindagijimana/vecta.git vecta
-cd vecta/content
+cd vecta
 ```
 
 Then install in editable mode for development (includes `pytest`):
@@ -146,7 +146,7 @@ dbi-audit --config /path/to/my_config.yaml --root /data --out ./results
 
 ## Tests
 
-From **`content/`** (directory that contains `pyproject.toml`):
+From the **repository root** (directory that contains `pyproject.toml`):
 
 ```bash
 pytest dbi/tests -v
@@ -154,7 +154,7 @@ pytest dbi/tests -v
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](../CONTRIBUTING.md) next to this package (`content/`).
+See [`CONTRIBUTING.md`](../CONTRIBUTING.md) in the repository root.
 
 ## Outputs and Git
 

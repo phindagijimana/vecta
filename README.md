@@ -1,12 +1,29 @@
-# vecta
+# data-birth-integrity (DBI)
 
-The **Data Birth Integrity (DBI)** Python package is maintained in [`content/`](content/).
+Python package and CLIs for **Data Birth Integrity** — scoring DICOM series for automation-readiness before image processing.
+
+## Quick start
 
 ```bash
 git clone git@github.com:phindagijimana/vecta.git
-cd vecta/content
+cd vecta
+python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 dbi-audit --help
+pytest dbi/tests -v
 ```
 
-Full documentation: [`content/README.md`](content/README.md).
+## Documentation
+
+- **Package overview and CLI:** [`dbi/README.md`](dbi/README.md)
+- **Formal spec:** [`dbi/DBI_v1_SPECIFICATION.md`](dbi/DBI_v1_SPECIFICATION.md)
+- **Contributing:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- **License:** [`LICENSE`](LICENSE)
+
+Audit outputs under `dbi/outputs*` are gitignored; run `dbi-audit` / `dbi-convert` locally after clone.
+
+**Maintainers:** manuscript tooling (`writing/`, `build_*.py`, generated `*.docx`) is listed in `.gitignore` so it stays on your machine but is not pushed to GitHub.
+
+## Citation
+
+When using DBI in publications, cite the version in `dbi/dbi_v1_config.yaml` and the accompanying paper when available.
