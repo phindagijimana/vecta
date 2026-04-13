@@ -1,5 +1,8 @@
 # Data Birth Integrity (DBI)
 
+[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
 **DBI** is a 0–1 score for raw DICOM MRI series: it checks metadata, protocol structure, diffusion evidence (when relevant), spatial consistency, and naming—**before** heavy processing—so you can see whether data is ready for automated workflows.
 
 - **Python:** 3.9+  
@@ -31,7 +34,6 @@ Use `--help` on either command for options (layouts, config file, etc.).
 | | |
 |---|---|
 | **Installation variants, repo CLI, outputs, API, configuration** | [**USER_GUIDE.md**](USER_GUIDE.md) |
-| **Package overview (PyPI / `pip`)** | [`dbi/README.md`](dbi/README.md) |
 | **Formal specification** | [`dbi/DBI_v1_SPECIFICATION.md`](dbi/DBI_v1_SPECIFICATION.md) |
 | **Contributing** | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 
