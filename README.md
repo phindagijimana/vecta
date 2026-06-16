@@ -1,7 +1,10 @@
 # Data Birth Integrity (DBI)
 
+[![Docs](https://img.shields.io/badge/docs-phindagijimana.github.io%2Fvecta-009688?logo=readthedocs&logoColor=white)](https://phindagijimana.github.io/vecta/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
+### Read the docs → **[https://phindagijimana.github.io/vecta/](https://phindagijimana.github.io/vecta/)**
 
 **DBI** is a 0–1 score for raw DICOM MRI series: it checks metadata, protocol structure, diffusion evidence (when relevant), spatial consistency, and naming—**before** heavy processing—so you can see whether data is ready for automated workflows.
 
@@ -31,8 +34,11 @@ Use `--help` on either command for options (layouts, config file, etc.).
 
 ## Documentation
 
+The full documentation hub lives at **[phindagijimana.github.io/vecta](https://phindagijimana.github.io/vecta/)** — getting-started guide, concepts (M / P / G / S / N), CLI reference, configuration, outputs, and the v1 specification.
+
 | | |
 |---|---|
+| **Docs hub (recommended)** | [phindagijimana.github.io/vecta](https://phindagijimana.github.io/vecta/) |
 | **Installation variants, repo CLI, outputs, API, configuration** | [**USER_GUIDE.md**](USER_GUIDE.md) |
 | **Formal specification** | [`dbi/DBI_v1_SPECIFICATION.md`](dbi/DBI_v1_SPECIFICATION.md) |
 | **Contributing** | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
