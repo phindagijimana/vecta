@@ -1,0 +1,117 @@
+site_name: Vecta — Data Birth Integrity
+site_description: Vecta / DBI v1 — reproducible, auditable structural-quality scoring for DICOM MR series, before image processing.
+site_url: https://phindagijimana.github.io/vecta/
+repo_url: https://github.com/phindagijimana/vecta
+repo_name: phindagijimana/vecta
+edit_uri: edit/main/dbi/docs/
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.path
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.action.edit
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - getting-started/index.md
+      - 1. Install: getting-started/install.md
+      - 2. Your first audit: getting-started/first-audit.md
+      - 3. Your first conversion: getting-started/first-conversion.md
+  - Concepts:
+      - concepts/index.md
+      - The DBI score: concepts/dbi-score.md
+      - Components (M / P / G / S / N): concepts/components.md
+      - Series classification: concepts/classification.md
+      - Scanner cluster: concepts/scanner-cluster.md
+  - CLI reference:
+      - cli/index.md
+      - dbi-audit: cli/dbi-audit.md
+      - dbi-convert: cli/dbi-convert.md
+  - Configuration:
+      - configuration/index.md
+      - YAML reference: configuration/yaml-reference.md
+      - Naming conventions: configuration/naming-conventions.md
+  - Outputs:
+      - outputs/index.md
+      - CSV schema: outputs/csv-schema.md
+      - Figures: outputs/figures.md
+      - QC spot-check: outputs/qc-spotcheck.md
+  - Specification: spec.md
+  - Contributing: contributing.md
+  - Glossary: glossary.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/phindagijimana/vecta
+  generator: false
