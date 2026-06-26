@@ -15,13 +15,19 @@
 ## Install
 
 ```bash
-git clone https://github.com/phindagijimana/vecta.git
-cd vecta
-python3 -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
+pip install git+https://github.com/phindagijimana/vecta.git
 ```
 
-This installs the **`dbi-audit`** and **`dbi-convert`** commands.
+This installs the **`dbi-audit`** and **`dbi-convert`** commands and the `dbi` Python package.
+
+For development (editable install with tests):
+
+```bash
+git clone https://github.com/phindagijimana/vecta.git
+cd vecta
+pip install -e ".[dev]"
+pytest dbi/tests
+```
 
 ## Run (minimal)
 

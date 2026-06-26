@@ -16,6 +16,14 @@ DBI scores five components per series:
 
 ## Installation options
 
+### Direct from GitHub (recommended for users)
+
+```bash
+pip install git+https://github.com/phindagijimana/vecta.git
+```
+
+Pulls `main` and installs the `dbi` package, `dbi-audit`, and `dbi-convert`. No clone required.
+
 ### Editable install (development)
 
 From the repository root (directory that contains `pyproject.toml`):
