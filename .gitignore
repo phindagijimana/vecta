@@ -1,5 +1,6 @@
 # Local-only — not part of the public DBI repository surface
 plan/
+reference_vecta/
 
 # Runtime state for ./scripts/vecta (start/stop/logs)
 .vecta/
